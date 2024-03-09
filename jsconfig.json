@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "baseUrl": "src",
+    "paths": {
+      "@app": ["app"],
+      "@apis": ["apis"],
+      "@components": ["components"],
+      "@hooks": ["hooks"],
+      "@locales": ["locales"],
+      "@utils": ["utils"],
+      "@recoils": ["recoils"],
+
+      "@pages/*": ["pages/*"],
+      "@apis/*": ["apis/*"],
+      "@components/*": ["components/*"],
+      "@hooks/*": ["hooks/*"],
+      "@locales/*": ["locales/*"],
+      "@utils/*": ["utils/*"],
+      "@recoils/*": ["recoils/*"],
+    }
+  }
+}
