@@ -118,7 +118,7 @@ const FeedComments = ({ feed, items, onCallback}) => {
               boxShadow: "none",
               resize: "none"
             }}
-            placeholder="Bạn đang nghỉ gì?" 
+            placeholder="Bạn đang nghĩ gì?" 
           />
           <div className="flex justify-end gap-2">
             <label onClick={() => refImage.current.click()}>

@@ -24,17 +24,24 @@ export default function QuickPostModal({ visible,setEmotion, onCancel, emotion, 
   const [user] = useAuthState(auth)
   const [setUser, updating, error] = useUpdateProfile(auth);
   const [loading, setLoading] = useState(false);
+  const [loadUser, setLoadUser] = useState(true)
   const [usingUser, setUsingUser] = useState()
   useEffect(() =>{
     (async () => {
+      setLoadUser(true)
       try {
         const dataCall = await getProfile(user?.accessToken) 
         setUsingUser(dataCall)
+        
       } catch (e) {
         console.log(e)
       }
+      setTimeout(() => {
+        setLoadUser(false)
+      }, 3000);
     })();
   },[user])
+  console.log(loadUser)
 
   const refImage = useRef();
   const [description, setDescription] = useState();
@@ -72,7 +79,7 @@ export default function QuickPostModal({ visible,setEmotion, onCancel, emotion, 
   const [inputVisible, setInputVisible] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const inputRef = useRef(null);
-  const [active, setActive] = useState(0)
+  const [active, setActive] = useState()
 
   useEffect(() => {
     if (inputVisible) {
@@ -140,6 +147,8 @@ export default function QuickPostModal({ visible,setEmotion, onCancel, emotion, 
       setActive(feed?.isActive == true ? 0: 1)
     }
   }, [feed])
+
+  console.log(feed)
 
   const save = () => {
     setLoading(true);
@@ -210,6 +219,7 @@ export default function QuickPostModal({ visible,setEmotion, onCancel, emotion, 
     }
     
   };  
+  console.log(active)
   return (
     <Modal
       visible={visible}
@@ -217,12 +227,12 @@ export default function QuickPostModal({ visible,setEmotion, onCancel, emotion, 
       onCancel={() => {
         onCancel();
         setLoading(false);
-        setPhotos([])
-        setDescription()
-        setEmotion("")
-        setTags([]);
-        setActive(0)
-        onCancel();
+        // setPhotos([])
+        // setDescription()
+        // setEmotion("")
+        // setTags([]);
+        // setActive(0)
+        // onCancel();
       }}
       destroyOnClose={true}
       footer={
@@ -289,6 +299,7 @@ export default function QuickPostModal({ visible,setEmotion, onCancel, emotion, 
       centered
       className="modal-quick-post private"
     >
+     { !loadUser ?
       <>
         {/* user, emotion */}
         <div class="flex mb-4">
@@ -305,7 +316,7 @@ export default function QuickPostModal({ visible,setEmotion, onCancel, emotion, 
               {user?.displayName} {emotion && emotion.length > 0 ? emotion : ""}
             </p>
             <div className='relative rounded-[6px] mt-1 w-fit'>
-            <select className='w-full h-full bg-[#e5e5e5] border-0 text-sm font-medium' onChange={(e) => setActive(e.target.value)}>
+            <select className='w-full h-full bg-[#e5e5e5] border-0 text-sm font-medium' value={active} onChange={(e) => setActive(e.target.value)}>
               <option className='text-xs font-medium' value={0}>
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
                 <path d="M15.75 8.25a.75.75 0 0 1 .75.75c0 1.12-.492 2.126-1.27 2.812a.75.75 0 1 1-.992-1.124A2.243 2.243 0 0 0 15 9a.75.75 0 0 1 .75-.75Z" />
@@ -570,7 +581,8 @@ export default function QuickPostModal({ visible,setEmotion, onCancel, emotion, 
             <PlusOutlined /> New Tag
           </Tag>
         )}
-      </>
+      </>: <Spinner />
+      }
     </Modal>
   );
     
