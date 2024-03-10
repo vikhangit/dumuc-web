@@ -60,6 +60,7 @@ const PostWritePage = ({ searchParams }) => {
 
   const [description, setDescription] = useState();
   const [descriptionError, setDescriptionError] = useState();
+  const [label, setLabel] = useState("")
 
   const [category, setCategory] = useState();
   const [categoryError, setCategoryError] = useState("");
@@ -67,6 +68,10 @@ const PostWritePage = ({ searchParams }) => {
   const [isLongform, setIsLongform] = useState(false);
   const [editor, setEditor] = useState();
   const [editorError, setEditorError] = useState();
+
+  const labelList = [
+    "Hỏi đáp", "Tu vấn"
+  ]
 
   const initializeEditor = async (accessToken, data) => {
     const EditorJS = (await import("@editorjs/editorjs")).default;
@@ -355,6 +360,7 @@ const PostWritePage = ({ searchParams }) => {
           });
           setTitle(post?.title);
           setCategory(post?.category);
+          setLabel(post?.label)
           setEditor([
             ...post?.body?.blocks.map((x) => {
               if (x.type === "gallery") {
@@ -463,6 +469,7 @@ const PostWritePage = ({ searchParams }) => {
           categoryParent,
           isLongform,
           postId,
+          // label
         };
 
         if (tags?.length > 0) {
@@ -587,6 +594,37 @@ const PostWritePage = ({ searchParams }) => {
             htmlFor="location"
             className="block text-sm font-medium text-gray-700"
           >
+            Chủ đề
+          </label>
+          <select
+            id="label"
+            name="label"
+            className={
+              "mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+            }
+            defaultValue={label}
+            value={label}
+            onChange={(e) => {
+              setLabel(e.target.value);
+            }}
+          >
+            <option key={""} value={""}>
+              {"--Chọn chủ đề--"}
+            </option>
+            {labelList
+              .map((item, index) => {
+              return  <option key={index} value={item}>
+                            {item}
+                </option>
+              })}
+          </select>
+        </div>
+
+        <div class="mb-6 w-full">
+          <label
+            htmlFor="location"
+            className="block text-sm font-medium text-gray-700"
+          >
             Đăng vào
           </label>
           <select
@@ -609,7 +647,7 @@ const PostWritePage = ({ searchParams }) => {
             }}
           >
             <option key={""} value={""}>
-              {"Chọn danh mục"}
+              {"--Chọn danh mục--"}
             </option>
             {categories
               .filter((x) => x.categoryParentId === "")

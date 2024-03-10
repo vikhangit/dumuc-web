@@ -142,7 +142,7 @@ const ArticleComments = ({ post, items, onCallback}) => {
                     postId: post?.postId,
                   }, user?.accessToken)
                   .then(() => {
-                    er
+                  
                     setLoading(false);
                     message.success("Đăng bình luận thành công");
                     setBody('')
@@ -289,7 +289,7 @@ const ArticleComments = ({ post, items, onCallback}) => {
                         type="button" 
                         onClick={() => {
                           if (user) {
-                            er
+                      
                             setCommentId(item?.commentId)
                             setReplyToName(item?.user?.name)
                             setIsCommentModal(true)

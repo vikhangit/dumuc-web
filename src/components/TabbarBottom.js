@@ -165,9 +165,17 @@ export default function TabbarBottom({ active = 'home' }) {
           </div>
         </div>
       <Link className='bottom-link relative flex items-center justify-center basis-1/2 bg-[#c80000] bg-opacity-40 shadow-lg shadow-gray-500 text-white text-center h-[50px] rounded-xl hover:text-white' href={user ? "/sos" : "/auth"} onClick={(e) => {
-          e.preventDefault();
+          
+       if(user)
+       {
+        e.preventDefault();
           setIsOpenMenu(false)
           setOpenModal(true);
+       }else{
+        const url_return = `${process.env.NEXT_PUBLIC_HOMEPAGE_URL}/sos/`;
+        router.push(`/auth?url_return=${url_return}`);
+       }
+    
         }}>
          <span> Gửi SOS </span>
         </Link>

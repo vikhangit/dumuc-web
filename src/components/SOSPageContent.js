@@ -108,7 +108,6 @@ const SOSPageContent = () => {
   useEffect(() => {
     (async () => {
       try {
-        // er
         setLoadingFetch(true)
 
         let categoriesData = await getCategories();
@@ -908,7 +907,7 @@ const SOSPageContent = () => {
                                   color="failure"
                                   className={`bg-[#D15156] w-full rounded-full ${sizes.width > 450 ? "[&>span]:text-sm [&>span]:sm:text-base" : `[&>span]:text-xs`} p-1.5`}
                                   onClick={() => {
-                                    // er;
+                                  
                                     setLoadingSubmit(true);
                                     //require login
                                     if (user === undefined && loading === false) {
