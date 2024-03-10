@@ -9,7 +9,7 @@ import { useWindowSize } from '@hooks/useWindowSize';
 import { useEffect } from 'react';
 import Image from 'next/image';
 
-export default function ModalImageZoom({openImage, setOpenImage, imageList, index}) {
+export default function ModalImageZoom({openImage, setOpenImage, imageList, index, type="image"}) {
     const [swiper, setSwiper] = useState(null)
     const [activeSlide, setActiveSlide] = useState(0)
     const sizes = useWindowSize();

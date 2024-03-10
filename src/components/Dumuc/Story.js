@@ -7,6 +7,7 @@ import { MdOutlineAdd } from 'react-icons/md';
 
 import { auth } from '@utils/firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
+import ModalImageZoom from '@components/ModalImageZoom';
 
 const Story = () => {
   const [swiper, setSwiper] = useState(null)
@@ -19,6 +20,9 @@ const Story = () => {
       console.log("File", e?.target?.files)
     }
   };
+  const [showImage, setShowImage] = useState(false)
+  const [imageList, setImageList] = useState([]);
+  const [indexImage, setIndexImage] = useState(0);
 
   return (
     <>
@@ -74,7 +78,10 @@ const Story = () => {
                   height: 200,
                   cursor: "pointer"
                 }}>
-        <div className='border border-gray-400 rounded-[10px] w-full h-full px-[10px] py-[20px] relative'>
+        <div onClick={() => {
+          setShowImage(true)
+          setIndexImage(indexC);
+        }} className='border border-gray-400 rounded-[10px] w-full h-full px-[10px] py-[20px] relative'>
             <Image width={0} height={0} sizes="100vw" src="/dumuc/avatar.png" alt="" className='absolute top-2 left-2 w-8 h-8 rounded-full' />
             <Image width={0} height={0} sizes="100vw" src="/icons/video-1.png" alt="" className='w-full h-full object-contain' />
             <span className='absolute bottom-2 left-2 text-sm font-medium'>Vỉ Khang</span>
@@ -99,6 +106,14 @@ const Story = () => {
       </button>
       }
       </div>
+      <ModalImageZoom openImage={showImage} setOpenImage={setShowImage} imageList={[
+        "/icons/video-1.png",
+        "/icons/video-1.png",
+
+        "/icons/video-1.png",
+        "/icons/video-1.png",
+        "/icons/video-1.png",
+      ]} index={indexImage}/>
     </>
   );
 }
