@@ -39,7 +39,7 @@ const ArticleForumPopularItems = ({ items, title, category }) => {
                       <span class="bg-yellow-100 text-yellow-800 text-sm font-medium mr-2 px-2.5 py-0.5 rounded flex justify-center items-center">
                             Nổi bật
                       </span>
-                      <span class="bg-indigo-100 text-indigo-800 text-sm font-medium mr-2 px-2.5 py-0.5 rounded flex justify-center items-center">[{category?.name}]</span>
+                      <span class="bg-indigo-100 text-indigo-800 text-sm font-medium mr-2 px-2.5 py-0.5 rounded flex justify-center items-center">[Chủ đề]</span>
                       </div>
                     <Link href={url} className="font-bold font-bold text-xl hover:underline text-[#605F5F]">
                       {item?.title?.charAt(0).toUpperCase()}{item?.title?.slice(1, item?.title?.length).toLowerCase()}

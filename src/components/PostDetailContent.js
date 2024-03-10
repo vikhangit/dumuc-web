@@ -116,7 +116,7 @@ console.log("PPPPPPPPPPPPPPPPPPPPP", post)
                       Nổi bật
                 </span>
                      }
-                      <span class="bg-indigo-100 text-indigo-800 text-sm font-medium mr-2 px-2.5 py-0.5 rounded text-center w-fit">[{post?.categoryObj?.name}]</span>
+                      <span class="bg-indigo-100 text-indigo-800 text-sm font-medium mr-2 px-2.5 py-0.5 rounded text-center w-fit">[Chủ đề]</span>
                       </div>
             
             <h1 className={`my-2 text-xl font-semibold sm:font-bold leading-tight text-[#4A4949] capitalizie`}>{post?.title}</h1>

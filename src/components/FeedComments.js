@@ -303,15 +303,14 @@ const FeedComments = ({ feed, items, onCallback}) => {
                           }
                         }}
                       >Trả lời</button>
-                      {
-                        user?.email === item?.user?.email && <div className="relative cursor-pointer group flex items-center">
+                      <div className="relative cursor-pointer group flex items-center">
                         <IoMdMore size={18} />
                         <div className="absolute hidden group-hover:flex flex-col top-full -right-10 z-50 bg-white shadow-sm shadow-gray-500 text-[10px] sm:text-xs font-medium w-[80px] rounded p-1">
-                          <Link href={`/forum/post?id=${item?.postId}`} className="hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5">Sửa</Link>
-                          <Link href="" className="hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5">Xóa</Link>
+                        <Link href="" className="hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5">Trích dẫn</Link>
+                       { user?.email === item?.user?.email && <Link href={`/forum/post?id=${item?.postId}`} className="hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5">Sửa</Link>}
+                       { user?.email === item?.user?.email &&  <Link href="" className="hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5">Xóa</Link>}
                         </div>
                         </div>
-                      }
                     </div>
                     {
                       showReply.map(x => x === index && <FeedCommentReplyModal
@@ -413,15 +412,14 @@ const FeedComments = ({ feed, items, onCallback}) => {
                                     }
                                   }}
                                 >Trả lời</button>
-                                {
-                                  reply?.email === user?.email && <div className="relative cursor-pointer group flex items-center">
-                                  <IoMdMore size={18} />
-                                  <div className="absolute hidden group-hover:flex flex-col top-6 sm:top-full right-4 sm:-right-10 z-50 bg-white shadow-sm shadow-gray-500 text-[10px] sm:text-xs font-medium w-[80px] rounded p-1">
-                                    <Link href={`/forum/post?id=${item?.postId}`} className="hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5">Sửa</Link>
-                                    <Link href="" className="hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5">Xóa</Link>
-                                  </div>
-                                  </div>
-                                }
+                                <div className="relative cursor-pointer group flex items-center">
+                        <IoMdMore size={18} />
+                        <div className="absolute hidden group-hover:flex flex-col top-full -right-10 z-50 bg-white shadow-sm shadow-gray-500 text-[10px] sm:text-xs font-medium w-[80px] rounded p-1">
+                        <Link href="" className="hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5">Trích dẫn</Link>
+                       { user?.email === item?.user?.email && <Link href={`/forum/post?id=${item?.postId}`} className="hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5">Sửa</Link>}
+                       { user?.email === item?.user?.email &&  <Link href="" className="hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5">Xóa</Link>}
+                        </div>
+                        </div>
                                </div>
                               </div>
                               {

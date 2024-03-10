@@ -83,7 +83,7 @@ const ArticleForumItems = ({
                       /> */}
                   <div class="font-medium dark:text-white">
                     <div className="flex xl:items-center flex-col xl:flex-row justify-start">
-                    <span class="bg-indigo-100 text-indigo-800 text-sm font-medium mr-2 px-2.5 py-0.5 rounded text-center w-fit">[{category?.name}]</span>
+                    <span class="bg-indigo-100 text-indigo-800 text-sm font-medium mr-2 px-2.5 py-0.5 rounded text-center w-fit">[Chủ đề]</span>
                     <Link href={url} className="font-bold text-xl hover:underline text-[#605F5F]">
                       {/* <span class="bg-yellow-100 text-yellow-800 text-sm font-medium mr-2 xl:px-2.5 py-0.5 rounded">
                             Nổi bật
