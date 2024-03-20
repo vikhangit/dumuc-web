@@ -6,7 +6,6 @@ import React from 'react';
 
 const FeaturedPost = ({ items, limit }) => {
   const sizes = useWindowSize()
-  console.log("post", items)
   return (
     <div className='px-4 bg-white'>
       {items && items?.map((item, index) => {

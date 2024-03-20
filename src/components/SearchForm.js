@@ -77,7 +77,6 @@ const SearchForm = () => {
         );
       })
       .catch(error => {
-        console.log('error: ', error);
       });
     }, 300)
   };
@@ -121,7 +120,6 @@ const SearchForm = () => {
     setLoadingRemove(false);
   }, 2000);
   }
-  console.log(loadingRemove)
 
   const RenderRecentSearch = () => {
     let recentSearch = JSON.parse(localStorage.getItem("RecentSearch")) || []

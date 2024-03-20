@@ -15,7 +15,6 @@ const Output = dynamic(
 );
 
 const EditorjsRender = ({ item }) => {
-  console.log("ITem",item)
   const sizes = useWindowSize()
   const renderers = {
     image: CustomImageRenderer,

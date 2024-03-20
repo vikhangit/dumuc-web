@@ -10,7 +10,7 @@ import { IoMdCloseCircle } from "react-icons/io";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@utils/firebase";
 
-const FeedCommentReplyModal = ({ visible, setIsCommentModal, onCreateReply, onCancel, replyToName, commentId, onCallback, user }) => {
+const FeedCommentReplyModal = ({ setIsCommentModal, onCreateReply,replyToName, commentId, onCallback, user }) => {
   const [loading, setLoading] = useState(false);
   const [body, setBody] = useState("");
   const [bodyError, setBodyError] = useState('');
@@ -31,7 +31,6 @@ const FeedCommentReplyModal = ({ visible, setIsCommentModal, onCreateReply, onCa
     let newPhoto = [];
     array.map(async (x) => {
       uploadImage(x, user?.accessToken).then((data) => {
-        console.log(data?.url)
         newPhoto.push(`${data?.url}`)
         setPhotos([...photos, ...newPhoto]);
       }

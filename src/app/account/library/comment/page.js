@@ -28,8 +28,7 @@ const LibraryPage = ({searchParams}) => {
         router.push(`/auth?url_return=${url_return}`);
       }
     }, [user, loading])
-    
-    console.log('feedComments: ', feedComments)
+
 
     useEffect(() => {
       (async () => {

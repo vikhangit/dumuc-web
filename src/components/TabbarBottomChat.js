@@ -21,6 +21,7 @@ export default function TabbarBottomChat({ active = 'home' }) {
   const router = useRouter();
   const sizes = useWindowSize()
   let now = moment();
+  const [check, setCheck] = useState(false);
   useEffect(() => {
     (async () => {
       setCheck(true);

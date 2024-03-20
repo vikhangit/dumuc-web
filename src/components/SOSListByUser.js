@@ -24,7 +24,6 @@ import { useAuthState } from "react-firebase-hooks/auth";
 
 const SOSListByUser = ({ items, onCallback }) => {
   const [user, loading, error] = useAuthState(auth);
-  console.log('SOSListByUser.items: ', items)
   const router = useRouter()
   const [showRating, setShowRating] = useState(false);
   const [valueRating, setValueRating] = useState();
@@ -40,7 +39,6 @@ const SOSListByUser = ({ items, onCallback }) => {
       }
     );
   }, []);
-  console.log("SOS.Items", items);
   const onDirectionClick = (userLocation, sosLocation) => {
     window.open(
       "https://www.google.com/maps/dir/?api=1&origin=" +
@@ -119,7 +117,6 @@ const SOSListByUser = ({ items, onCallback }) => {
         {items &&
           items?.map((item, index) => {
             const photos = item?.photos.filter(x => x != "");
-            //console.log(DateTimeLog(item.createdAt, item.deadline));
             return (
               <div className="border-b-2 my-8 mx-4 pb-4" key={index}>
                 <div className="flex flex-col pr-4 mt-2">
@@ -165,7 +162,6 @@ const SOSListByUser = ({ items, onCallback }) => {
                                     });
                                 },
                                 onCancel() {
-                                  //console.log('Cancel');
                                 },
                                 cancelText: 'Không',
                                 cancelButtonProps: {

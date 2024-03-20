@@ -4,21 +4,13 @@ import Header from "@components/Header";
 import TableOfContent from "@components/TableOfContent";
 import ArticleItems from "@components/ArticleItems";
 import ArticleComments from "@components/ArticleComments";
-import BannerCenter from "@components/BannerCenter";
-import ArticleLike from "@components/ArticleLike";
-import ArticleComment from "@components/ArticleComment";
-import ArticleShare from "@components/ArticleShare";
 import ArticleMeta from "@components/ArticleMeta";
-import ArticleAuthor from "@components/ArticleAuthor";
 import EditorjsRender from "@components/editorjs/EditorjsRender";
 import Scroll from "react-scroll";
 import moment from "moment";
 import TabbarBottom from "@components/TabbarBottom";
 
-import { getPopularPosts, getPost, getPosts, createPostView } from "@apis/posts";
-
-import ArticleTopTen from "@components/ArticleTopTen";
-import Newsletter from "@components/Newsletter";
+import {getPost, getLabels } from "@apis/posts";
 import Image from "next/image";
 import ArticleBookmark from "@components/ArticleBookmark";
 import Link from "next/link";
@@ -32,35 +24,16 @@ import { auth } from "@utils/firebase";
 
 const PostDetailContent = ({ slug, id }) => {
   const [post, setPost] = useState({});
-  const [popular, setPopular] = useState()
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [showScroll, setShowScroll] = useState(false);
   const [user] = useAuthState(auth);
+  const [label, setLabel] = useState([])
   const sizes = useWindowSize()
   useEffect(() => {
-    (async () => {
-      setLoading(true)
-      try {
-        const [post, popular] = await Promise.all([
-          getPost({
-            postId: id,
-          }),
-          getPopularPosts(),
-          createPostView({
-            postId: id,
-          })
-        ]);
-        setPost(post)
-        setPopular(popular)
-        setLoading(false)
-      } catch (e) {}
-    })();
-    
+    getPost({postId: id}).then((data) => setPost(data))
+    setLoading(false)
   }, [id, slug]);
-
   const url = `${process.env.NEXT_PUBLIC_HOMEPAGE_URL}/forum/post/${slug}/${id}`;
-console.log("PPPPPPPPPPPPPPPPPPPPP", post)
-  
   return (
     <div className="">
      {
@@ -83,7 +56,7 @@ console.log("PPPPPPPPPPPPPPPPPPPPP", post)
             </div>
             <nav className="flex flex-col md:flex-row mt-4 gap-2" aria-label="Breadcrumb">
               {
-                user && <Link href={"/forum/post"} className="bg-[#c80000] text-white flex pl-2 pr-3 py-0.5 rounded-md md:rounded-e-md items-center text-sm gap-1 w-fit mx-auto md:mx-0"><IoMdAddCircleOutline size="18" />Thêm bài</Link>
+                <Link href={user ? "/forum/post" : `/auth?url_return=${process.env.NEXT_PUBLIC_HOMEPAGE_URL}/forum/post`} className="bg-[#c80000] text-white flex pl-2 pr-3 py-0.5 rounded-md md:rounded-e-md items-center text-sm gap-1 w-fit mx-auto md:mx-0"><IoMdAddCircleOutline size="18" />Thêm bài</Link>
               }
               <ol class="inline-flex items-center space-x-1 md:space-x-3">
                 <li class="inline-flex items-center text-[#828181]">
@@ -96,7 +69,7 @@ console.log("PPPPPPPPPPPPPPPPPPPPP", post)
                 <li>
                   <div class="flex items-center ">
                   <span className="font-semibold">{">>"}</span>
-                    <a href="/forum" class="ml-1 text-xs sm:text-sm font-medium text-[#828181] hover:text-blue-600 md:ml-2 breadcrumb-mobile">{post?.categoryParentObj?.name}</a>
+                    <a href={`/forum/topic/${post?.categoryObj?.slug}/${post?.categoryObj?.categoryId}`} class="ml-1 text-xs sm:text-sm font-medium text-[#828181] hover:text-blue-600 md:ml-2 breadcrumb-mobile">{post?.categoryParentObj?.name}</a>
                   </div>
                 </li>
                 <li aria-current="page">
@@ -116,26 +89,20 @@ console.log("PPPPPPPPPPPPPPPPPPPPP", post)
                       Nổi bật
                 </span>
                      }
-                      <span class="bg-indigo-100 text-indigo-800 text-sm font-medium mr-2 px-2.5 py-0.5 rounded text-center w-fit">[Chủ đề]</span>
+                     {
+                   post?.label &&  Object.keys(post?.label).length > 0 &&
+                      <span style={{
+                        color: post?.label?.color
+                      }} class={`bg-indigo-100 text-indigo-800 text-sm font-medium mr-2 px-2.5 py-0.5 rounded text-center w-fit`}>{post?.label?.name}</span>
+                     }
                       </div>
             
             <h1 className={`my-2 text-xl font-semibold sm:font-bold leading-tight text-[#4A4949] capitalizie`}>{post?.title}</h1>
             </div>
             {/* <p className={`text-gray-500 italic text-justify my-3 text-[#605F5F] ${sizes.width > 576 ? "text-base" : "text-sm"}`}>{post?.description}</p> */}
             <ArticleMeta item={post} onCallback={async () =>{
-                          try {
-                            const [post, popular] = await Promise.all([
-                              getPost({
-                                postId: id,
-                              }),
-                              getPopularPosts(),
-                            ]);
-                            setPost(post)
-                            setPopular(popular)
-                            setLoading(false)
-                          } catch (e) {}
+                          await getPost({postId: id}).then((data) => setPost(data))
                         }} />
-            {/* <div >sdasdas</div> */}
             <TableOfContent
               headers={post?.body?.blocks.filter((x) => x.type === "header")}
               onShowScroll={() => setShowScroll(true)}
@@ -168,19 +135,9 @@ console.log("PPPPPPPPPPPPPPPPPPPPP", post)
             </Scroll.Link>
              }
              <div className="mt-4"></div>
-            <ArticleComments items={post?.comments}
+            <ArticleComments items={post?.comments || []}
               post={post}  onCallback={async () => {
-                try {
-                  const [post, popular] = await Promise.all([
-                    getPost({
-                      postId: id,
-                    }),
-                    getPopularPosts(),
-                  ]);
-                  setPost(post)
-                  setPopular(popular)
-                  setLoading(false)
-                } catch (e) {}
+                await getPost({postId: id}).then((data) => setPost(data))
               }}
             />
             <div className="mb-10"></div>
@@ -210,16 +167,5 @@ console.log("PPPPPPPPPPPPPPPPPPPPP", post)
     </div>
   )
 };
-
-//getStaticPaths in Next13
-export async function generateStaticParams() {
-  let posts = await getPosts();
-  return posts?.map((post) => {
-    return {
-      slug: post.slug,
-      id: post.postId,
-    };
-  });
-}
 
 export default PostDetailContent;

@@ -136,9 +136,6 @@ const SOSPageContent = () => {
       } catch (e) { }
     })();
   }, [coordinates])
-
-  console.log(coordinates);
-
   useEffect(() => {
     (async () => {
       try {
@@ -193,7 +190,6 @@ const SOSPageContent = () => {
         },
       )
         .then((result) => {
-          console.log('S.O.S has been expired')
         })
         .catch((error) => {
           console.error(error);
@@ -227,11 +223,6 @@ const SOSPageContent = () => {
 
   }
   const [active, setActive] = useState(0)
-  // console.log("----------------", sos?.photos)
-
-  console.log('soss: ', soss)
-  // console.log('sossOriginal: ', sossOriginal)
-  // console.log('sossDetail: ', sos)
   const Status1 = ({ detail }) => {
     return <div style={{
       backgroundImage: `url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' rx='25' ry='25' stroke='%2311F10DFF' stroke-width='2' stroke-dasharray='20' stroke-dashoffset='4' stroke-linecap='square'/%3e%3c/svg%3e")`,
@@ -276,8 +267,6 @@ const SOSPageContent = () => {
       className={`${!detail && `absolute top-1/3 sm:top-1/2 -rotate-[15deg] -translate-y-1/3 sm:-translate-y-1/2  translate-x-1/2  ${sizes.width > 450 ? "right-1/3 xl:right-1/2" : "right-[40%]"}`} ${detail ? "text-sm sm:text-base md:text-lg" : "text-lg"}  ${sizes.width > 376 ? "w-[160px] md:w-[200px] h-[48px]" : "w-fit px-5 h-[40px] text-xs text-center"} font-semibold flex justify-center items-center text-[#5E666D]`}>Hết hạn
     </div>
   }
-  // console.log("Help", helperSoss);
-  // console.log("User", user);
   return (
     <main className="w-full">
       <div className="w-full">
@@ -419,7 +408,6 @@ const SOSPageContent = () => {
               {loadingFetch === false ?
                 (soss.length > 0 && soss.filter(x => x?.status === 0 && x?.helpers.length <= 0 && now.isBefore(moment(DateTimeLog(x?.createdAt, x?.deadline), 'DD/MM/YYYY hh:mm:ss'))).length > 0 ? (
                   soss.filter(x => x?.status === 0 && x?.helpers.length <= 0 && now.isBefore(moment(DateTimeLog(x?.createdAt, x?.deadline), 'DD/MM/YYYY hh:mm:ss'))).map((item, index) => {
-                    console.log("Mới nhất", item)
                     return (
                       <div
                         key={index}
@@ -924,7 +912,6 @@ const SOSPageContent = () => {
 
                                       createSosHelper(item, user?.accessToken)
                                         .then(async (result) => {
-                                          console.log("Result: ", result)
                                           let payload = {
                                             lat: coordinates.lat,
                                             lng: coordinates.lng,

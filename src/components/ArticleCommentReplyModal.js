@@ -34,7 +34,6 @@ const FeedCommentReplyModal = ({ visible, setIsCommentModal, onCreateReply, onCa
     let newPhoto = [];
     array.map(async (x) => {
       uploadImage(x, user?.accessToken).then((data) => {
-        console.log(data?.url)
         newPhoto.push(`${data?.url}`)
         setPhotos([...photos, ...newPhoto]);
       }

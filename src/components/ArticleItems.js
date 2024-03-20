@@ -55,7 +55,6 @@ const ArticleItems = ({ data, title, authorId, category, tagId, layout='scroll',
   }
 
   const renderItems = (items) => {
-    console.log(items);
     return items?.map((item, index) => {
       const url = `/forum/post/${item?.slug}/${item?.postId}`;
       const photos = item?.body?.blocks.filter(x => x.type === "image");

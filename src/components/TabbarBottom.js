@@ -11,78 +11,45 @@ import moment from 'moment';
 import { DateTimeLog } from "@utils/dateFormat";
 import { MdPeople } from 'react-icons/md';
 import { useRouter } from 'next/navigation';
-import { generateCustomToken } from '@apis/users';
-
 import { auth } from 'utils/firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
-
 export default function TabbarBottom({ active = 'home' }) {
   const [user, loading, error] = useAuthState(auth);
-
   const [isOpenMenu, setIsOpenMenu] = useState(false);
   const [openModal, setOpenModal] = useState(false);
   const [modalSuccess, setModalSuccess] = useState(false);
   const sizes = useWindowSize();
   const [soss, setSoss] = useState([]);
-  
-  const [check, setCheck] = useState(false);
+  const [check, setCheck] = useState(true);
   const router = useRouter();
   let now = moment();
   useEffect(() => {
-    (async () => {
-      setCheck(true);
-      try {
-        if (user) {  
-          //soss
-          const [soosData] = await Promise.all([
-            getSossByUser(user?.accessToken),
-          ]);
-          setSoss(soosData);
-        }
-        setCheck(false);
-      } catch (e) {}
-    })();
+    getSossByUser(user?.accessToken).then((result) => setSoss(result))
+    setCheck(false);
   }, [user])
   return (
     <div className="tabbarBottom fixed bottom-0 w-full z-50 py-[10px] bg-white border-t border-gray-200 dark:bg-gray-700 dark:border-gray-600">
       <div className="grid h-full mx-auto grid-cols-5 font-medium">
-        {active === "home" ? (
-          <Link
-            href={"/"}
-            className="inline-flex flex-col items-center justify-center px-0 sm:px-2 hover:bg-gray-50 dark:hover:bg-gray-800 group"
-          >
-            <Image width={0} height={0} sizes="100vw" src="/icons/bottom/Home1.png" alt="" className='w-8 h-8' />
-            <span class="text-base md:text-lg font-semibold text-[#c80000] bottomTabBarHiden">Trang chủ</span>
-          </Link>
-        ) : (
-          <Link
-            href={"/"}
-            className="inline-flex flex-col items-center justify-center px-0 sm:px-2 hover:bg-gray-50 dark:hover:bg-gray-800 group"
-          >
-            <Image width={0} height={0} sizes="100vw" src="/icons/bottom/Home.png" alt="" className='w-8 h-8' />
-            <span class="text-base md:text-lg font-semibold text-[#9C9C9C] bottomTabBarHiden">Trang chủ</span>
-          </Link>
-        )}
-
-        {active === "forum" ? (
-          <Link
-            href={"/forum"}
-            className="inline-flex flex-col items-center justify-center px-0 sm:px-2 hover:bg-gray-50 dark:hover:bg-gray-800 group"
-          >
-            <MdPeople size={32} color='#c80000' />
-            <span class="text-base md:text-lg font-semibold text-[#c80000] bottomTabBarHiden">
-              Forum
-            </span>
-          </Link>
-        ) : (
-          <Link
-            href={"/forum"}
-            className="inline-flex flex-col items-center justify-center px-0 sm:px-2 hover:bg-gray-50 dark:hover:bg-gray-800 group"
-          >
-            <MdPeople size={32} color='#9C9C9C' />
-            <span class="text-base md:text-lg font-semibold text-gray-500 bottomTabBarHiden">Forum</span>
-          </Link>
-        )}
+        <div
+          onClick={() => router.push("/")}
+          className="cursor-pointer inline-flex flex-col items-center justify-center px-0 sm:px-2 hover:bg-gray-50 dark:hover:bg-gray-800 group"
+        >
+          <Image width={0} height={0} sizes="100vw" src={active === "home" ? "/icons/bottom/Home1.png" : "/icons/bottom/Home.png"} alt="" className='w-8 h-8' />
+          <span class={`text-base md:text-lg font-semibold ${active === "home" ? "text-[#c80000]" : "text-[#9C9C9C]" }  bottomTabBarHiden`}>Trang chủ</span>
+        </div>
+        <div
+          onClick={() => router.push("/forum")}
+          className="cursor-pointer inline-flex flex-col items-center justify-center px-0 sm:px-2 hover:bg-gray-50 dark:hover:bg-gray-800 group"
+        >
+          {
+            active === "forum" 
+            ? <MdPeople size={32} color='#c80000' /> 
+            : <MdPeople size={32} color='#9C9C9C' />
+          }
+          <span class={`text-base md:text-lg font-semibold  ${active === "forum" ? "text-[#c80000]" : "text-[#9C9C9C]" } bottomTabBarHiden`}>
+            Forum
+          </span>
+        </div>
         <div class="flex items-center justify-center">
           <button
             onClick={() => setIsOpenMenu(true)}
@@ -102,33 +69,27 @@ export default function TabbarBottom({ active = 'home' }) {
           Create new item
           <div class="tooltip-arrow" data-popper-arrow></div>
         </div>
-        {active === "sos" ? (
-          <Link
-            href={"/sos"}
-            className="inline-flex flex-col items-center justify-center px-0 sm:px-2 hover:bg-gray-50 dark:hover:bg-gray-800 group"
-          >
-            <Image width={0} height={0} sizes="100vw" src="/icons/bottom/Sos1.png" alt="" className='w-8 h-8' />
-            <span class="text-base md:text-lg font-semibold text-[#c80000] bottomTabBarHiden">S.O.S</span>
-          </Link>
-        )
-          : (
-            <Link
-              href={"/sos"}
-              className="inline-flex flex-col items-center justify-center px-0 sm:px-2 hover:bg-gray-50 dark:hover:bg-gray-800 group"
-            >
-              <Image width={0} height={0} sizes="100vw" src="/icons/bottom/Sos.png" alt="" className='w-8 h-8' />
-              <span class="text-base md:text-lg font-semibold text-gray-500 bottomTabBarHiden">S.O.S</span>
-            </Link>
-          )}
-          <Link
+        <div
+          onClick={() => router.push("/sos")}
+          className="cursor-pointer inline-flex flex-col items-center justify-center px-0 sm:px-2 hover:bg-gray-50 dark:hover:bg-gray-800 group"
+        >
+          {
+            active === "sos" 
+            ? <Image width={0} height={0} sizes="100vw" src="/icons/bottom/Sos1.png" alt="" className='w-8 h-8' />
+            : <Image width={0} height={0} sizes="100vw" src="/icons/bottom/Sos.png" alt="" className='w-8 h-8' />
+          }
+          <span class={`text-base md:text-lg font-semibold ${ active === "sos" ? "text-[#c80000]" : "text-[#9C9C9C]"}  bottomTabBarHiden`}>S.O.S</span>
+        </div>
+        <div
           href={"/chat"}
-            className="inline-flex flex-col items-center justify-center px-0 sm:px-2 hover:bg-gray-50 dark:hover:bg-gray-800 group"
-          >
-            <Image width={0} height={0} sizes="100vw" src="/icons/comment-1.jpeg" alt="" className='w-8 h-8' />
-            <span class="text-base md:text-lg font-semibold text-[#9C9C9C] text-center bottomTabBarHiden">
-              Chat
-            </span>
-          </Link>
+          onClick={() => router.push("/chat")}
+          className="cursor-pointer inline-flex flex-col items-center justify-center px-0 sm:px-2 hover:bg-gray-50 dark:hover:bg-gray-800 group"
+        >
+          <Image width={0} height={0} sizes="100vw" src="/icons/comment-1.jpeg" alt="" className='w-8 h-8' />
+          <span class="text-base md:text-lg font-semibold text-[#9C9C9C] text-center bottomTabBarHiden">
+            Chat
+          </span>
+        </div>
       </div>
       <div id="modal-bottom">
         <Drawer
@@ -196,23 +157,43 @@ export default function TabbarBottom({ active = 'home' }) {
             <PostSOSWithModal  setModalSuccess={setModalSuccess} setCloseForm={setOpenModal} />
           </Modal.Body>
         </Modal>
-        <Modal show={modalSuccess} onClose={() => {
-        setModalSuccess(false);
-      }} style={{
-          padding: sizes.width > 376 ? 4 : 0
-        }}>
+        <Modal 
+          show={modalSuccess} 
+          onClose={() => {
+            setModalSuccess(false);
+          }} 
+          style={{
+            padding: sizes.width > 376 ? 4 : 0
+          }}
+        >
           <Modal.Header className="bg-[#c80000] bg-opacity-60 rounded-b-xl justify-center text-center  text-white [&>h3]:text-white [&>h3]:w-full [&>h3]:text-base [&>h3]:sm:text-xl  [&>button]:ml-auto p-2.5 [&>button]:text-white">
-          Thông báo SOS
+            Thông báo SOS
           </Modal.Header>
           <Modal.Body className="px-4 py-0 pb-6 flex flex-col items-center">
-            <div className="text-2xl text-[#525050] mt-4">Bạn đã gửi <span className="text-[#D15156]">SOS</span> thành công !</div>
+            <div className="text-2xl text-[#525050] mt-4">
+              Bạn đã gửi 
+              <span className="text-[#D15156]">SOS</span> 
+              thành công !
+            </div>
             <div className="text-[#525050] mt-4">Chúng tôi đang tìm Hiệp Sĩ cho bạn ...</div>
-            <button className="mt-4 w-[200px] h-[30px] text-sm font-semibold bg-[#D15156] text-white rounded-full leading-normal flex justify-center items-center"
-            onClick={() => router.push("/")}
-            >Quay về trang chủ</button>
+            <button 
+              className="mt-4 w-[200px] h-[30px] text-sm font-semibold bg-[#D15156] text-white rounded-full leading-normal flex justify-center items-center"
+              onClick={() => router.push("/")}
+            >
+              Quay về trang chủ
+            </button>
           </Modal.Body>
           <Modal.Footer className="flex justify-center items-center">
-            <div className="text-[#525050] text-xs text-center">***Bạn có thể <Link className="underline px-1" href="/sos">xem lại</Link> tình trạng SOS qua cảnh báo trang chủ</div>
+            <div className="text-[#525050] text-xs text-center">
+              ***Bạn có thể 
+              <div 
+                className="underline px-1" 
+                onClick={() => router.push("/sos")}
+              >
+                xem lại
+              </div> 
+                tình trạng SOS qua cảnh báo trang chủ
+            </div>
           </Modal.Footer>
         </Modal>
       </div>

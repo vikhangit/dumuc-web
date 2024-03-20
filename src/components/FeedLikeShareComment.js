@@ -2,9 +2,8 @@ import React, { useEffect, useState } from "react";
 import FeedLike from "./FeedLike";
 import FeedComment from "./FeedComment";
 import FeedShare from "./FeedShare";
-import {  Modal} from 'flowbite-react';
+import {  Modal } from 'flowbite-react';
 import Image from "next/image";
-import { useRecoilValue } from 'recoil';
 import { message } from "antd";
 import { useWindowSize } from "@hooks/useWindowSize";
 import {createUserFollow, deleteUserFollow, getProfile, updateProfile} from '@apis/users';
@@ -16,21 +15,11 @@ import { auth } from "@utils/firebase";
 const FeedLikeShareComment = ({ item, url, index, onCallback}) => {
   const sizes = useWindowSize();
   const [user] = useAuthState(auth)
-  const [setUser, updating, error] = useUpdateProfile(auth);
   const [showLike, setShowLike] = useState(false)
-  const [showComment, setShowComment] = useState(
-   false
-  );
+  const [showComment, setShowComment] = useState(false);
   const [usingUser, setUsingUser] = useState()
   useEffect(() =>{
-    (async () => {
-      try {
-        const dataCall = await getProfile(user?.accessToken) 
-        setUsingUser(dataCall)
-      } catch (e) {
-        console.log(e)
-      }
-    })();
+    getProfile(user?.accessToken).then((dataCall) => setUsingUser(dataCall))
   },[user])
   const renderCountComment = () => {
     if(!item?.likesCount){
@@ -186,73 +175,6 @@ const FeedLikeShareComment = ({ item, url, index, onCallback}) => {
       </div>
       }
     </div>
-    // <div className="relative">
-    //   <div
-    //     class={`flex gap-x-2 justify-end items-center absolute right-2 sm:right-4 top-0 -translate-y-10`}
-    //   >
-    //     <NewFeedComment
-    //       onClick={setShowComment}
-    //     />
-    //     <NewFeedShare item={item} />
-    //     <NewFeeLike
-    //       style={"feed"}
-    //       id={item?.feedId}
-    //       currentUrl={url}
-    //       count={item?.likesCount}
-    //     />
-    //   </div>
-    //   <div class="flex items-center justify-between mt-4">
-    //     <div className="flex items-center">
-    //       <div className="flex items-center">
-    //         {item?.likesUser?.length === 0 ?
-    //           <>
-    //             <div className="p-1 bg-white rounded-full">
-    //               <Image width={0} height={0} sizes="100vw"
-    //                 className="w-10 h-10 rounded-full"
-    //                 src={`/dumuc/avatar.png`}
-    //                 alt={""}
-    //               />
-    //             </div>
-    //             <div className="p-1 -translate-x-4 bg-white rounded-full">
-    //               <Image width={0} height={0} sizes="100vw"
-    //                 className="w-10 h-10 rounded-full"
-    //                 src={`/dumuc/avatar.png`}
-    //                 alt={""}
-    //               />
-    //             </div>
-    //           </>
-    //           :
-    //           item?.likesUser?.map(user => {
-    //            return <div className="p-1 bg-white rounded-full">
-    //               <Image width={0} height={0} sizes="100vw"
-    //                 className="w-10 h-10 rounded-full"
-    //                 src={user?.photo}
-    //                 alt={user?.name}
-    //               />
-    //             </div>
-    //           })
-    //         }
-    //       </div>
-    //       <div className="text-xs  hidden sm:block">
-    //         <strong>{item?.likesUser?.length > 0 && item?.likesUser[0]?.name} {(item?.likesUser?.length > 1 && item?.likesUser[1]?.name) && `, ${item?.likesUser[1]?.name}`}</strong> <br /> and {item?.likesCount} more liked this
-    //       </div>
-    //     </div>
-    //     <div className="flex gap-x-4 items-center">
-    //       <span className="text-gray-500 text-sm flex items-center">
-    //         <Image width={0} height={0} sizes="100vw" alt="" src="/icons/heart-b.png" className="w-5 h-5 mr-1.5" />
-    //         {item?.likesCount || "0"}
-    //       </span>
-    //       <span className="text-gray-500 text-sm flex items-center">
-    //         <Image width={0} height={0} sizes="100vw" alt="" src="/icons/link.png" className="w-5 h-5 mr-1.5" />{" "}
-    //         {item?.shareCount || "0"}
-    //       </span>
-    //       <span className="text-gray-500 text-sm flex items-center">
-    //         <Image width={0} height={0} sizes="100vw" alt="" src="/icons/message-2.png" className="w-5 h-5 mr-1.5" />
-    //         {item?.commentsCount || "0"}
-    //       </span>
-    //     </div>
-    //   </div>
-    // </div>
   );
 };
 

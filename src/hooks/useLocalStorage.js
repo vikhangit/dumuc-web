@@ -13,7 +13,6 @@ export default function useLocalStorage(key, initialValue) {
       }
     } catch (error) {
       // If error also return initialValue
-      console.log(error);
       return initialValue;
     }
   });

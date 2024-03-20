@@ -624,3 +624,16 @@ ul.tree:before {
 .scroll-quick-post::-webkit-scrollbar-thumb:hover,  .scroll-chat::-webkit-scrollbar-thumb:hover{
   background: #DADBDE;
 }
+  
+.ck.ck-editor__main>.ck-editor__editable:not(.ck-focused), .ck-focused {
+  border:none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  height: 100%;
+}
+.ck.ck-editor__top.ck-reset_all{
+  display: none;
+}
+.ck.ck-editor__main{
+  min-height: 200px;
+}

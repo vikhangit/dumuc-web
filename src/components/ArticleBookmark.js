@@ -26,7 +26,6 @@ const iconActive = () => <svg class="w-4 h-4 sm:w-5 sm:h-5 text-[#c80000]" aria-
         const dataCall = await getProfile(user?.accessToken) 
         setUsingUser(dataCall)
       } catch (e) {
-        console.log(e)
       }
     })();
   },[user])

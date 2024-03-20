@@ -5,7 +5,6 @@ import { Input, Tag, message } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { TweenOneGroup } from 'rc-tween-one';
 
-//apis
 import { uploadImage } from "apis/other";
 import {
   createUserRanking,
@@ -15,6 +14,7 @@ import {
   createPostByUser,
   updatePostByUser,
   getPost,
+  getLabels,
 } from "@apis/posts";
 
 import {UnderlineInlineTool} from 'editorjs-inline-tool';
@@ -25,64 +25,42 @@ import BannerRight from "@components/BannerRight";
 import axios from "axios";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@utils/firebase";
+import TabbarBottom from "@components/TabbarBottom";
 
 const PostWritePage = ({ searchParams }) => {
   const postId = searchParams?.id;
 
-  useEffect(() => {
-    (async () => {
-      try {
-        if (postId) {
-          let post = await getPost({
-            postId,
-          });
-          setTitle(post?.title);
-          // setDescription(post?.description);
-          setTags(post?.tags);
-          setCategory(post?.category);
-          setIsLongform(post?.isLongform);
-          setEditor(post?.body?.blocks);
-        }
-      } catch (e) { }
-    })();
-  }, [postId])
-
+  
   const router = useRouter();
   const [user] = useAuthState(auth);
   const [loading, setLoading] = useState(false);
-
+  
   const [isMounted, setIsMounted] = useState(false);
   const ref = useRef();
   const [categories, setCategories] = useState([]);
-
+  
   const [title, setTitle] = useState();
   const [titleError, setTitleError] = useState("");
-
+  
   const [description, setDescription] = useState();
   const [descriptionError, setDescriptionError] = useState();
   const [label, setLabel] = useState("")
-
+  
   const [category, setCategory] = useState();
   const [categoryError, setCategoryError] = useState("");
-
+  
   const [isLongform, setIsLongform] = useState(false);
   const [editor, setEditor] = useState();
   const [editorError, setEditorError] = useState();
 
-  const labelList = [
-    "Hỏi đáp", "Tu vấn"
-  ]
-
+  const [labelList, setLabelList] = useState([])
+  
   const initializeEditor = async (accessToken, data) => {
-    const EditorJS = (await import("@editorjs/editorjs")).default;
+    const EditorJS = (await require("@editorjs/editorjs")).default;
     const Header = await require("@editorjs/header");
-    const Embed = (await import("@editorjs/embed")).default;
-    const Table = (await import("@editorjs/table")).default;
-    const List = (await import("@editorjs/list")).default;
-    const Code = (await import("@editorjs/code")).default;
-    //const LinkTool = (await import("@editorjs/link")).default;
-    const InlineCode = (await import("@editorjs/inline-code")).default;
-    const ImageTool = (await import("@editorjs/image")).default;
+    const Embed = await require("@editorjs/embed");
+    const InlineCode = await require("@editorjs/inline-code");
+    const ImageTool = await require("@editorjs/image");
     const ImageLink = await require('editorjs-inline-image');;
     const Quote = await require("@editorjs/quote");
     const Paragraph = await require("@editorjs/paragraph");
@@ -91,9 +69,7 @@ const PostWritePage = ({ searchParams }) => {
     const Delimiter = await require("@editorjs/delimiter");
     const TextVariantTune = await require("@editorjs/text-variant-tune");
     const Marker = await require("@editorjs/marker");
-    const ChangeCase = await require("editorjs-change-case");
     const Strikethrough = await require("@sotaproject/strikethrough");
-
     if(!ref.current){
       const editor = new EditorJS({
         holder: "editorjs-container",
@@ -110,20 +86,39 @@ const PostWritePage = ({ searchParams }) => {
           },
           header: {
             class: Header,
-            inlineToolbar: true,
+            Toolbar: true,
+            toolbox: [
+              {
+                icon:"<p style='font-size: 14px; font-weight:700'>H<span style='font-size: 9px; font-weight:800'>1</span></p>",
+                title: 'Tiêu đề 1 (32px)',
+                data: {
+                  level: 1,
+                },
+              },
+              {
+                icon:"<p style='font-size: 14px; font-weight:700'>H<span style='font-size: 9px; font-weight:800'>2</span></p>",
+                title: 'Tiêu đề 2 (24px)',
+                data: {
+                  level: 2,
+                },
+              },
+              {
+                icon:"<p style='font-size: 14px; font-weight:700'>H<span style='font-size: 9px; font-weight:800'>3</span></p>",
+                title: 'Tiêu đề 3 (18.72px)',
+                data: {
+                  level: 3,
+                },
+              }
+            ]
+            ,
             tunes: ["textAlignment", "textVariant"],
             config: {
+              placeholder: 'Nhập tiêu đề',
               levels: [2, 3, 4, 5, 6],
               defaultLevel: 3,
             },
           },
           underline: UnderlineInlineTool,
-          // linkTool: {
-          //   class: LinkTool,
-          //   config: {
-          //     endpoint: '/api/link',
-          //   },
-          // },
           image: {
             class: ImageTool,
             config: {
@@ -168,81 +163,25 @@ const PostWritePage = ({ searchParams }) => {
             class: ImageLink,
             inlineToolbar: true,
             toolbox:{
-              icon: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M12.232 4.232a2.5 2.5 0 0 1 3.536 3.536l-1.225 1.224a.75.75 0 0 0 1.061 1.06l1.224-1.224a4 4 0 0 0-5.656-5.656l-3 3a4 4 0 0 0 .225 5.865.75.75 0 0 0 .977-1.138 2.5 2.5 0 0 1-.142-3.667l3-3Z" /><path d="M11.603 7.963a.75.75 0 0 0-.977 1.138 2.5 2.5 0 0 1 .142 3.667l-3 3a2.5 2.5 0 0 1-3.536-3.536l1.225-1.224a.75.75 0 0 0-1.061-1.06l-1.224 1.224a4 4 0 1 0 5.656 5.656l3-3a4 4 0 0 0-.225-5.865Z" /></svg>',
-            title: "Image Link"
-            
+              icon: '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-link-45deg" viewBox="0 0 16 16"> <path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1.002 1.002 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4.018 4.018 0 0 1-.128-1.287z"/> <path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243L6.586 4.672z"/> </svg>',
             },
             config: {
-             
               embed: {
                 display: true,
               },
             
             }
            },
-          // gallery: {
-          //   class: ImageGallery,
-          //   inlineToolbar: true,
-          //   config: {
-          //     uploader: {
-          //       uploadByFile(file) {
-          //         console.log("file: ", file);
-          //         return uploadImage(file, user?.accessToken).then((data) => {
-          //           console.log("DAta:", data);
-          //           return {
-          //             success: 1,
-          //             file: {
-          //               url: data?.url.replace("amp;", ""),
-          //             },
-          //           };
-          //         });
-          //       },
-          //       uploadByUrl(url) {
-          //         const fileName = "myFile.jpg";
-          //         return axios
-          //           .get(url, { responseType: "blob" })
-          //           .then(async (response) => {
-          //             const contentType = response.headers.get("content-type");
-          //             const blob = await response.data;
-          //             const file = new File([blob], fileName, {
-          //               contentType,
-          //               type: contentType,
-          //             });
-          //             // access file here
-          //             return uploadImage(file, user?.accessToken).then((data) => {
-          //               return {
-          //                 success: 1,
-          //                 file: {
-          //                   url: data?.url,
-          //                 },
-          //               };
-          //             });
-          //           })
-          //           .catch((err) => console.log("err", err));
-          //       },
-          //     },
-          //   },
-          // },
-          // list: {
-          //   class: List,
+          // code: {
+          //   class: Code,
           //   inlineToolbar: true,
           //   tunes: ["textAlignment"],
           // },
-          code: {
-            class: Code,
-            inlineToolbar: true,
-            tunes: ["textAlignment"],
-          },
           inlineCode: {
             class: InlineCode,
             inlineToolbar: true,
             tunes: ["textAlignment"],
           },
-          // table: {
-          //   class: Table,
-          //   inlineToolbar: true,
-          //   tunes: ["textAlignment"],
-          // },
           embed: Embed,
           paragraph: {
             class: Paragraph,
@@ -262,21 +201,86 @@ const PostWritePage = ({ searchParams }) => {
             inlineToolbar: true,
             tunes: ["textAlignment"],
           },
-          // fontSize: {
-          //   class: FontSize,
-          // },
           textVariant: TextVariantTune,
           Marker: {
             class: Marker,
             shortcut: "CMD+SHIFT+M",
           },
-          changeCase: ChangeCase,
           strikethrough: Strikethrough,
+        },
+        i18n: {
+          /**
+         * @type {I18nDictionary}
+          */
+         messages: {
+           ui: {
+              // Translations of internal UI components of the editor.js core
+              "blockTunes": {
+                "toggler": {
+                  "Click to tune": "Bấm để điều chỉnh",
+                  "or drag to move": "hoặc kéo để di chuyển"
+                },
+              },
+              "inlineToolbar": {
+                "converter": {
+                  "Convert to": "Chuyển đổi sang"
+                }
+              },
+              "toolbar": {
+                "toolbox": {
+                  "Add": "Thêm mới"
+                }
+              }
+            },
+            toolNames: {
+              // Section for translation Tool Names: both block and inline tools
+              "Text": "Đoạn văn",
+              "Heading": "Tiêu đề",
+              "Quote": "Trích dẫn",
+              "Delimiter": "Phân cách",
+              "Link": "Đường đẫn",
+              "Marker": "Đánh dấu",
+              "Bold": "In đậm",
+              "Italic": "In đậm",
+              "InlineCode": "Code",
+              "InlineImage": "Đường dẫn ảnh",
+              "Image": "Hình ảnh",
+              "Strikethrough": "Gạch ngang",
+              "Underline": "Gách dưới",
+              "ChangeCase": "Thay đổi kiểu chữ",
+              
+            },
+            tools: {
+              "warning": { // <-- 'Warning' tool will accept this dictionary section
+                "Title": "Название",
+                "Message": "Сообщение",
+              },
+              "link": {
+                "Add a link": "Thêm một đường dẫn"
+              },
+              "stub": {
+                'The block can not be displayed correctly.': 'Блок не может быть отображен'
+              }
+            },
+            blockTunes: {
+              // Section allows to translate Block Tunes
+              "delete": {
+                "Delete": "Xóa"
+              },
+              "moveUp": {
+                "Move up": "Di chuyển lên"
+              },
+              "moveDown": {
+                "Move down": "Di chuyển xuống"
+              }, 
+            },
+          }
         },
         tunes: ["textAlignment", "textVariant"],
         data: {
           blocks: data,
         },
+        
       });
       ref.current = editor
     }
@@ -288,11 +292,20 @@ const PostWritePage = ({ searchParams }) => {
   const [inputValue, setInputValue] = useState('');
   const inputRef = useRef(null);
   useEffect(() => {
-    if (user === null) {
-      const url_return = `${process.env.NEXT_PUBLIC_HOMEPAGE_URL}/forum/post`
-      router.push(`/auth?url_return=${url_return}`);
-    }
-  }, [user])
+    getLabels().then(list => setLabelList(list));
+  }, []);
+  useEffect(() => {
+    getPost({
+      postId,
+    }).then((data) => {
+        setTitle(data?.title);
+        setTags(data?.tags);
+        setCategory(data?.category);
+        setIsLongform(data?.isLongform);
+        setEditor(data?.body?.blocks);
+        setLabel(data?.label?.labelId)
+    })
+  }, [postId])
 
   useEffect(() => {
     if (inputVisible) {
@@ -302,7 +315,6 @@ const PostWritePage = ({ searchParams }) => {
 
   const handleClose = (removedTag) => {
     const newTags = tags.filter((tag) => tag !== removedTag);
-    console.log(newTags);
     setTags(newTags);
   };
 
@@ -350,39 +362,6 @@ const PostWritePage = ({ searchParams }) => {
   const tagPlusStyle = {
     borderStyle: 'dashed',
   };
-
-  useEffect(() => {
-    (async () => {
-      try {
-        if (postId) {
-          let post = await getPost({
-            postId,
-          });
-          setTitle(post?.title);
-          setCategory(post?.category);
-          setLabel(post?.label)
-          setEditor([
-            ...post?.body?.blocks.map((x) => {
-              if (x.type === "gallery") {
-                let arr = [];
-                x.data.files.map((i) =>
-                  arr.push({
-                    url: i.url.replace("amp;", ""),
-                  })
-                );
-                return {
-                  ...x,
-                  files: [...arr],
-                };
-              } else {
-                return x;
-              }
-            }),
-          ]);
-        }
-      } catch (e) {}
-    })();
-  }, [postId]);
   
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -393,30 +372,31 @@ const PostWritePage = ({ searchParams }) => {
     );
   }, []);
   useEffect(() => {
-    if (user) {
-      if (postId) {
-        //update
-        if (editor) {
+    if(window !== undefined){
+      if (user) {
+        if (postId) {
+          if (editor) {
+            const init = async () => {
+              await initializeEditor(user?.accessToken, editor);
+            };
+            if (isMounted) {
+              init();
+            }
+          }
+        } else {
+          //create
           const init = async () => {
-            await initializeEditor(user?.accessToken, editor);
+            await initializeEditor(user?.accessToken, undefined);
           };
           if (isMounted) {
             init();
+  
+            return () => {
+              if (ref.current) {
+                ref.current?.destroy();
+              }
+            };
           }
-        }
-      } else {
-        //create
-        const init = async () => {
-          await initializeEditor(user?.accessToken, undefined);
-        };
-        if (isMounted) {
-          init();
-
-          return () => {
-            if (ref.current) {
-              ref.current?.destroy();
-            }
-          };
         }
       }
     }
@@ -443,8 +423,7 @@ const PostWritePage = ({ searchParams }) => {
     }
 
     if (ref.current) {
-      ref.current.save().then((outputData) => {
-        console.log(outputData);
+      ref.current.save().then((outputData) => {;
         if (outputData?.blocks.length === 0) {
           setEditorError("Vui lòng nhập nội dung!");
           setLoading(false);
@@ -469,7 +448,7 @@ const PostWritePage = ({ searchParams }) => {
           categoryParent,
           isLongform,
           postId,
-          // label
+          label: label != "" && label?.length > 0 ? labelList?.find(item => item.labelId === label) : {}
         };
 
         if (tags?.length > 0) {
@@ -493,7 +472,6 @@ const PostWritePage = ({ searchParams }) => {
           createPostByUser(item, user?.accessToken)
             .then((result) => {
               message.success(result.message);
-
               //ranking
               createUserRanking(
                 {
@@ -503,7 +481,7 @@ const PostWritePage = ({ searchParams }) => {
                 },
                 user?.accessToken
               ).then(() => {
-                router.push("/account/library/post");
+                 router.push("/account/library/post");
                 setLoading(false);
               });
             })
@@ -613,8 +591,8 @@ const PostWritePage = ({ searchParams }) => {
             </option>
             {labelList
               .map((item, index) => {
-              return  <option key={index} value={item}>
-                            {item}
+              return  <option key={index} value={item?.labelId}>
+                            {item?.name}
                 </option>
               })}
           </select>
@@ -801,6 +779,8 @@ const PostWritePage = ({ searchParams }) => {
           {/* <button onClick={save} type="button" class="py-2.5 px-5 mr-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Đã lưu</button> */}
         </div>
       </div>
+      <div className="mb-24"></div>
+      <TabbarBottom active='forum' />
       <BannerRight isAppInstall={true} />
     </main>
   );

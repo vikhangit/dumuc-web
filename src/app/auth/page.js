@@ -11,6 +11,8 @@ import isEmail from 'validator/lib/isEmail';
 
 import { auth, providerGoogle } from 'utils/firebase';
 import { signInWithPopup, isSignInWithEmailLink, signInWithEmailLink, sendSignInLinkToEmail, onAuthStateChanged } from "firebase/auth";
+import TabbarBottom from "@components/TabbarBottom";
+import BannerRight from "@components/BannerRight";
 
 const PasswordlessPage = ({searchParams}) => {
     const query = searchParams;
@@ -58,7 +60,6 @@ const PasswordlessPage = ({searchParams}) => {
             .catch(err => {
                 setLoadingAction(false);
                 message.error(err.message);
-                console.log(err);
             })
         })
         .catch(function(error) {
@@ -66,10 +67,13 @@ const PasswordlessPage = ({searchParams}) => {
             message.error(error.message);
         });
     }
+    const subEmail= (str) => {
+        const findIndex = str?.indexOf("@")
+        return str.substring(0, findIndex)
+    }
 
     const loginWithPasswordless = () => {
         setLoadingAction(true);
-
         //signin with email (passwordless)
         const actionCodeSettings = {
             // URL you want to redirect back to. The domain (www.example.com) for this
@@ -110,23 +114,23 @@ const PasswordlessPage = ({searchParams}) => {
             signInWithEmailLink(auth, saved_email, window.location.href)
                 .then(async (result) => {
                     let userCreate = result.user;
-
                     // Clear email from storage.
                     window.localStorage.removeItem('emailForSignIn');
                     createUser({
                         uid: userCreate.uid,
                         email: userCreate.email,
-                        name: userCreate.displayName,
+                        name: userCreate.displayName || subEmail(userCreate.email || "No name"),
                         phone: userCreate.phoneNumber,
                         photo: userCreate.photoURL,
                     })
-                        .then(() => {
+                    .then((result) => {
+                        console.log("Create User", result)
                             setLoadingAction(true);
-                        })
-                        .catch(error => console.log(error))
+                    })
+                        .catch(error => {})
                 })
                 .catch((error) => {
-                    console.log('error', error)
+                    // console.log('error', error)
                     setErrorCode(error.code)
                     setLoadingAction(false)
                     // Some error occurred, you can inspect the code: error.code
@@ -274,6 +278,9 @@ const PasswordlessPage = ({searchParams}) => {
                     </div>
                 )}
             </form>
+            <div className="mb-24"></div>
+      <TabbarBottom active='' />
+      <BannerRight isAppInstall={true} />
         </main>
     );
 };

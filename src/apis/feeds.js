@@ -44,6 +44,16 @@ export const createComment = (payload, token) => {
     });
 };
 
+export const updateComment = (payload, token) => {
+  return request("api/feed/comment", payload, { method: "PUT", token })
+    .then((data) => {
+      return data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
 export const createCommentReply = (payload, token) => {
   return request("api/feed/comment/reply", payload, { method: "POST", token })
     .then((data) => {
@@ -65,8 +75,10 @@ export const createFeedByUser = (payload, token) => {
 };
 
 export const updateFeedByUser = (payload, token) => {
+  console.log("Payload", payload)
   return request("api/user/feed", payload, { method: "PUT", token })
     .then((data) => {
+      console.log(data)
       return data;
     })
     .catch((err) => {

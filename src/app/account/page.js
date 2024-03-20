@@ -25,7 +25,7 @@ const AccountPage = () => {
   // const [setUser, updating] = useUpdateProfile(auth);
   const [signOut, loadingSignout, error] = useSignOut(auth);
   useEffect(() => {
-    if (user === null && loading === false) {
+    if (!user && !loading) {
       const url_return = `${process.env.NEXT_PUBLIC_HOMEPAGE_URL}/account/`
       router.push(`/auth?url_return=${url_return}`);
     }
@@ -39,7 +39,6 @@ const AccountPage = () => {
           setProfile(profile);
         }
       } catch (e) {
-        console.log(e)
       }
     })();
   }, [user])
@@ -138,10 +137,9 @@ const AccountPage = () => {
         </div>
         <div className="rounded-3xl shadow-md shadow-gray-400 px-4 sm:px-8  py-6 bg-white mb-3">
           <button
-            onClick={async () => {
-          const success = await signOut();
+            onClick={async () => { 
+          const success = await signOut().then((res) => router.push("/"));
           if (success) {
-            router.push("/")
             message.success("Đăng xuất thành công!");
           }
         }}

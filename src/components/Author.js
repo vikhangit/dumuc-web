@@ -19,7 +19,6 @@ const Author = ({author, currentUrl = '/'}) => {
         const dataCall = await getProfile(user?.accessToken) 
         setUsingUser(dataCall)
       } catch (e) {
-        console.log(e)
       }
     })();
   },[user])

@@ -15,11 +15,10 @@ const ArticleLibraryItems = ({ items, status = 0,onCallback }) => {
             items?.filter(x => x.status === parseInt(status)).map((item, index) => {
             const url = `/forum/post/${item?.slug}/${item?.postId}`;
             
-            const photos = item?.body?.blocks.filter(x => x.type === "image");
-            const photo = item?.photo ? item?.photo : photos[0]?.data?.file?.url
-            const photosLink = item?.body?.blocks.filter(x => x.type === "imageInline");
-            const photoLink = item?.photo ? item?.photo : photosLink[0]?.data?.url
-            console.log("abc", photoLink)
+            const photos = item?.body?.blocks?.filter(x => x.type === "image");
+            const photo =photos && photos?.length > 0 && photos[0]?.data?.file?.url
+            const photosLink = item?.body?.blocks?.filter(x => x.type === "imageInline");
+            const photoLink = photosLink && photosLink?.length > 0 && photosLink[0]?.data?.url
 
             return (
               item?.isActive &&

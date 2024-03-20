@@ -30,7 +30,6 @@ const FeedBookmark = ({id, currentUrl = '/' }) => {
           setUsingUser(dataCall)
           setLoading(false)
         } catch (e) {
-          console.log(e)
           setLoading(false)
         }
       })();

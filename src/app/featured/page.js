@@ -18,7 +18,6 @@ const Featured =  async ({searchParams}) => {
     getPopularPosts(),
     getUsersRanking(),
   ]);
-console.log(popular)
   return (
     <main className="w-full">
       <div>

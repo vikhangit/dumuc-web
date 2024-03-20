@@ -26,7 +26,6 @@ const FeaturedMember = ({items, limit}) => {
           const dataCall = await getProfile(user?.accessToken) 
           setUsingUser(dataCall)
         } catch (e) {
-          console.log(e)
         }
       })();
     },[user])
@@ -213,7 +212,6 @@ const FeaturedMember = ({items, limit}) => {
                   })
                   .then(result => {
                     setAuthorStatistics(result)
-                    console.log('authorStatistics', result);
                   }).then(() => {
                     setShowModal(true);
                   })

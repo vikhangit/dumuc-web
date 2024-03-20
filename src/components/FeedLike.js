@@ -10,7 +10,6 @@ import { Spinner } from "flowbite-react";
 const FeedLike = ({id, currentUrl, onCallback, renderCountComment, item}) => {
     const router = useRouter();
     const [user] = useAuthState(auth);
-  const [setUser, updating, error] = useUpdateProfile(auth);
   const [usingUser, setUsingUser] = useState()
   const [loading, setLoading] = useState(false)
   useEffect(() =>{
@@ -21,12 +20,10 @@ const FeedLike = ({id, currentUrl, onCallback, renderCountComment, item}) => {
         setUsingUser(dataCall)
         setLoading(false)
       } catch (e) {
-        console.log(e)
         setLoading(false)
       }
     })();
   },[user])
-  console.log("1212321321",  usingUser)
 
     const icon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-gray-500">
     <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
@@ -47,7 +44,7 @@ const FeedLike = ({id, currentUrl, onCallback, renderCountComment, item}) => {
                  deleteUserLike(
                     {
                       likeType: 'feed',
-                      likeValue: id,
+                      likeValue: id      
                     },
                     user?.accessToken
                   ).then( async (result) =>{
@@ -57,16 +54,9 @@ const FeedLike = ({id, currentUrl, onCallback, renderCountComment, item}) => {
                         (x) => x.likeValue !== id && x.likeType === 'feed'
                       ), 
                     }, user?.accessToken)
-                
-                    //  onCallback()
-                     const dataCall = await getProfile(user?.accessToken) 
-                     setUsingUser(dataCall)
                      setLoading(false)
-                  } 
-                    //update recoil
-                   
-                    
-                    // message.success('Đã bỏ like thành công');
+                     onCallback()
+                  }
                   );
                 }}
                 tooltip="Bỏ like"
@@ -74,7 +64,7 @@ const FeedLike = ({id, currentUrl, onCallback, renderCountComment, item}) => {
                 {
                   loading ? <Spinner /> : <span class="feed-tool gap-x-1 flex items-center text-base sm:text-lg  text-[#c80000] hover:underline  dark:text-gray-400 ">
                   {iconActive()}
-                  {usingUser?.likesCount || "0"} Lượt thích
+                  {item?.likesCount || "0"} Lượt thích
                 </span>
                 }
               </button>
@@ -89,10 +79,11 @@ const FeedLike = ({id, currentUrl, onCallback, renderCountComment, item}) => {
                     {
                       likeType: 'feed',
                       likeValue: id,
+                      user: usingUser
                     },
                     user?.accessToken
                   ).then(async (result) => {
-                    //update recoil
+                    console.log("Result", result)
                     updateProfile({
                       ...usingUser,
                       likes: usingUser?.likes?.length > 0 ? [...usingUser?.likes, {
@@ -105,12 +96,8 @@ const FeedLike = ({id, currentUrl, onCallback, renderCountComment, item}) => {
                         likeValue: id,
                       }]
                     }, user?.accessToken)
-                    // onCallback();
-                    const dataCall = await getProfile(user?.accessToken) 
-                    setUsingUser(dataCall)
                     setLoading(false)
-                 
-                    // message.success('Đã like thành công')
+                    onCallback()
                 });
                 }}
                 tooltip="Like"

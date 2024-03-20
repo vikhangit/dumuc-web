@@ -30,6 +30,7 @@ const NewQuickPost = ({onCallback}) => {
               onClick={() => {
                 if (user?.email) {
                   setShowPostText(true);
+                  localStorage.removeItem("isPrivate")
                 } else {
                   router.push("/auth");
                 }

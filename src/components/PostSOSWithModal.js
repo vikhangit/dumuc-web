@@ -110,7 +110,6 @@ const PostSOSWithModal = ({ searchParams, setModalSuccess,setCloseForm}) => {
     if(e.target?.files[0]){
       setLoadingImage(index);
         return uploadImage(e.target.files[0], user?.accessToken).then((data) => {
-          console.log(data)
           let newArr = [...photos]
           newArr[index] = data?.url
           setPhotos([...newArr]);
@@ -182,9 +181,6 @@ const PostSOSWithModal = ({ searchParams, setModalSuccess,setCloseForm}) => {
       }, 1000);
     }
   }
-
-  console.log("ADDRESS.CALL: ", address)
-  console.log("Address Component", address_components)
 
   useEffect(() => {
     (async () => {

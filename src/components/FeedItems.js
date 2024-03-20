@@ -1,34 +1,22 @@
 "use client";
 import { useEffect, useState } from "react";
-
-//apis
 import { getFeedsLoadMore } from "@apis/feeds";
-
-//components
 import FeedItem from "@components/FeedItem";
 import "@fancyapps/ui/dist/fancybox/fancybox.css";
 import InfiniteScroll from "react-infinite-scroller";
 import { Spinner } from "flowbite-react";
 import NewQuickPost from "./Dumuc/NewQuickPost";
-import { userAtom } from "@recoils/atoms";
-import { useRecoilValue } from "recoil";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@utils/firebase";
 
 const FeedItems = ({
-  data,
-  title,
+  data, 
   authorId,
   tagId,
   layout='scroll',
-  onCallback,
-  setFeedData
+  onCallback
 }) => {
   const [items, setItems] = useState(data?.items);
-  const [last, setLast] = useState(data?.last);
-  const [isLastResult, setIsLastResult] = useState(
-    data?.last === data?.lastest
-  );
   const [user, loading, error] = useAuthState(auth);
   const [hasLoadMore, setHasLoadMore] = useState(true);
   useEffect(() => {
@@ -37,27 +25,17 @@ const FeedItems = ({
   const loadMore = async () => {
     setHasLoadMore(true)
     let payload = {};
-    if (authorId) {
-      payload["author"] = authorId;
-    }
-
-    if (tagId) {
-      payload["tag"] = tagId;
-    }
-
+    authorId && (payload["author"] = authorId)
+    tagId && (payload["tag"] = tagId)
     payload["limit"] = items ? items.length + 2 : 2;
-    // payload["last"] = last;
-    
-   await getFeedsLoadMore(payload).then((result) => {
-      setLast(result?.last);
-      setIsLastResult(result?.last === result?.lastest);
+    await getFeedsLoadMore(payload).then((result) => {
       let data = [];
       result?.items?.filter((x) =>{
-       const find = items.find(y=>x.feedId === y.feedId)
-       if(find?.feedId === x.feedId){
-       }else{
-        data.push(x)
-       }
+        const find = items.find(y => x.feedId === y.feedId)
+        if(find?.feedId === x.feedId){
+        }else{
+          data.push(x)
+        }
       })
       setItems([...items, ...data]);
       if(items?.length >= result?.items.length ){
@@ -67,13 +45,13 @@ const FeedItems = ({
   };
 
   return (
-    <div>
-      {title && (
-        <h2 class="pt-2 px-4 text-2xl font-bold text-gray-900">{title}</h2>
-      )}
-
-      { !authorId ? <NewQuickPost onCallback={onCallback} /> : authorId
-=== user?.author?.authorId ? <NewQuickPost onCallback={onCallback} /> : ""}
+    <div>      { 
+        !authorId 
+        ? <NewQuickPost onCallback={onCallback} /> 
+        : authorId === user?.author?.authorId 
+          ? <NewQuickPost onCallback={onCallback} /> 
+          : ""
+      }
       {layout === 'scroll' && items && (
         <InfiniteScroll
           pageStart={0}
@@ -85,12 +63,14 @@ const FeedItems = ({
             </div>
           }
         >
-          {items?.map((item, index) => (
-            <FeedItem key={index} item={item} index={index} onCallback={onCallback} />
-          ))}
+          {[...items]?.sort((a, b) => b.no - a.no)?.map((item, index) => 
+            user?.email === item?.author?.user?.email 
+            ? <FeedItem key={index} item={item} index={index} onCallback={onCallback} />
+            : !item?.isPrivate ? <FeedItem key={index} item={item} index={index} onCallback={onCallback} /> :  <div></div>
+            
+          )}
         </InfiniteScroll>
       )}
-
       {layout === 'list' && items && (
         items?.map((item, index) => (
           <FeedItem key={index} item={item} index={index} />

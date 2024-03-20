@@ -236,7 +236,6 @@ export default function SOSHeaderBar() {
                                   sosId: item?.sosId,
                                 })
                                   .then((result) => {
-                                    console.log("S.O.S has been expired");
                                   })
                                   .catch((error) => {
                                     console.error(error);
@@ -346,7 +345,7 @@ export default function SOSHeaderBar() {
                                   sosId: item?.sosId,
                                 })
                                   .then((result) => {
-                                    //console.log("S.O.S has been expired");
+                                   
                                   })
                                   .catch((error) => {
                                     console.error(error);
@@ -820,11 +819,7 @@ export default function SOSHeaderBar() {
                 visible={showRating}
                 onCancel={() => setShowRating(false)}
                 onSubmit={(rating, isPrimaryHelper, ratingNote) => {
-                  console.log(
-                    "rating, isPrimaryHelper: ",
-                    rating,
-                    isPrimaryHelper
-                  );
+                 
                   if (valueRating) {
                     onCompleteConfirmed(
                       {

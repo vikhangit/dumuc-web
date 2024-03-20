@@ -82,6 +82,16 @@ export const getCategories = async () => {
     });
 };
 
+export const getLabels = async () => {
+  return await request(`api/labels`, {}, { method: "GET" })
+    .then((data) => {
+      return data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
 export const getCategory = (payload) => {
   const {categoryId} = payload;
   return request(`api/category/${categoryId}`, {}, { method: "GET" })
@@ -166,6 +176,16 @@ export const createComment = (payload, token) => {
       return err;
     });
 };
+export const updateComment = (payload, token) => {
+  return request("api/post/comment", payload, { method: "PUT", token })
+    .then((data) => {
+      return data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
 
 export const createCommentReply = (payload, token) => {
   return request("api/post/comment/reply", payload, { method: "POST", token })

@@ -51,7 +51,6 @@ export default function FeedCommentstems({items, onCallback,feed}) {
     let newPhoto = [];
     array.map(async (x) => {
       uploadImage(x, user?.accessToken).then((data) => {
-        console.log(data?.url)
         newPhoto.push(`${data?.url}`)
         setPhotos([...photos, ...newPhoto]);
       }

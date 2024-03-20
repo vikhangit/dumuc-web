@@ -18,40 +18,27 @@ import { useWindowSize } from '@hooks/useWindowSize';
 import { IoMdCloseCircle } from 'react-icons/io';
 import { useAuthState, useUpdateProfile } from 'react-firebase-hooks/auth';
 import { auth } from '@utils/firebase';
+import dynamic from 'next/dynamic';
+const CustomEditor = dynamic( () => {
+  return import( './editorjs/CustomCKEditor' );
+}, { ssr: false } );
 
 
 export default function QuickPostModal({ visible,setEmotion, onCancel, emotion, setShowPostEmotion, showImage, setShowImage, onCallback, feed}) {
   const [user] = useAuthState(auth)
-  const [setUser, updating, error] = useUpdateProfile(auth);
   const [loading, setLoading] = useState(false);
   const [loadUser, setLoadUser] = useState(true)
   const [usingUser, setUsingUser] = useState()
-  useEffect(() =>{
-    (async () => {
-      setLoadUser(true)
-      try {
-        const dataCall = await getProfile(user?.accessToken) 
-        setUsingUser(dataCall)
-        
-      } catch (e) {
-        console.log(e)
-      }
-      setTimeout(() => {
-        setLoadUser(false)
-      }, 3000);
-    })();
-  },[user])
-  console.log(loadUser)
-
+  const ref = useRef();
+  const [isMounted, setIsMounted] = useState(false);
   const refImage = useRef();
   const [description, setDescription] = useState();
   const [descriptionError, setDescriptionError] = useState();
-
   const [photos, setPhotos] = useState([]);
   const [loadingImage, setLoadingImage] = useState(false)
   const sizes = useWindowSize()
-  const maximumSize = 5 * 1024 * 1024
-
+  const [editor, setEditor] = useState();
+  const [editorError, setEditorError] = useState();
   const handleChange =  (e) => {
     setLoadingImage(true);
    if(e?.target?.files){
@@ -62,7 +49,6 @@ export default function QuickPostModal({ visible,setEmotion, onCancel, emotion, 
     let newPhoto = [];
     array.map(async (x) => {
       uploadImage(x, user?.accessToken).then((data) => {
-        console.log(data?.url)
         newPhoto.push(`${data?.url}`)
         setPhotos([...photos, ...newPhoto]);
       }
@@ -73,14 +59,18 @@ export default function QuickPostModal({ visible,setEmotion, onCancel, emotion, 
     
 
   };
-  
-  //tags
   const [tags, setTags] = useState([]);
   const [inputVisible, setInputVisible] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const inputRef = useRef(null);
   const [active, setActive] = useState()
-
+  useEffect(() =>{
+    setLoadUser(true)
+        getProfile(user?.accessToken).then((dataCall) => setUsingUser(dataCall))
+        setTimeout(() => {
+          setLoadUser(false)
+        }, 3000);
+  },[user])
   useEffect(() => {
     if (inputVisible) {
       inputRef.current?.focus();
@@ -132,7 +122,6 @@ export default function QuickPostModal({ visible,setEmotion, onCancel, emotion, 
       </span>
     );
   };
-
   const tagChild = tags?.map(forMap);
   const tagPlusStyle = {
     borderStyle: "dashed",
@@ -144,19 +133,16 @@ export default function QuickPostModal({ visible,setEmotion, onCancel, emotion, 
       setPhotos(feed?.photos);
       setEmotion(feed?.emotion);
       setTags(feed?.tags)
-      setActive(feed?.isActive == true ? 0: 1)
+      setActive(feed?.isPrivate == true ? 0: 1)
     }
   }, [feed])
-
-  console.log(feed)
-
   const save = () => {
     setLoading(true);
     let item = {
       emotion,
       photos,
       tags,
-      isActive: active === 0 ? true : false
+      isPrivate: JSON.parse(localStorage.getItem("isPrivate")) ? JSON.parse(localStorage.getItem("isPrivate")) === "0" ? true : false : true
     };
 
     if (description === undefined || description === "") {
@@ -167,23 +153,17 @@ export default function QuickPostModal({ visible,setEmotion, onCancel, emotion, 
       item.description = description;
     }
     if(feed){
-      console.log("Item", item)
-      updateFeedByUser({...item, feedId: feed?.feedId, isActive: true}, user?.accessToken)
+      updateFeedByUser({...feed ,...item, feedId: feed?.feedId, isPrivate: JSON.parse(localStorage.getItem("isPrivate")) ? JSON.parse(localStorage.getItem("isPrivate")) === "0" ? true : false : feed?.isPrivate  }, user?.accessToken)
     .then(async (result) => {
       const findIndex = photos?.filter( ai => !usingUser
         .photos.includes(ai));
       updateProfile({
         ...usingUser,
-        photos:usingUser?.photos?.length > 0 ? [...usingUser?.photos, ...photos] : [...photos],
+        photos:usingUser?.photos?.length > 0 ? [...usingUser?.photos, ...findIndex] : [...findIndex],
         userId: usingUser?.userId
       }, user?.accessToken)
       setLoading(false);
-      
-      // setPhotos([])
-      // setDescription()
-      // setEmotion("")
-      const dataCall = await getProfile(user?.accessToken) 
-      setUsingUser(dataCall)
+      getProfile(user?.accessToken).then((dataCall) =>  setUsingUser(dataCall))
       onCancel();
       onCallback();
       message.success("Sửa tin thành công");
@@ -195,13 +175,11 @@ export default function QuickPostModal({ visible,setEmotion, onCancel, emotion, 
     }else{
       createFeedByUser(item, user?.accessToken)
       .then(async (result) => {
-        console.log("Item.Feed.Result", result)
         updateProfile({
           ...usingUser,
           photos:usingUser?.photos?.length > 0?  [...usingUser.photos, ...photos] : [...photos],
-        }, user?.accessToken).then(rex => console.log("texxxx", rex))
-        const dataCall = await getProfile(user?.accessToken) 
-          setUsingUser(dataCall)
+        }, user?.accessToken)
+        getProfile(user?.accessToken).then((dataCall) =>  setUsingUser(dataCall))
         setLoading(false);
         setPhotos([])
         setDescription()
@@ -217,9 +195,9 @@ export default function QuickPostModal({ visible,setEmotion, onCancel, emotion, 
         setLoading(false);
       });
     }
+    localStorage.removeItem("isPrivate")
     
-  };  
-  console.log(active)
+  }; 
   return (
     <Modal
       visible={visible}
@@ -316,20 +294,24 @@ export default function QuickPostModal({ visible,setEmotion, onCancel, emotion, 
               {user?.displayName} {emotion && emotion.length > 0 ? emotion : ""}
             </p>
             <div className='relative rounded-[6px] mt-1 w-fit'>
-            <select className='w-full h-full bg-[#e5e5e5] border-0 text-sm font-medium' value={active} onChange={(e) => setActive(e.target.value)}>
-              <option className='text-xs font-medium' value={0}>
+            <select className='w-full h-full bg-[#e5e5e5] border-0 text-sm font-medium' value={active} onChange={(e) => {
+              setActive(e.target.value)
+              localStorage.setItem("isPrivate", JSON.stringify(e.target.value))
+            }}>
+            <option className='text-xs font-medium' value={0}>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
+                <path fillRule="evenodd" d="M12 1.5a5.25 5.25 0 0 0-5.25 5.25v3a3 3 0 0 0-3 3v6.75a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3v-6.75a3 3 0 0 0-3-3v-3c0-2.9-2.35-5.25-5.25-5.25Zm3.75 8.25v-3a3.75 3.75 0 1 0-7.5 0v3h7.5Z" clipRule="evenodd" />
+              </svg>
+                Riêng tư
+              </option>
+              <option className='text-xs font-medium' value={1}>
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
                 <path d="M15.75 8.25a.75.75 0 0 1 .75.75c0 1.12-.492 2.126-1.27 2.812a.75.75 0 1 1-.992-1.124A2.243 2.243 0 0 0 15 9a.75.75 0 0 1 .75-.75Z" />
                 <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM4.575 15.6a8.25 8.25 0 0 0 9.348 4.425 1.966 1.966 0 0 0-1.84-1.275.983.983 0 0 1-.97-.822l-.073-.437c-.094-.565.25-1.11.8-1.267l.99-.282c.427-.123.783-.418.982-.816l.036-.073a1.453 1.453 0 0 1 2.328-.377L16.5 15h.628a2.25 2.25 0 0 1 1.983 1.186 8.25 8.25 0 0 0-6.345-12.4c.044.262.18.503.389.676l1.068.89c.442.369.535 1.01.216 1.49l-.51.766a2.25 2.25 0 0 1-1.161.886l-.143.048a1.107 1.107 0 0 0-.57 1.664c.369.555.169 1.307-.427 1.605L9 13.125l.423 1.059a.956.956 0 0 1-1.652.928l-.679-.906a1.125 1.125 0 0 0-1.906.172L4.575 15.6Z" clipRule="evenodd" />
               </svg>
               Công khai
               </option>
-              <option className='text-xs font-medium' value={1}>
-              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
-                <path fillRule="evenodd" d="M12 1.5a5.25 5.25 0 0 0-5.25 5.25v3a3 3 0 0 0-3 3v6.75a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3v-6.75a3 3 0 0 0-3-3v-3c0-2.9-2.35-5.25-5.25-5.25Zm3.75 8.25v-3a3.75 3.75 0 1 0-7.5 0v3h7.5Z" clipRule="evenodd" />
-              </svg>
-                Riêng tư
-              </option>
+              
             </select>
               <div className='icon absolute right-2 top-1/2 -translate-y-1/2 text-black'>
               <CaretDownOutlined style={{
@@ -342,26 +324,10 @@ export default function QuickPostModal({ visible,setEmotion, onCancel, emotion, 
         </div>
 
         {/* description */}
-        <textarea
-          id="message"
-          rows="4"
-          className='w-full border-0 outline-0 focus:outline-0 focus:shadow-none focus:shadow-white' style={{
-            boxShadow: "0 0 #0000",
-            padding:0,
-            resize: "none"
-          }} 
-          autoFocus={true} 
-          placeholder='Bạn đang nghĩ gì'
-          onChange={(e) => {
-            setDescription(e.target.value);
-            if (e.target.value === "") {
-              setDescriptionError("Vui lòng nhập mô tả chi tiết!");
-            } else {
-              setDescriptionError("");
-            }
-          }}
-          value={description}
-        
+        <CustomEditor
+          initialData={description}
+          setData={setDescription}
+          placeholder={`${user?.displayName} ơi bạn đang nghĩ gì?`}
         />
         {descriptionError !== "" && (
           <p class="mt-1.5 text-sm text-[#c80000] font-semibold">
@@ -380,28 +346,6 @@ export default function QuickPostModal({ visible,setEmotion, onCancel, emotion, 
         
       </div>
             <div className={`relative rounded-md p-3 w-full border border-gray-400 mt-2 mb-4 ${photos.length < 0 && "h-40 sm:h-72"}`}>
-            {/* <button
-                    className="absolute top-5 right-5 bg-white border border-gray-400 rounded-full p-1 shadow shadow-white z-50"
-                    onClick={() => {
-                      setShowImage(false)
-                    setPhotos([])
-                    }}
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                      className="w-5 h-5 text-gray-400"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M6 18L18 6M6 6l12 12"
-                      />
-                    </svg>
-            </button> */}
             
             {photos.length > 0 && (
             <div
@@ -584,6 +528,7 @@ export default function QuickPostModal({ visible,setEmotion, onCancel, emotion, 
       </>: <Spinner />
       }
     </Modal>
+    
   );
     
 }

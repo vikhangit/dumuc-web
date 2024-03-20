@@ -26,7 +26,7 @@ const ProfilePage = () => {
   const [user, loading, errorAuth] = useAuthState(auth);
   const [setUser, updating, error] = useUpdateProfile(auth);
 
-  const [name, setName] = useState(user?.displayName);
+  const [name, setName] = useState("");
   const [nameError, setNameError] = useState("");
 
   const [phone, setPhone] = useState();
@@ -54,11 +54,9 @@ const ProfilePage = () => {
         const dataCall = await getProfile(user?.accessToken) 
         setUsingUser(dataCall)
       } catch (e) {
-        console.log(e)
       }
     })();
   },[user])
-  console.log(usingUser)
   useEffect(() => {
     setName(usingUser?.name?.length > 0 ? usingUser?.name : user?.displayName)
     setAddress(usingUser?.address)
@@ -162,7 +160,7 @@ const ProfilePage = () => {
 
     //post data
     let item = {
-      displayName: name,
+      name: name,
       phone,
       address,
       sex,
@@ -180,7 +178,6 @@ const ProfilePage = () => {
               displayName: name,
               photoURL: profile.photo
             })
-            console.log('profile: ', profile)
           })
       });
   };

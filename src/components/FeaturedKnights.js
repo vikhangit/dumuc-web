@@ -70,7 +70,6 @@ const FeaturedKnights = ({ usersRanking, limit }) => {
                       categories
                         .filter((y) => y.categoryParentId === item.categoryId)
                         .map((sub) => {
-                          console.log(sub)
                           return (
                                       <div className="flex py-4 mt-2 gap-x-3 items-center border-b border-gray-500">
                                       <div
@@ -108,7 +107,6 @@ const FeaturedKnights = ({ usersRanking, limit }) => {
       </Modal>
     );
   };
-  console.log("detail", details);
   return (
     <>
       <div className="px-2 md:px-4 lg:px-8 bg-white">
@@ -169,7 +167,6 @@ const FeaturedKnights = ({ usersRanking, limit }) => {
                           .then(result => {
              
                             setAuthorStatistics(result)
-                            console.log('authorStatistics', result);
                             setLoading(false);
                           }).then(() => {
                             setShowModal(true);

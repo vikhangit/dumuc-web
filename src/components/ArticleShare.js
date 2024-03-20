@@ -3,7 +3,7 @@ import { CiShare2 } from "react-icons/ci";
 import { PiShareFatLight } from "react-icons/pi";
 import { FacebookShareButton } from "react-share";
 const ArticleShare = ({ item }) => {
-  const excerpt = item?.body?.blocks.filter((x) => x.type === "paragraph")[0]
+  const excerpt = item?.body?.blocks?.filter((x) => x.type === "paragraph")[0]
     ?.data?.text;
 
   return (

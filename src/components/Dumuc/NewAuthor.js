@@ -57,7 +57,6 @@ const NewAuthorUI = ({ currentUrl = '/', params, searchParams }) => {
             } catch (e) { }
         })();
     }, [id, slug])
-    console.log("Feed.Data", authorData)
     return (
         loading ? <Loading /> :
             <main className="w-full">

@@ -1,22 +1,13 @@
 "use client";
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { Fancybox } from "@fancyapps/ui";
-import { Modal } from 'flowbite-react';
 import "@fancyapps/ui/dist/fancybox/fancybox.css";
-
 import {createFeedView, deleteFeedByUser, updateFeedByUser} from 'apis/feeds';
-
-//components
 import FeedBookmark from "@components/FeedBookmark";
-import FeedComments from "@components/FeedComments";
 import FeedLikeShareComment from "./FeedLikeShareComment";
-
 import moment from "moment";
 import "@fancyapps/ui/dist/fancybox/fancybox.css";
 import { useRouter } from "next/navigation";
-
-import { Dropdown } from "flowbite-react";
 import { message } from "antd";
 import { useWindowSize } from "@hooks/useWindowSize";
 import { IoMdMore } from "react-icons/io";
@@ -26,28 +17,24 @@ import QuickPostModalEmoji from "./QuickPostModlEmoji";
 import ModalImageZoom from "./ModalImageZoom";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@utils/firebase";
-
+import { faLessThanEqual } from "@fortawesome/free-solid-svg-icons";
 
 const FeedItem = ({ item, index, onCallback }) => {
   const [user, loading, error] = useAuthState(auth);
   const sizes = useWindowSize();
   const router = useRouter()
   const [showMore, setShowMore] = useState(false)
-  const [showComment, setShowComment] = useState(false)
   const [showSlide, setshowSlide] = useState(false)
-  const [showLike, setShowLike] = useState(false);
   const [showPostText, setShowPostText] = useState(false)
   const [showPostEmotion, setShowPostEmotion] = useState(false);
   const [emotion, setEmotion] = useState("")
   const [showImage, setShowImage] = useState(false)
   const [imageList, setImageList] = useState([]);
   const [indexImage, setIndexImage] = useState(0);
-
-console.log(item)
-
-  const url = `/forum/post/${item?.slug}/${item?.postId}`;
+  const url = "/"
+  console.log(item)
   return (
-    item.isActive && <div key={item?.feedId} className="p-4 bg-white rounded-lg shadow shadow-gray-300 dark:bg-gray-800 xl:p-6 2xl:p-8 lg:space-y-3 mb-4">
+    <div key={item?.feedId} className="p-4 bg-white rounded-lg shadow shadow-gray-300 dark:bg-gray-800 xl:p-6 2xl:p-8 lg:space-y-3 mb-4">
     <div class="flex items-center space-x-4">
       <div class="flex-shrink-0">
         <a
@@ -86,27 +73,56 @@ console.log(item)
       </div>
       <div className="flex justify-end items-center">
       {
-        item?.user?.email === user?.email && <div className="relative cursor-pointer group">
+        item?.author?.user?.email === user?.email && <div className="relative cursor-pointer group">
         <IoMdMore size={24} />
         <div className="absolute z-40 hidden group-hover:flex flex-col top-full right-0 bg-white shadow-sm shadow-gray-500 text-[10px] sm:text-xs font-medium w-[80px] rounded p-1">
-          {item?.user?.email === user?.email && <Link href="" onClick={(e) => {
+         <Link href="" onClick={(e) => {
             e.preventDefault();
             setShowPostText(true);
             setShowImage(true)
-          }} className="hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5">Sửa</Link>}
+          }} className="hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5">Sửa</Link>
+          <Link href="" 
+          onClick={(e) => {
+            e.preventDefault();
+           if(item.isPrivate){
+            return updateFeedByUser({
+              ...item,
+              isPrivate: false,
+               feedId: item?.feedId
+             }, user?.accessToken).then((result) =>{
+               message.success("Công khai bài viết thành công");
+               onCallback();
+             })
+           }else{
+            return updateFeedByUser({
+              ...item,
+              isPrivate: true,
+               feedId: item?.feedId
+             }, user?.accessToken).then((result) =>{
+               message.success("Ẩn bài viết thành công");
+               onCallback();
+             })
+           }
+          }} 
+          className="hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5">
+            {
+              item.isPrivate ? "Hủy ẩn" : "Ẩn"
+            }
+          </Link>
           <Link href="" 
           onClick={(e) => {
             e.preventDefault();
            return updateFeedByUser({
-              isActive: false,
+             ...item,
+             isReport: true,
               feedId: item?.feedId
             }, user?.accessToken).then((result) =>{
-              message.success("Ẩn bài viết thành công");
+              message.success("Chúng tôi sẽ xem xét báo cáo của bạn về bài viết này. Xin cảm ơn!!!");
               onCallback();
             })
           }} 
-          className="hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5">Ẩn</Link>
-          {item?.user?.email === user?.email && <Link href="" onClick={(e) => {
+          className="hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5">Báo cáo</Link>
+          {/* {item?.author?.user?.email === user?.email && <Link href="" onClick={(e) => {
             e.preventDefault();
            return deleteFeedByUser(
               item?.feedId
@@ -114,7 +130,7 @@ console.log(item)
               message.success("Xóa bài viết thành công");
               onCallback();
             })
-          }} className="hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5">Xóa</Link>}
+          }} className="hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5">Xóa</Link>} */}
         </div>
         </div>
         
@@ -145,19 +161,13 @@ console.log(item)
         />
       <FeedBookmark id={item?.feedId} currentUrl={url} />
       </div>
-      {/* <Dropdown id="custom-dropdown" placement="left-start" renderTrigger={() => <span><svg class="w-4 h-4 sm:w-5 sm:h-5 cursor-pointer" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 4 15">
-        <path d="M3.5 1.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm0 6.041a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm0 5.959a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z" />
-      </svg></span>}>
-        <Dropdown.Item onClick={() => message.warning("Chúng tôi đang cập nhật tính năng này")}>
-          <div class="block px-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white cursor-pointer">Chặn người dùng</div>
-        </Dropdown.Item>
-      </Dropdown> */}
     </div>
     <div>
       <div
         className="text-base mt-4"
       >
-        <p className={`text-lg font-normal text-justify`}>{!showMore ? item.description.slice(0, 70) : item.description} {
+        <div dangerouslySetInnerHTML={{__html: item.description}}  className={`text-lg font-normal text-justify [&>figure]:mt-2`} > 
+        {/* {
           item.description.length > 70 && <a
             className="font-bold text-sm sm:text-base cursor-pointer hover:underline"
             onClick={() => {
@@ -169,7 +179,9 @@ console.log(item)
           >
             {showMore ? "Ẩn" : "...Xem thêm"}
           </a>
-        }</p>
+        } */}
+        
+        </div>
       </div>
       {item?.tags?.length > 0 && (
         <div className="mt-2">
@@ -236,13 +248,13 @@ console.log(item)
     </div>
     <FeedLikeShareComment
       // setShowComment={setShowComment}
-      setShowLike={setShowLike}
+      // setShowLike={setShowLike}
       item={item}
       index={index}
       url={url}
       onCallback={onCallback}
     />
-<ModalImageZoom openImage={showSlide} setOpenImage={setshowSlide} imageList={imageList} index={indexImage}/>
+    <ModalImageZoom openImage={showSlide} setOpenImage={setshowSlide} imageList={imageList} index={indexImage}/>
   </div>
   );
 };

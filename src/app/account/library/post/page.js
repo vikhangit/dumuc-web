@@ -40,8 +40,6 @@ const LibraryPage = ({searchParams}) => {
       })();
     }, [user, searchParams?.tab])
 
-    console.log("POST.DAT", posts)
-
     return (
       loadingSkeleton ? <Loading /> :
       <main className="w-full">

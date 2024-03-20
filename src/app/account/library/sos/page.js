@@ -34,8 +34,6 @@ const LibraryPage = ({searchParams}) => {
               getSossByUser(user?.accessToken),
             ]);
             setSoss(soosData);
-            console.log(soosData)
-            
             setLoadingSkeleton(false);
           }
         } catch (e) {}

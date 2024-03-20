@@ -6,7 +6,6 @@ import { Fancybox } from "@fancyapps/ui";
 import "@fancyapps/ui/dist/fancybox/fancybox.css";
 
 function CustomImageLinkRenderer({ data }) {
-  console.log(data, "123")
   const src = data.url;
   return (
     <div>

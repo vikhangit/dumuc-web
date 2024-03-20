@@ -73,7 +73,6 @@ const LoginWithModal = ({searchParams, setClose}) => {
             .catch(err => {
                 setLoading(false);
                 message.error(err.message);
-                console.log(err);
             })
         })
         .catch(function(error) {
@@ -111,7 +110,6 @@ const LoginWithModal = ({searchParams, setClose}) => {
             .catch((error) => {
                 var errorCode = error.code;
                 var errorMessage = error.message;
-                console.log('error: ', error, errorCode);
                 setIsModalOpen(false);
                 setErrorMsg(error.message)
                 setLoading(false);
@@ -144,7 +142,6 @@ const LoginWithModal = ({searchParams, setClose}) => {
                         .catch(error => console.log(error))
                 })
                 .catch((error) => {
-                    console.log('error', error)
                     setErrorCode(error.code)
                     setLoading(false)
                     // Some error occurred, you can inspect the code: error.code
@@ -189,7 +186,6 @@ const LoginWithModal = ({searchParams, setClose}) => {
                     setLoading(false)
                 })
                 .catch(err => {
-                    console.log(err)
                     setLoading(false)
                 })
             } else {

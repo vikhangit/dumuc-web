@@ -38,7 +38,6 @@ export default function AuthorLibrary({active, setActive, id, slug, setOpenLibra
             } catch (e) { }
         })();
     }, [id, slug])
-    console.log("Feed.Data", authorData)
     return (
         <div>
             <div className='flex shadow-md shadow-gray-500 px-3 py-6 items-center'>

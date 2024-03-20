@@ -2,24 +2,15 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from 'next/navigation';
 import {createUserLike, deleteUserLike, getProfile, updateProfile} from '@apis/users';
-import {userAtom} from '@recoils/atoms';
 import { useAuthState, useUpdateProfile } from "react-firebase-hooks/auth";
 import { auth } from "@utils/firebase";
 
 const ArticleLike = ({id, currentUrl, count = 0,  onCallback}) => {
     const router = useRouter();
     const [user] = useAuthState(auth)
-  const [setUser, updating, error] = useUpdateProfile(auth);
   const [usingUser, setUsingUser] = useState()
   useEffect(() =>{
-    (async () => {
-      try {
-        const dataCall = await getProfile(user?.accessToken) 
-        setUsingUser(dataCall)
-      } catch (e) {
-        console.log(e)
-      }
-    })();
+    getProfile(user?.accessToken).then((dataCall) => setUsingUser(dataCall)) 
   },[user])
 
     const icon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
@@ -52,9 +43,8 @@ const ArticleLike = ({id, currentUrl, count = 0,  onCallback}) => {
                         (x) => x.likeValue !== id && x.likeType === 'post'
                       ),
                     }, user?.accessToken);
-                    const dataCall = await getProfile(user?.accessToken) 
-                    setUsingUser(dataCall)
-                    //message.success('Đã bỏ like thành công');
+                    getProfile(user?.accessToken).then((dataCall) => setUsingUser(dataCall)) 
+                    onCallback()
                   });
                 }}
                 tooltip="Bỏ like"
@@ -91,9 +81,8 @@ const ArticleLike = ({id, currentUrl, count = 0,  onCallback}) => {
                         likeValue: id,
                       }],
                     }, user?.accessToken);
-                    const dataCall = await getProfile(user?.accessToken) 
-                    setUsingUser(dataCall)
-                    //message.success('Đã like thành công')
+                    getProfile(user?.accessToken).then((dataCall) => setUsingUser(dataCall)) 
+                    onCallback()
                   });
                 }}
                 tooltip="Like"
