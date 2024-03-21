@@ -55,6 +55,7 @@ const FeedLike = ({id, currentUrl, onCallback, renderCountComment, item}) => {
                       ), 
                     }, user?.accessToken)
                      setLoading(false)
+                     getProfile(user?.accessToken).then((dataCall) => setUsingUser(dataCall)) 
                      onCallback()
                   }
                   );
@@ -97,6 +98,7 @@ const FeedLike = ({id, currentUrl, onCallback, renderCountComment, item}) => {
                       }]
                     }, user?.accessToken)
                     setLoading(false)
+                    getProfile(user?.accessToken).then((dataCall) => setUsingUser(dataCall)) 
                     onCallback()
                 });
                 }}
