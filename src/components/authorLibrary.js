@@ -76,34 +76,14 @@ export default function AuthorLibrary({active, setActive, id, slug, setOpenLibra
                 {active === 0 && (
                     <div className=''>
                         <FeedItems data={feedsData} authorId={id} onCallback={async () => {
-                            try {
-                                let payload = {
-                                    limit: 20,
-                                    author: id,
-                                };
-
-                                const [feeds] = await Promise.all([
-                                    getFeedsLoadMore(payload),
-                                ]);
-                                setFeedsData(feeds);
-                            } catch (e) { }
+                           await getFeedsLoadMore({limit: 20,author: id}).then((feeds) => setFeedsData(feeds))
                         }} />
                     </div>
                 )}
                 {active === 1 && (
                     <div className='!bg-white'>
                         <ArticleItems data={postsData} authorId={id} onCallback={async () => {
-                            try {
-                                let payload = {
-                                    limit: 20,
-                                    author: id,
-                                };
-
-                                const [posts] = await Promise.all([
-                                    getPostsLoadMore(payload),
-                                ]);
-                                setPostsData(posts);
-                            } catch (e) { }
+                            await getPostsLoadMore({limit: 20,author: id}).then((posts) => setPostsData(posts))
                         }} />
                     </div>
                 )}</>

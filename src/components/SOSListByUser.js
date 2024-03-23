@@ -296,7 +296,6 @@ const SOSListByUser = ({ items, onCallback }) => {
                                           const [token] = await Promise.all([
                                             currentUser.getIdToken(true),
                                           ]);
-
                                           generateCustomToken(token)
                                           .then(result => {
                                             window.open(`${process.env.NEXT_PUBLIC_COMMUNICAION_URL}/call/${result?.token}`, "_blank");

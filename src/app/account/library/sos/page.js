@@ -17,26 +17,16 @@ const LibraryPage = ({searchParams}) => {
     const [loadingSkeleton, setLoadingSkeleton] = useState(true);
     const [soss, setSoss] = useState([]);
     const [user, loading, error] = useAuthState(auth);
-    useEffect(() => {
-      if (user === undefined && loading === false) {
-        const url_return = `${process.env.NEXT_PUBLIC_HOMEPAGE_URL}/account/bookmark`
-        router.push(`/auth?url_return=${url_return}`);
-      }
-    }, [user, loading])
-
+    const [usingUser, setUsingUser] = useState()
+    useEffect(() =>{
+      getProfile(user?.accessToken).then((dataCall) => setUsingUser(dataCall)) 
+    },[user])
     useEffect(() => {
       (async () => {
-        try {
-          setLoadingSkeleton(true);
-          if (user) {  
-            //soss
-            const [soosData] = await Promise.all([
-              getSossByUser(user?.accessToken),
-            ]);
-            setSoss(soosData);
-            setLoadingSkeleton(false);
-          }
-        } catch (e) {}
+        if (user  && usingUser) {  
+          getSossByUser(user?.accessToken).then((soosData) => setSoss(soosData))
+          setLoadingSkeleton(false);
+        }
       })();
     }, [user, searchParams?.tab])
 
@@ -68,25 +58,7 @@ const LibraryPage = ({searchParams}) => {
               items={searchParams?.status === undefined ? soss?.filter(x => x.status === 0): soss?.filter(x => x.status === parseInt(searchParams?.status))} 
 
               onCallback={async () => {
-                const [soosData] = await Promise.all([
-                  getSossByUser(user?.accessToken),
-                ]);
-                setSoss(soosData);
-
-                // //S.O.S đã gửi
-                // if (parseInt(searchParams?.status) === 0) {
-                //   setSoss(soosData?.filter(x => x.status === 0));
-                // }
-
-                // //S.O.S đã kết thúc
-                // if (parseInt(searchParams?.status) === 1) {
-                //   setSoss(soosData?.filter(x => x.status === 1));
-                // }
-
-                //S.O.S đã huỷ
-                // if (parseInt(searchParams?.status) === -1) {
-                //   setSoss(soosData?.filter(x => x.status === -1));
-                // }
+                getSossByUser(user?.accessToken).then((soosData) => setSoss(soosData))
               }}
             />
           )}

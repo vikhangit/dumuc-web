@@ -22,47 +22,29 @@ const BookmarkPage = ({searchParams}) => {
     const [loadingSkeleton, setLoadingSkeleton] = useState(true);
     const [postBookmarks, setPostBookmarks] = useState([]);
     const [feedBookmarks, setFeedBookmarks] = useState([]);
-
-    //require login
-    const [user, loading, error] = useAuthState(auth);
+    const [user, loading] = useAuthState(auth);
+    const [usingUser, setUsingUser] = useState()
+    useEffect(() =>{
+      getProfile(user?.accessToken).then((dataCall) => setUsingUser(dataCall)) 
+    },[user])
 
     useEffect(() => {
-      if (user === undefined && loading === false) {
-        const url_return = `${process.env.NEXT_PUBLIC_HOMEPAGE_URL}/account/library/bookmark`
-        router.push(`/auth?url_return=${url_return}`);
+      if (user && usingUser) {
+        const postBookmarksData  = usingUser?.bookmarks?.filter(x => x.bookmarkType === 'post').map(async (item, index) => {
+          return await getPost({
+            postId: item?.bookmarkValue,
+          })
+        })
+        setPostBookmarks(postBookmarksData);
+        const feedBookmarksData = usingUser?.bookmarks?.filter(x => x.bookmarkType === 'feed').map(async (item, index) => {
+          return await getFeed({
+            feedId: item?.bookmarkValue,
+          })
+        })
+        setFeedBookmarks(feedBookmarksData);
+        setLoadingSkeleton(false);
       }
-    }, [user, loading])
-
-    useEffect(() => {
-      (async () => {
-        try {
-          setLoadingSkeleton(true);
-          if (user) {  
-            let user1 = await getProfile(user?.accessToken);
-            
-            //postBookmarks
-            const postBookmarksData = await Promise.all(user1?.bookmarks?.filter(x => x.bookmarkType === 'post').map(async (item, index) => {
-              let post = await getPost({
-                postId: item?.bookmarkValue,
-              })
-              return post;
-            }));
-            setPostBookmarks(postBookmarksData);
-
-            //feedBookmarks
-            const feedBookmarksData = await Promise.all(user1?.bookmarks?.filter(x => x.bookmarkType === 'feed').map(async (item, index) => {
-              let feed = await getFeed({
-                feedId: item?.bookmarkValue,
-              })
-              return feed;
-            }));
-            setFeedBookmarks(feedBookmarksData);
-
-            setLoadingSkeleton(false);
-          }
-        } catch (e) {}
-      })();
-    }, [user, searchParams?.tab])
+    }, [user, usingUser, searchParams?.tab])
 
     return (
       loadingSkeleton ? <Loading /> :

@@ -17,28 +17,16 @@ const LibraryPage = ({searchParams}) => {
     const [loadingSkeleton, setLoadingSkeleton] = useState(true);
     const [posts, setPosts] = useState([]);
     const [user, loading, error] = useAuthState(auth);
+    const [usingUser, setUsingUser] = useState()
+    useEffect(() =>{
+      getProfile(user?.accessToken).then((dataCall) => setUsingUser(dataCall)) 
+    },[user])
     useEffect(() => {
-      if (user === undefined && loading === false) {
-        const url_return = `${process.env.NEXT_PUBLIC_HOMEPAGE_URL}/account/library/post`
-        router.push(`/auth?url_return=${url_return}`);
+      if (user && usingUser) {
+        getPostsByUser(user?.accessToken).then((postsData) =>  setPosts(postsData))
+        setLoadingSkeleton(false);
       }
-    }, [user, loading])
-
-    useEffect(() => {
-      (async () => {
-        try {
-          setLoadingSkeleton(true);
-          if (user) {
-            //posts
-            const [postsData] = await Promise.all([
-              getPostsByUser(user?.accessToken),
-            ]);
-            setPosts(postsData);
-            setLoadingSkeleton(false);
-          }
-        } catch (e) {}
-      })();
-    }, [user, searchParams?.tab])
+    }, [user,usingUser, searchParams?.tab])
 
     return (
       loadingSkeleton ? <Loading /> :

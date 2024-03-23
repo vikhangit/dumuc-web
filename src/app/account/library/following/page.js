@@ -18,32 +18,22 @@ const LibraryPage = ({searchParams}) => {
     const [loadingSkeleton, setLoadingSkeleton] = useState(true);
     const [followings, setFollowings] = useState([]);
     const [user, loading, error] = useAuthState(auth);
+    const [usingUser, setUsingUser] = useState()
+    useEffect(() =>{
+      getProfile(user?.accessToken).then((dataCall) => setUsingUser(dataCall)) 
+    },[user])
     useEffect(() => {
-      if (user === undefined && loading === false) {
-        const url_return = `${process.env.NEXT_PUBLIC_HOMEPAGE_URL}/account/bookmark`
-        router.push(`/auth?url_return=${url_return}`);
+      if (user && usingUser) {  
+        const followingsData = usingUser?.follows?.map(async (item, index) => {
+          let author = await getAuthor({
+            authorId: item?.authorId,
+          })
+          return author;
+        })
+        setFollowings(followingsData);
+        setLoadingSkeleton(false);
       }
-    }, [user, loading])
-
-    useEffect(() => {
-      (async () => {
-        try {
-          setLoadingSkeleton(true);
-          if (user) {  
-            let user1 = await getProfile(user?.accessToken);
-            //following
-            const followingsData = await Promise.all(user1?.follows?.map(async (item, index) => {
-              let author = await getAuthor({
-                authorId: item?.authorId,
-              })
-              return author;
-            }));
-            setFollowings(followingsData);
-            setLoadingSkeleton(false);
-          }
-        } catch (e) {}
-      })();
-    }, [user, searchParams?.tab])
+    }, [user, usingUser, searchParams?.tab])
 
     return (
       loadingSkeleton ? <Loading /> :

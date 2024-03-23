@@ -49,6 +49,7 @@ export default function Chat() {
                 {
                     Array(20).fill().map((item, index) => 
                     <div
+                    key={index}
                     onClick={() => {
                         setShow(index);
                         setMobile(true)

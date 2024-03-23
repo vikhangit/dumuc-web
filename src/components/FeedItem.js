@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
 import "@fancyapps/ui/dist/fancybox/fancybox.css";
 import {createFeedView, deleteFeedByUser, updateFeedByUser} from 'apis/feeds';
@@ -18,11 +18,13 @@ import ModalImageZoom from "./ModalImageZoom";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@utils/firebase";
 import { faLessThanEqual } from "@fortawesome/free-solid-svg-icons";
+import ModalImageZoomFeed from "./ModalImageZoomFeed";
 
 const FeedItem = ({ item, index, onCallback }) => {
   const [user, loading, error] = useAuthState(auth);
   const sizes = useWindowSize();
   const router = useRouter()
+  const videoEl = useRef(null)
   const [showMore, setShowMore] = useState(false)
   const [showSlide, setshowSlide] = useState(false)
   const [showPostText, setShowPostText] = useState(false)
@@ -32,7 +34,10 @@ const FeedItem = ({ item, index, onCallback }) => {
   const [imageList, setImageList] = useState([]);
   const [indexImage, setIndexImage] = useState(0);
   const url = "/"
-  console.log(item)
+  useCallback(() => {
+    const timeToStart = (7 * 60) + 12.6;
+    videoEl.current.seekTo(timeToStart, 'seconds');
+  }, [videoEl.current])
   return (
     <div key={item?.feedId} className="p-4 bg-white rounded-lg shadow shadow-gray-300 dark:bg-gray-800 xl:p-6 2xl:p-8 lg:space-y-3 mb-4">
     <div class="flex items-center space-x-4">
@@ -163,8 +168,19 @@ const FeedItem = ({ item, index, onCallback }) => {
       </div>
     </div>
     <div>
+    {item?.tags?.length > 0 && (
+        <div className="mt-4">
+          {item?.tags.map((tag, index) => (
+            <a key={index} href={`/search?q=${tag}`}>
+              <span class="mr bg-slate-100 text-gray-500 hover:bg-red-500 hover:text-white text-sm mr-2 px-2.5 py-0.5 rounded">
+                #{tag}
+              </span>
+            </a>
+          ))}
+        </div>
+      )}
       <div
-        className="text-base mt-4"
+        className="text-base mt-2"
       >
         <div dangerouslySetInnerHTML={{__html: item.description}}  className={`text-lg font-normal text-justify [&>figure]:mt-2`} > 
         {/* {
@@ -183,17 +199,6 @@ const FeedItem = ({ item, index, onCallback }) => {
         
         </div>
       </div>
-      {item?.tags?.length > 0 && (
-        <div className="mt-2">
-          {item?.tags.map((tag, index) => (
-            <a key={index} href={`/search?q=${tag}`}>
-              <span class="mr bg-slate-100 text-gray-500 hover:bg-red-500 hover:text-white text-sm mr-2 px-2.5 py-0.5 rounded">
-                #{tag}
-              </span>
-            </a>
-          ))}
-        </div>
-      )}
       {item?.photos?.length > 0 && (
         <div
           className={`w-full grid ${
@@ -217,7 +222,12 @@ const FeedItem = ({ item, index, onCallback }) => {
                   }}
                   className={`w-full relative cursor-pointer h-full`}
                 >
-                  <Image
+                  {
+                    photo?.type === "video" 
+                    ? <video ref={videoEl} className="rounded-lg w-full h-full" controls loop>
+                    <source src={photo.url} type="video/mp4" />
+                  </video> 
+                  : <Image
                     width={0}
                     height={0}
                     style={{
@@ -227,9 +237,10 @@ const FeedItem = ({ item, index, onCallback }) => {
                     }}
                     sizes="100vw"
                     className="rounded-lg w-full h-full"
-                    src={photo}
-                    alt={photo}
+                    src={photo.url}
+                    alt={photo.url}
                   />
+                  }
                   {item?.photos?.length > 2 &&
                     indexC === item.photos?.slice(0, 2).length - 1 && (
                       <div className="absolute top-0 right-0 bg-black bg-opacity-60 w-full h-full flex justify-center items-center rounded-lg">
@@ -254,7 +265,7 @@ const FeedItem = ({ item, index, onCallback }) => {
       url={url}
       onCallback={onCallback}
     />
-    <ModalImageZoom openImage={showSlide} setOpenImage={setshowSlide} imageList={imageList} index={indexImage}/>
+    <ModalImageZoomFeed openImage={showSlide} setOpenImage={setshowSlide} imageList={imageList} index={indexImage}/>
   </div>
   );
 };

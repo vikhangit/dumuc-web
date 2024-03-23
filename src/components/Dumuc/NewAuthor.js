@@ -1,19 +1,15 @@
 "use client"
-import React, { useState, useRef, useEffect } from "react";
-import { message } from "antd";
+import React, { useState, useEffect } from "react";
 import { useRouter } from 'next/navigation';
 import Image from "next/image";
-import { getPostsLoadMore, getAuthor } from "@apis/posts";
-import { getFeedsLoadMore } from "@apis/feeds";
-
+import {getAuthor } from "@apis/posts";
 import TabbarBottom from "@components/TabbarBottom";
 import Header from "@components/Header";
 import BannerRight from "@components/BannerRight";
-import { MdOutlinePersonAddAlt, MdOutlinePhoto, MdOutlinePlayCircleOutline, MdPersonAddAlt1} from "react-icons/md";
+import {MdOutlinePhoto, MdOutlinePlayCircleOutline} from "react-icons/md";
 import Loading from "app/author/[slug]/[id]/loading";
 import { useWindowSize } from "@hooks/useWindowSize";
-import { IoEyeOutline, IoPencilSharp } from "react-icons/io5";
-import { FaPen } from "react-icons/fa6";
+import { IoEyeOutline } from "react-icons/io5";
 import { HiPencil } from "react-icons/hi";
 import AuthorLibrary from "@components/authorLibrary";
 import { useAuthState } from "react-firebase-hooks/auth";
@@ -25,37 +21,14 @@ const NewAuthorUI = ({ currentUrl = '/', params, searchParams }) => {
     const router = useRouter();
     const [user] = useAuthState(auth)
     const [active, setActive] = useState(0)
-    const [loading, setLoading] = useState(false)
-    const [showSeemore, setShowSeeMore] = useState(false);
-    const [postsData, setPostsData] = useState();
-    const [feedsData, setFeedsData] = useState();
+    const [loading, setLoading] = useState(true)
     const [authorData, setAuthorData] = useState();
     const [openLibrary, setOpenLibrary] = useState(false)
 
     const sizes = useWindowSize();
-
     useEffect(() => {
-        (async () => {
-            setLoading(true)
-            try {
-                let payload = {
-                    limit: 20,
-                    author: id,
-                };
-
-                const [posts, feeds, author] = await Promise.all([
-                    getPostsLoadMore(payload),
-                    getFeedsLoadMore(payload),
-                    getAuthor({
-                        authorId: id,
-                    }),
-                ]);
-                setPostsData(posts);
-                setFeedsData(feeds);
-                setAuthorData(author)
-                setLoading(false)
-            } catch (e) { }
-        })();
+        getAuthor({authorId: id}).then((author) => setAuthorData(author))
+        setLoading(false)
     }, [id, slug])
     return (
         loading ? <Loading /> :

@@ -16,7 +16,7 @@ export default function Comment({comment, feed, setComments, qoute, setQoute, on
           onCallback={onCallback}
         />
             {comment.children && comment.children.length > 0  && comment.children.map((item, index) => 
-              <div className="pl-[15px] sm:pl-[20px] md:pl-10 relative">
+              <div className="pl-[35px] sm:pl-[40px] relative">
               <Comment comment={item} feed={feed} setComments={setComments} qoute={qoute} setQoute={setQoute} onCallback={onCallback} />
             </div>
          )}

@@ -23,43 +23,30 @@ const LibraryPage = ({searchParams}) => {
     const [postLikes, setPostLikes] = useState([]);
     const [feedLikes, setFeedLikes] = useState([]);
     const [user, loading, error] = useAuthState(auth);
+    const [usingUser, setUsingUser] = useState()
+    useEffect(() =>{
+      getProfile(user?.accessToken).then((dataCall) => setUsingUser(dataCall)) 
+    },[user])
+
     useEffect(() => {
-      if (user === undefined && loading === false) {
-        const url_return = `${process.env.NEXT_PUBLIC_HOMEPAGE_URL}/account/bookmark`
-        router.push(`/auth?url_return=${url_return}`);
+      if (user && usingUser) {  
+       const postLikesData = usingUser?.likes?.filter(x => x.likeType === 'post').map(async (item, index) => {
+          let post = await getPost({
+            postId: item?.likeValue,
+          })
+          return post;
+        })
+        setPostLikes(postLikesData);
+        const feedLikesData = usingUser?.likes?.filter(x => x.likeType === 'feed').map(async (item, index) => {
+          let feed = await getFeed({
+            feedId: item?.likeValue,
+          })
+          return feed;
+        })
+        setFeedLikes(feedLikesData);
+        setLoadingSkeleton(false);
       }
-    }, [user, loading])
-
-    useEffect(() => {
-      (async () => {
-        try {
-          setLoadingSkeleton(true);
-          if (user) {  
-            let user1 = await getProfile(user?.accessToken);
-            
-            //postLikes
-            const postLikesData = await Promise.all(user1?.likes?.filter(x => x.likeType === 'post').map(async (item, index) => {
-              let post = await getPost({
-                postId: item?.likeValue,
-              })
-              return post;
-            }));
-            setPostLikes(postLikesData);
-
-            //postLikes
-            const feedLikesData = await Promise.all(user1?.likes?.filter(x => x.likeType === 'feed').map(async (item, index) => {
-              let feed = await getFeed({
-                feedId: item?.likeValue,
-              })
-              return feed;
-            }));
-            setFeedLikes(feedLikesData);
-
-            setLoadingSkeleton(false);
-          }
-        } catch (e) {}
-      })();
-    }, [user, searchParams?.tab])
+    }, [user, usingUser, searchParams?.tab])
 
     return (
       loadingSkeleton ? <Loading /> :

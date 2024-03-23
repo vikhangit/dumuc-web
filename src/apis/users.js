@@ -31,6 +31,16 @@ export const createUserBookmark = (payload, token) => {
     });
 };
 
+export const createUserStories = (payload, token) => {
+  return request("api/user/stories", payload, { method: "POST", token })
+    .then((data) => {
+      return data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
 export const deleteUserBookmark = (payload, token) => {
   const { bookmarkType, bookmarkValue} = payload;
   return request(`api/user/bookmark/${bookmarkType}/${bookmarkValue}`, {}, { method: "DELETE", token })

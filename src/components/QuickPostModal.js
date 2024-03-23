@@ -1,19 +1,14 @@
 "use client"
 import Image from 'next/image';
-
 import React, { useState, useEffect, useRef } from "react";
-
-import { Dropdown, Spinner } from 'flowbite-react';
+import { Spinner } from 'flowbite-react';
 import { Modal, Input, Tag, message} from "antd";
 import { PlusOutlined } from '@ant-design/icons';
 import { TweenOneGroup } from 'rc-tween-one';
-
-//apis
 import { uploadImage } from "apis/other";
-import { createFeedByUser, getFeed, updateFeedByUser } from "@apis/feeds";
+import { createFeedByUser, updateFeedByUser } from "@apis/feeds";
 import { updateProfile, getProfile } from "@apis/users";
-import { CaretDownOutlined, UserOutlined} from '@ant-design/icons';
-import { Truculenta } from 'next/font/google';
+import { CaretDownOutlined} from '@ant-design/icons';
 import { useWindowSize } from '@hooks/useWindowSize';
 import { IoMdCloseCircle } from 'react-icons/io';
 import { useAuthState, useUpdateProfile } from 'react-firebase-hooks/auth';
@@ -22,23 +17,16 @@ import dynamic from 'next/dynamic';
 const CustomEditor = dynamic( () => {
   return import( './editorjs/CustomCKEditor' );
 }, { ssr: false } );
-
-
 export default function QuickPostModal({ visible,setEmotion, onCancel, emotion, setShowPostEmotion, showImage, setShowImage, onCallback, feed}) {
   const [user] = useAuthState(auth)
   const [loading, setLoading] = useState(false);
-  const [loadUser, setLoadUser] = useState(true)
   const [usingUser, setUsingUser] = useState()
-  const ref = useRef();
-  const [isMounted, setIsMounted] = useState(false);
   const refImage = useRef();
   const [description, setDescription] = useState();
   const [descriptionError, setDescriptionError] = useState();
   const [photos, setPhotos] = useState([]);
   const [loadingImage, setLoadingImage] = useState(false)
   const sizes = useWindowSize()
-  const [editor, setEditor] = useState();
-  const [editorError, setEditorError] = useState();
   const handleChange =  (e) => {
     setLoadingImage(true);
    if(e?.target?.files){
@@ -49,15 +37,16 @@ export default function QuickPostModal({ visible,setEmotion, onCancel, emotion, 
     let newPhoto = [];
     array.map(async (x) => {
       uploadImage(x, user?.accessToken).then((data) => {
-        newPhoto.push(`${data?.url}`)
+        newPhoto.push({
+          type: x?.type === "video/mp4" ? "video": "image",
+          url: `${data?.url}`
+        })
         setPhotos([...photos, ...newPhoto]);
       }
       );
     })
   }
   setLoadingImage(false)
-    
-
   };
   const [tags, setTags] = useState([]);
   const [inputVisible, setInputVisible] = useState(false);
@@ -65,11 +54,7 @@ export default function QuickPostModal({ visible,setEmotion, onCancel, emotion, 
   const inputRef = useRef(null);
   const [active, setActive] = useState()
   useEffect(() =>{
-    setLoadUser(true)
-        getProfile(user?.accessToken).then((dataCall) => setUsingUser(dataCall))
-        setTimeout(() => {
-          setLoadUser(false)
-        }, 3000);
+     getProfile(user?.accessToken).then((dataCall) => setUsingUser(dataCall))
   },[user])
   useEffect(() => {
     if (inputVisible) {
@@ -196,7 +181,6 @@ export default function QuickPostModal({ visible,setEmotion, onCancel, emotion, 
       });
     }
     localStorage.removeItem("isPrivate")
-    
   }; 
   return (
     <Modal
@@ -205,12 +189,6 @@ export default function QuickPostModal({ visible,setEmotion, onCancel, emotion, 
       onCancel={() => {
         onCancel();
         setLoading(false);
-        // setPhotos([])
-        // setDescription()
-        // setEmotion("")
-        // setTags([]);
-        // setActive(0)
-        // onCancel();
       }}
       destroyOnClose={true}
       footer={
@@ -277,9 +255,7 @@ export default function QuickPostModal({ visible,setEmotion, onCancel, emotion, 
       centered
       className="modal-quick-post private"
     >
-     { !loadUser ?
       <>
-        {/* user, emotion */}
         <div class="flex mb-4">
           <div
             className="flex items-center gap-x-3"
@@ -322,8 +298,6 @@ export default function QuickPostModal({ visible,setEmotion, onCancel, emotion, 
             </div>
           </div>
         </div>
-
-        {/* description */}
         <CustomEditor
           initialData={description}
           setData={setDescription}
@@ -350,7 +324,6 @@ export default function QuickPostModal({ visible,setEmotion, onCancel, emotion, 
             {photos.length > 0 && (
             <div
               className={`grid  ${
-                 
                   "grid-cols-2"
               }  gap-2 ${sizes.width > 410 ? "h-40 sm:h-44": sizes.width > 350 ? "h-32": "h-24"} overflow-y-auto scroll-quick-post pr-1`}
               id="photo"
@@ -366,11 +339,16 @@ export default function QuickPostModal({ visible,setEmotion, onCancel, emotion, 
                       photos.splice(indexC, 1)
                       setPhotos([...photos])
                     }}
-                    className='absolute top-1.5 right-1.5'><IoMdCloseCircle size={20} color="red" /></button>
+                    className='absolute top-1.5 right-1.5 z-10'><IoMdCloseCircle size={20} color="red" /></button>
                     <a
                     className="w-full h-full"
                     >
-                      <Image
+                      {
+                        photo.type === "video" ? 
+                        <video className={`rounded-md w-full ${photos.length === 1 ? "h-full"  : sizes.width > 410 ? "h-36 sm:h-40" : sizes.width > 350 ? "h-28" : "h-20"} `} controls loop>
+                          <source src={photo.url} type="video/mp4" />
+                        </video>
+                        :<Image
                         width={0}
                         height={0}
                         style={{
@@ -379,18 +357,10 @@ export default function QuickPostModal({ visible,setEmotion, onCancel, emotion, 
                         }}
                         sizes="100vw"
                         className={`rounded-md w-full ${photos.length === 1 ? "h-full"  : sizes.width > 410 ? "h-36 sm:h-40" : sizes.width > 350 ? "h-28" : "h-20"} `}
-                        src={photo}
+                        src={photo.url}
                         alt=""
                       />
-                      {/* {photos.length > 2 &&
-                        indexC === photos?.slice(0, 2).length - 1 && (
-                          <div className="absolute top-0 right-0 bg-black bg-opacity-60 w-full h-full flex justify-center items-center rounded-md">
-                            <p className="text-xl text-white text-center">
-                              +{photos.length - 2}
-                            </p>
-                          </div>
-                        )} */}
-                        
+                      } 
                     </a>
                   </div>
                 );
@@ -472,9 +442,6 @@ export default function QuickPostModal({ visible,setEmotion, onCancel, emotion, 
           {/* <p class="text-xs sm:text-sm text-gray-500">PNG, JPG (Tối đa 5MB).</p> */}
           </div>
         }
-        
-
-        {/* hashtag */}
         <div>
           <label
             for="default-input"
@@ -525,8 +492,7 @@ export default function QuickPostModal({ visible,setEmotion, onCancel, emotion, 
             <PlusOutlined /> New Tag
           </Tag>
         )}
-      </>: <Spinner />
-      }
+      </>
     </Modal>
     
   );

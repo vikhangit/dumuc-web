@@ -1,41 +1,25 @@
 "use client"
 import Link from 'next/link';
 import React, { useEffect, useState } from "react";
-import { Drawer } from "antd";
 import Image from 'next/image';
-import { Modal, Spinner } from 'flowbite-react';
-import PostSOSWithModal from './PostSOSWithModal';
 import { useWindowSize } from '@hooks/useWindowSize';
 import { getSossByUser } from '@apis/soss';
-import moment from 'moment';
-import { DateTimeLog } from "@utils/dateFormat";
 import { MdOutlineAccountBox, MdOutlineSupervisedUserCircle, MdPending, MdPeople } from 'react-icons/md';
 import { useRouter } from 'next/navigation';
-import { generateCustomToken } from '@apis/users';
 
 import { auth } from 'utils/firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
 
 export default function TabbarBottomChat({ active = 'home' }) {
-  const [user, loading, error] = useAuthState(auth);
+  const [user] = useAuthState(auth);
   const router = useRouter();
   const sizes = useWindowSize()
-  let now = moment();
-  const [check, setCheck] = useState(false);
+  const [check, setCheck] = useState(true);
   useEffect(() => {
-    (async () => {
-      setCheck(true);
-      try {
-        if (user) {  
-          //soss
-          const [soosData] = await Promise.all([
-            getSossByUser(user?.accessToken),
-          ]);
-          setSoss(soosData);
-        }
-        setCheck(false);
-      } catch (e) {}
-    })();
+    if (user) {  
+      getSossByUser(user?.accessToken).then((soosData) => setSoss(soosData))     
+    }
+    setCheck(false);
   }, [user])
   return (
     <div className={`fixed bottom-0 w-full z-50 ${sizes.width > 410 ? "h-[70px]" : "h-[45px]"} bg-white border-t border-gray-200 dark:bg-gray-700 dark:border-gray-600`}>

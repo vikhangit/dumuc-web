@@ -7,7 +7,6 @@ import { register } from "swiper/element/bundle";
 import { auth, firestore } from "@utils/firebase";
 import _ from "lodash";
 import moment from "moment";
-
 import {
   getSossByUser,
   getHelperSossByUser,
@@ -15,38 +14,28 @@ import {
   cancelSosHelper,
   completeConfirmSosHelper,
 } from "@apis/soss";
-
 import Timer from "@components/Timer";
 import { DateTimeLog } from "@utils/dateFormat";
-
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
-
 import ModalRating from "@components/ModalRating";
 import TimerHome from "./TimmerHome";
 import { useAuthState } from "react-firebase-hooks/auth";
-
 export default function SOSHeaderBar() {
   const [loadingSubmit, setLoadingSubmit] = useState(false);
-  const [user, loading, error] = useAuthState(auth);
+  const [user] = useAuthState(auth);
   const [coordinates, setCoordinates] = useState({ lat: 0, lng: 0 });
-
-  const [loadingSkeleton, setLoadingSkeleton] = useState(false);
-
+  const [loadingSkeleton, setLoadingSkeleton] = useState(true);
   const [soss, setSoss] = useState([]);
   const [helperSoss, setHelperSoss] = useState([]);
   const [sos, setSos] = useState();
   const [lastLoggedIn, setLastLoggedIn] = useState("");
-
   const [openSOSModal, setOpenSOSModal] = useState();
   const [openHelperModal, setOpenHelperModal] = useState();
-
   const [showRating, setShowRating] = useState(false);
   const [valueRating, setValueRating] = useState();
-
   useEffect(() => {
     register();
-
     navigator.geolocation.getCurrentPosition(
       ({ coords: { latitude, longitude } }) => {
         setCoordinates({
@@ -56,37 +45,26 @@ export default function SOSHeaderBar() {
       }
     );
   }, []);
-
   useEffect(() => {
-    (async () => {
-      try {
-        setLoadingSkeleton(true);
-        if (user) {
-          //soss
-          const [soosData] = await Promise.all([getSossByUser(user?.accessToken)]);
-          setSoss(
-            soosData.filter(x => x.status === 0).map((item) => {
-              return {
-                ...item,
-                type: "sos",
-              };
-            })
-          );
-
-          const helperSossData = await getHelperSossByUser(user?.accessToken);
-          setHelperSoss(
-            helperSossData.filter(x => x.status === 0).map((item) => {
-              return {
-                ...item,
-                type: "helper",
-              };
-            })
-          );
-
-          setLoadingSkeleton(false);
-        }
-      } catch (e) {}
-    })();
+    if (user) {
+      getSossByUser(user?.accessToken).then((soosData) => setSoss(
+        soosData.filter(x => x.status === 0).map((item) => {
+          return {
+            ...item,
+            type: "sos",
+          };
+        })
+      ))
+      getHelperSossByUser(user?.accessToken).then((helperSossData) => setHelperSoss(
+        helperSossData.filter(x => x.status === 0).map((item) => {
+          return {
+            ...item,
+            type: "helper",
+          };
+        })
+      ))
+      setLoadingSkeleton(false);
+    }
   }, [user]);
 
   const onDirectionClick = (userLocation, sosLocation) => {

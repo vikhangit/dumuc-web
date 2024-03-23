@@ -12,8 +12,29 @@ export const getFeed = (payload) => {
     });
 };
 
+export const getStory = (payload) => {
+  const {feedId} = payload;
+  return request(`api/story/${feedId}`, {}, { method: "GET" })
+    .then((data) => {
+      return data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
 export const getFeeds = (payload) => {
   return request(`api/feeds/${payload}`, {}, { method: "GET" })
+    .then((result) => {
+      return result;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+export const getStories = (payload) => {
+  return request(`api/stories`, {}, { method: "GET" })
     .then((result) => {
       return result;
     })
@@ -25,6 +46,18 @@ export const getFeeds = (payload) => {
 export const getFeedsLoadMore = async (payload) => {
   // er
   return await request("api/feeds/loadmore", payload)
+    .then((result) => {
+      // er
+      return result;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+export const getStoriesLoadMore = async (payload) => {
+  // er
+  return await request("api/stories/loadmore", payload)
     .then((result) => {
       // er
       return result;
@@ -66,6 +99,16 @@ export const createCommentReply = (payload, token) => {
 
 export const createFeedByUser = (payload, token) => {
   return request("api/user/feed", payload, { method: "POST", token })
+    .then((data) => {
+      return data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+export const createStoryByUser = (payload, token) => {
+  return request("api/user/story", payload, { method: "POST", token })
     .then((data) => {
       return data;
     })

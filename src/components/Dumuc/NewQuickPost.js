@@ -28,7 +28,7 @@ const NewQuickPost = ({onCallback}) => {
           <a
               className="w-[calc(100%-55px)] sm:w-[calc(100%-70px)] h-14 sm:h-12 flex items-center rounded-[10px] bg-gray-300 font-medium sm:font-normal text-[13px] sm:text-sm md:text-base text-gray-500 cursor-text px-[20px]"
               onClick={() => {
-                if (user?.email) {
+                if (user) {
                   setShowPostText(true);
                   localStorage.removeItem("isPrivate")
                 } else {

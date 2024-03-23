@@ -12,13 +12,16 @@ import { message } from 'antd';
 import { MdFormatQuote } from 'react-icons/md';
 import { useRouter } from 'next/navigation';
 import { getFeed, updateComment } from '@apis/feeds';
+import ModalImageZoom from '@components/ModalImageZoom';
 
 export default function SingleComment({ item, feed, setComments, qoute, setQoute, onCallback }) {
   const [user] = useAuthState(auth)
   const [showReplyBox, setShowReplyBox] = useState(false)
   const [editItem, setEditItem] = useState()
   const router = useRouter()
-  
+  const [showImage, setShowImage] = useState(false)
+  const [imageList, setImageList] = useState([]);
+  const [indexImage, setIndexImage] = useState(0);
   const time = () => {
     moment.locale('vi');
     return moment(item.createdAt).fromNow().replace("trước", "").replace("một", "1");
@@ -57,7 +60,7 @@ export default function SingleComment({ item, feed, setComments, qoute, setQoute
                 }}
               />
           </div> : <div className="flex justify-between my-2 w-full">
-      <Image width={0} height={0} sizes="100vw" className="w-10 h-10 rounded-full" src={item?.user?.photo ? item?.user?.photo : '/dumuc/avatar.png'} alt={item?.user?.name} />
+      <Image width={0} height={0} sizes="100vw" className="w-6 h-6 sm:w-8 sm:h-8 xl:w-10 xl:h-10 rounded-full" src={item?.user?.photo ? item?.user?.photo : '/dumuc/avatar.png'} alt={item?.user?.name} />
       <div className="mx-2 w-[calc(100%-45px)]">
         <div className="relative">
           {
@@ -86,7 +89,7 @@ export default function SingleComment({ item, feed, setComments, qoute, setQoute
         </div>
         {item?.photos?.length > 0 && (
         <div
-          className={`w-full grid grid-cols-3 gap-2 mt-4 ${item?.photos?.length > 0 && "mb-2 mt-2"}`}
+          className={`w-full grid grid-cols-3 gap-2 ${item?.photos?.length > 0 && "mb-2 mt-2"}`}
           id="photo"
         >
         {item?.photos?.slice(0, 3).map((photo, indexC) => {
@@ -96,7 +99,11 @@ export default function SingleComment({ item, feed, setComments, qoute, setQoute
               className={`rounded-md w-full h-full`}
             >  
               <a
-                // onClick={() => handleShowImage(item)}
+                 onClick={() => {
+                  setShowImage(true)
+                  setImageList(item?.photos)
+                  setIndexImage(indexC);
+                }}
                 className={`w-full relative cursor-pointer h-full`}
               >
                 <Image
@@ -229,7 +236,7 @@ export default function SingleComment({ item, feed, setComments, qoute, setQoute
       </div>
     </div>
       }
-    
+    <ModalImageZoom openImage={showImage} setOpenImage={setShowImage} imageList={imageList} index={indexImage}/>
   </div>
   )
 }

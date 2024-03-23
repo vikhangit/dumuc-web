@@ -32,17 +32,9 @@ const SOSTab = ({ active, setActive, callBack }) => {
   const [user, loading, error] = useAuthState(auth);
   const [soss, setSoss] = useState()
   useEffect(() => {
-    (async () => {
-      try {
-        if (user) {  
-          //soss
-          const [soosData] = await Promise.all([
-            getSossByUser(user?.accessToken),
-          ]);
-          setSoss(soosData);
-        }
-      } catch (e) {}
-    })();
+    if (user) {  
+      getSossByUser(user?.accessToken).then((soosData) => setSoss(soosData))
+    }
   }, [user])
   return (
     <>

@@ -21,51 +21,36 @@ const LibraryPage = ({searchParams}) => {
     const [loadingSkeleton, setLoadingSkeleton] = useState(true);
     const [feedComments, setFeedComments] = useState([]);
     const [articleComments, setArticleComments] = useState([]);
-    const [user, loading, error] = useAuthState(auth);
+    const [user] = useAuthState(auth);
+    const [usingUser, setUsingUser] = useState()
+    useEffect(() =>{
+      getProfile(user?.accessToken).then((dataCall) => setUsingUser(dataCall)) 
+    },[user])
     useEffect(() => {
-      if (user === undefined && loading === false) {
-        const url_return = `${process.env.NEXT_PUBLIC_HOMEPAGE_URL}/account/bookmark`
-        router.push(`/auth?url_return=${url_return}`);
+      if (user && usingUser) {
+        const articleCommentsData = usingUser?.comments?.filter(x => x.commentType === 'post').map(async (item, index) => {
+          let post = await getPost({
+            postId: item?.postId,
+          })
+          return {
+            post,
+            ...item,
+          };
+        });
+        setArticleComments(articleCommentsData);
+        const feedCommentsData = usingUser?.comments?.filter(x => x.commentType === 'feed').map(async (item, index) => {
+          let feed = await getFeed({
+            feedId: item?.feedId,
+          })
+          return {
+            feed,
+            ...item,
+          };
+        })
+        setFeedComments(feedCommentsData);
+        setLoadingSkeleton(false);
       }
-    }, [user, loading])
-
-
-    useEffect(() => {
-      (async () => {
-        try {
-          setLoadingSkeleton(true);
-          if (user) {  
-            let user1 = await getProfile(user?.accessToken);
-            
-            //articleComments
-            const articleCommentsData = await Promise.all(user1?.comments?.filter(x => x.commentType === 'post').map(async (item, index) => {
-              let post = await getPost({
-                postId: item?.postId,
-              })
-              return {
-                post,
-                ...item,
-              };
-            }));
-            setArticleComments(articleCommentsData);
-
-            //feedComments
-            const feedCommentsData = await Promise.all(user1?.comments?.filter(x => x.commentType === 'feed').map(async (item, index) => {
-              let feed = await getFeed({
-                feedId: item?.feedId,
-              })
-              return {
-                feed,
-                ...item,
-              };
-            }));
-            setFeedComments(feedCommentsData);
-
-            setLoadingSkeleton(false);
-          }
-        } catch (e) {}
-      })();
-    }, [user?.accessToken, searchParams?.tab])
+    }, [user, usingUser, searchParams?.tab])
 
     return (
       loadingSkeleton ? <Loading /> :

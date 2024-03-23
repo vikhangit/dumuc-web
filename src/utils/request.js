@@ -25,12 +25,12 @@ const getAxiosInstance = (token, options = {}) => {
       return Promise.reject(response);
     },
     (error) => {
-      let { code } = error.response.data || error.response.status;
-      code = code || error.response.status;
+      let { code } = error.response?.data || error.response?.status;
+      code = code || error.response?.status;
       if (code) {
-        return Promise.reject(error.response.data);
+        return Promise.reject(error.response?.data);
       }
-      return Promise.reject(error.response.data);
+      return Promise.reject(error.response?.data);
     }
   );
 

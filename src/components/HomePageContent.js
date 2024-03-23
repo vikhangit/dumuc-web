@@ -1,6 +1,6 @@
 "use client"
 import React, { useEffect, useState } from "react";
-import { getFeedsLoadMore, getTags } from "@apis/feeds";
+import { getFeedsLoadMore, getStories, getStoriesLoadMore, getTags } from "@apis/feeds";
 import TabbarBottom from "@components/TabbarBottom";
 import Header from "@components/Header";
 import FeedItems from "@components/FeedItems";
@@ -9,13 +9,25 @@ import BannerRight from "@components/BannerRight";
 import TrendingTopFive from "@components/TrendingTopFive";
 import Loading from "app/loading";
 import Story from "./Dumuc/Story";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { auth } from "@utils/firebase";
 const HomePageContent = () => {
+  const [user] = useAuthState(auth)
   const [feedData, setFeedData] = useState({});
   const [loading, setLoading] = useState(true);
   const [tags, setTags] = useState([])
+  const [stories, setStories] = useState([])
   useEffect(() => {
     getFeedsLoadMore({limit: 5}).then((result) => setFeedData(result))
     getTags().then((result) => setTags(result))
+    getStories().then((data) => {
+      const author = data?.find(x => x?.author?.user?.email === user?.email)
+      if(author){
+        setStories(data);
+      }else{
+        setStories(data?.filter(x => x?.isPrivate === false))
+      }
+    })
     setLoading(false)
   }, [])
   return (
@@ -47,7 +59,17 @@ const HomePageContent = () => {
                     </div>
                   </div>
                   <div>
-                    <Story />
+                    { stories.length > 0 ?
+                    <Story stories={stories} onCallback={async (resut) =>  getStories().then((data) => setStories(data))} /> 
+                    : user && <Story stories={stories} onCallback={async (resut) =>  getStories().then((data) => {
+                      const author = data?.find(x => x?.author?.user?.email === user?.email)
+                        if(author){
+                          setStories(data);
+                        }else{
+                          setStories(data?.filter(x => x?.isPrivate === false))
+                        }
+                    })} /> 
+                    }
                   </div>
                   <FeedItems 
                     setFeedData={setFeedData} 

@@ -61,7 +61,7 @@ const ArticleCarousel = ({items, title, moreAction, width = 200 }) => {
                             const photos = item?.body?.blocks.filter(x => x.type === "image");
                             const photo = item?.photo ? item?.photo : photos[0]?.data?.file?.url
                             return (
-                                <article className={`w-[${width}px] flex-shrink-0 rounded-lg bg-white hover:scale-110 transition-all mt-[20px] cursor-pointer`} key={index}>
+                                <article  className={`w-[${width}px] flex-shrink-0 rounded-lg bg-white hover:scale-110 transition-all mt-[20px] cursor-pointer`} key={index}>
                                     {photo && <a href={url}>
                                         <Image width={0} height={0} sizes="100vw" src={photo} className="mb-2 rounded-t-lg w-full h-32" alt={item?.title} />
                                     </a>
