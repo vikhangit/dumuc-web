@@ -12,6 +12,7 @@ import router from "next/router";
 import Loading from "./loading";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@utils/firebase";
+import { getProfile } from "@apis/users";
 
 const LibraryPage = ({searchParams}) => {
     const [loadingSkeleton, setLoadingSkeleton] = useState(true);

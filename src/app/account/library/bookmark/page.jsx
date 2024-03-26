@@ -30,18 +30,16 @@ const BookmarkPage = ({searchParams}) => {
 
     useEffect(() => {
       if (user && usingUser) {
-        const postBookmarksData  = usingUser?.bookmarks?.filter(x => x.bookmarkType === 'post').map(async (item, index) => {
-          return await getPost({
+        usingUser?.bookmarks?.filter(x => x.bookmarkType === 'post').map(async (item, index) =>
+          await getPost({
             postId: item?.bookmarkValue,
-          })
-        })
-        setPostBookmarks(postBookmarksData);
-        const feedBookmarksData = usingUser?.bookmarks?.filter(x => x.bookmarkType === 'feed').map(async (item, index) => {
-          return await getFeed({
+          }).then((data) => setPostBookmarks([data, ...postBookmarks]))
+        )
+        usingUser?.bookmarks?.filter(x => x.bookmarkType === 'feed').map(async (item, index) =>
+         await getFeed({
             feedId: item?.bookmarkValue,
-          })
-        })
-        setFeedBookmarks(feedBookmarksData);
+          }).then((data) => setFeedBookmarks([data, ...feedBookmarks]))
+        )
         setLoadingSkeleton(false);
       }
     }, [user, usingUser, searchParams?.tab])
@@ -66,9 +64,7 @@ const BookmarkPage = ({searchParams}) => {
           </div>
           {(parseInt(searchParams?.status) === 0 || searchParams?.status === undefined) && (
             <ArticleItems 
-              data={{
-                items: postBookmarks
-              }} 
+              data={postBookmarks} 
               layout="list"
             />
           )}

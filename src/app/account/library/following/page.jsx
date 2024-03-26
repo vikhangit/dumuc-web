@@ -24,16 +24,15 @@ const LibraryPage = ({searchParams}) => {
     },[user])
     useEffect(() => {
       if (user && usingUser) {  
-        const followingsData = usingUser?.follows?.map(async (item, index) => {
-          let author = await getAuthor({
+        usingUser?.follows?.map(async (item, index) =>
+          await getAuthor({
             authorId: item?.authorId,
-          })
-          return author;
-        })
-        setFollowings(followingsData);
+          }).then((data) => setFollowings([data, ...followings]))
+        )
         setLoadingSkeleton(false);
       }
     }, [user, usingUser, searchParams?.tab])
+    console.log(followings)
 
     return (
       loadingSkeleton ? <Loading /> :

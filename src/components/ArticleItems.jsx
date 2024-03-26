@@ -52,10 +52,9 @@ const ArticleItems = ({ data, title, authorId, category, tagId, layout='scroll',
     return items?.map((item, index) => {
       const url = `/forum/post/${item?.slug}/${item?.postId}`;
       const photos = item?.body?.blocks.filter(x => x.type === "image");
-      const photo = item?.photo ? item?.photo : photos[0]?.data?.file?.url
+      const photo = photos && photos[0]?.data?.file?.url
 
       return (
-        item?.isActive &&
         <div className='my-8 mx-4' key={index}>
           <article className="article-item mb-14 flex gap-x-8 gap-y-4 flex-col sm:flex-row">
             <div className="">
