@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import Header from "@components/Header";
 import BannerRight from "@components/BannerRight";
 import BannerCenter from "@components/BannerCenter";
-import TableOfContent from "@components/TableOfContent";
 
 import moment from "moment";
 import _ from "lodash";
@@ -19,6 +18,7 @@ import { getPost } from "@apis/posts";
 import dynamic from 'next/dynamic'
 import Loading from "../loading";
 import Image from "next/image";
+import TableOfContent from "@components/TableOfContent";
 const Output = dynamic(
   async () => (await import('editorjs-react-renderer')).default,
   { ssr: false }

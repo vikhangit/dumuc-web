@@ -14,13 +14,9 @@ import Image from 'next/image';
 
 const ArticleItems = ({ data, title, authorId, category, tagId, layout='scroll', onCallback }) => {
   const [loading, setLoading] = useState(false)
-  const [items, setItems] = useState(data?.items);
-  const [last, setLast] = useState(data?.last);
-  const [isLastResult, setIsLastResult] = useState(data?.last === data?.lastest)
+  const [items, setItems] = useState(data);
   useEffect(() => {
-    setItems(data?.items);
-    setLast(data?.last);
-    setIsLastResult( data?.last === data?.lastest)
+    setItems(data);
   }, [data])
   const loadMore = () => {
     setLoading(true)
@@ -47,8 +43,6 @@ const ArticleItems = ({ data, title, authorId, category, tagId, layout='scroll',
 
     getPostsLoadMore(payload)
     .then((result) => {
-      setLast(result?.last);
-      setIsLastResult(result?.last === result?.lastest)
       setItems([...items, ...result?.items]);
       setLoading(false)
     });

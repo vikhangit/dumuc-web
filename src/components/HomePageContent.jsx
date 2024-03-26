@@ -75,7 +75,10 @@ const HomePageContent = () => {
                     setFeedData={setFeedData} 
                     data={feedData} 
                     onCallback={
-                      async () => await getFeedsLoadMore({limit: 5}).then((result) => setFeedData(result))
+                      async () => {
+                        await getFeedsLoadMore({limit: 5}).then((result) => setFeedData(result))
+                        await getTags().then((result) => setTags(result))
+                      }
                     } 
                   />
                 </section>

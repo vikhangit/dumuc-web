@@ -2,7 +2,7 @@
 import request from "@utils/request";
 
 export const getPosts = (payload) => {
-  return request(`api/posts/${payload}`, {}, { method: "GET" })
+  return request(`api/posts`, {}, { method: "GET" })
     .then((result) => {
       return result;
     })

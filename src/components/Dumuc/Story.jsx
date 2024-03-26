@@ -14,6 +14,7 @@ import QuickAddStory from '@components/QuickAddStory';
 import { useWindowSize } from '@hooks/useWindowSize';
 import ModalPlayVideos from '@components/ModalPlayVideos';
 import { message } from 'antd';
+import ModalWating from './ModalWating';
 
 const Story = ({stories, onCallback}) => {
   const sizes = useWindowSize()
@@ -27,26 +28,19 @@ const Story = ({stories, onCallback}) => {
   const refStory = useRef()
   const videoEl = useRef(null);
   const canvasRef = useRef(null)
-
-  const handleLoadedMetadata = () => {
-    const video = videoEl.current;
-    if (!video) return;
-    console.log(`The video is ${video.duration} seconds long.`);
-  };
   const handleChange =  (e) => {
     setLoading(true)
     if(e?.target?.files){
       uploadImage(e?.target?.files[0], user?.accessToken).then((data) => {
         setVideo(data?.url)
       }).then((res) => {
-        console.log(res)
-        setLoading(false)
         setShowModal(true)
+        setLoading(false)
       })
         .catch((err) => {
-          setLoading(false)
-          setShowModal(false)
           message.error("Video kích thước quá lớn")
+          setShowModal(false)
+          setLoading(false)
         })
     }
     };
@@ -162,6 +156,7 @@ const Story = ({stories, onCallback}) => {
         visible={showModal}
         url={video}
       />
+      <ModalWating openModal={loading} setOpenModal={setLoading} />
     </>
   );
 }

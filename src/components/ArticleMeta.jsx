@@ -9,8 +9,6 @@ import ArticleShare from "./ArticleShare";
 import Image from "next/image";
 import { IoMdMore } from "react-icons/io";
 import Link from "next/link";
-import { useRecoilValue } from "recoil";
-import { userAtom } from "@recoils/atoms";
 import { updatePostByUser } from "@apis/posts";
 import { message } from "antd";
 import { useAuthState } from "react-firebase-hooks/auth";

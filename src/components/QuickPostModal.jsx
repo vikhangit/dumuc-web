@@ -14,6 +14,7 @@ import { IoMdCloseCircle } from 'react-icons/io';
 import { useAuthState, useUpdateProfile } from 'react-firebase-hooks/auth';
 import { auth } from '@utils/firebase';
 import dynamic from 'next/dynamic';
+import ModalWating from './Dumuc/ModalWating';
 const CustomEditor = dynamic( () => {
   return import( './editorjs/CustomCKEditor' );
 }, { ssr: false } );
@@ -42,11 +43,14 @@ export default function QuickPostModal({ visible,setEmotion, onCancel, emotion, 
           url: `${data?.url}`
         })
         setPhotos([...photos, ...newPhoto]);
+        setLoadingImage(false)
       }
-      );
+      ).catch((err) => {
+        message.error("Video có kích thước quá lớn")
+        setLoadingImage(false)
+      });
     })
   }
-  setLoadingImage(false)
   };
   const [tags, setTags] = useState([]);
   const [inputVisible, setInputVisible] = useState(false);
@@ -76,7 +80,7 @@ export default function QuickPostModal({ visible,setEmotion, onCancel, emotion, 
   };
 
   const handleInputConfirm = () => {
-    if (inputValue && tags.indexOf(inputValue) === -1) {
+    if (inputValue && tags?.indexOf(inputValue) === -1) {
       setTags([...tags, inputValue]);
     }
     setInputVisible(false);
@@ -138,7 +142,7 @@ export default function QuickPostModal({ visible,setEmotion, onCancel, emotion, 
       item.description = description;
     }
     if(feed){
-      updateFeedByUser({...feed ,...item, feedId: feed?.feedId, isPrivate: JSON.parse(localStorage.getItem("isPrivate")) ? JSON.parse(localStorage.getItem("isPrivate")) === "0" ? true : false : feed?.isPrivate  }, user?.accessToken)
+      updateFeedByUser({...feed, ...item, feedId: feed?.feedId, isPrivate: JSON.parse(localStorage.getItem("isPrivate")) ? JSON.parse(localStorage.getItem("isPrivate")) === "0" ? true : false : feed?.isPrivate  }, user?.accessToken)
     .then(async (result) => {
       const findIndex = photos?.filter( ai => !usingUser
         .photos.includes(ai));
@@ -183,6 +187,7 @@ export default function QuickPostModal({ visible,setEmotion, onCancel, emotion, 
     localStorage.removeItem("isPrivate")
   }; 
   return (
+    <>
     <Modal
       visible={visible}
       title={`Đăng tin`}
@@ -388,7 +393,7 @@ export default function QuickPostModal({ visible,setEmotion, onCancel, emotion, 
                   strokeLinejoin="round"
                   d="M12 4.5v15m7.5-7.5h-15"
                 />
-              </svg>Thêm ảnh</div>
+              </svg>{loadingImage ? <Spinner /> : "Thêm ảnh/video"}</div>
                 }
               </div>
             </button>
@@ -433,7 +438,7 @@ export default function QuickPostModal({ visible,setEmotion, onCancel, emotion, 
                   strokeLinejoin="round"
                   d="M12 4.5v15m7.5-7.5h-15"
                 />
-              </svg>Thêm ảnh</div>
+              </svg>{loadingImage ? <Spinner /> : "Thêm ảnh/video"}</div>
                 }
               </div>
             </button>
@@ -494,7 +499,8 @@ export default function QuickPostModal({ visible,setEmotion, onCancel, emotion, 
         )}
       </>
     </Modal>
-    
+    <ModalWating openModal={loadingImage} setOpenModal={setLoadingImage} />
+    </>
   );
     
 }

@@ -1,6 +1,5 @@
 import Script from 'next/script'
 import { Inter, Mulish, Saira_Stencil_One } from 'next/font/google'
-import RecoilRootWrapper from "@recoils/wrappers/RecoilRootWrapper";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
@@ -22,9 +21,7 @@ export default function RootLayout({ children }) {
         <Script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.8.1/flowbite.min.js" />
         <Script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0.13/dist/fancybox/fancybox.umd.js" />
         <Script src="https://polyfill.io/v3/polyfill.min.js?features=default"></Script>
-        <RecoilRootWrapper>
-          {children}
-        </RecoilRootWrapper>
+        {children}
       </body>
       <Script
       src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB41DRUbKWJHPxaFjMAwdrzWzbVKartNGg&callback=initMap&v=weekly"

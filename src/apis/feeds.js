@@ -24,7 +24,7 @@ export const getStory = (payload) => {
 };
 
 export const getFeeds = (payload) => {
-  return request(`api/feeds/${payload}`, {}, { method: "GET" })
+  return request(`api/feeds`, {}, { method: "GET" })
     .then((result) => {
       return result;
     })

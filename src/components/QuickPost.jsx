@@ -3,8 +3,6 @@ import React, { useState } from 'react'
 import Link from "next/link";
 import QuickPostModal from './QuickPostModal';
 import QuickPostModalEmoji from './QuickPostModlEmoji';
-import { useRecoilValue } from "recoil";
-import { userAtom } from "@recoils/atoms";
 import { useRouter } from 'next/navigation';
 import { generateCustomToken } from "apis/users";
 import { auth } from 'utils/firebase';

@@ -8,7 +8,7 @@ const TrendingTopFive = ({ items, tiltle = 'XU HƯỚNG HÀNG ĐẦU', limit = 1
   return (
     <div>        
       <ul class="flex flex-nowrap xl:flex-wrap overflow-auto xl:overflow-none gap-x-6 gap-y-2 pb-1 scroll-trend">
-        {items && items?.map((item, index) => {
+        {items && items?.sort((a, b) => b?.no - a?.no)?.map((item, index) => {
           if (index < limit) {
             return (
               <div

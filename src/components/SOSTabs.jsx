@@ -7,8 +7,6 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Dropdown, Modal, Select } from 'flowbite-react';
 import PostSOSWithModal from './PostSOSWithModal';
-import { useRecoilValue } from 'recoil';
-import { userAtom } from '@recoils/atoms';
 import LoginWithModal from './LoginWithModal';
 import { message } from 'antd';
 import moment from "moment";

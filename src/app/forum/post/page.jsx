@@ -327,7 +327,7 @@ const PostWritePage = ({ searchParams }) => {
   };
 
   const handleInputConfirm = () => {
-    if (inputValue && tags.indexOf(inputValue) === -1) {
+    if (inputValue && tags?.indexOf(inputValue) === -1) {
       setTags([...tags, inputValue]);
     }
     setInputVisible(false);
@@ -460,7 +460,7 @@ const PostWritePage = ({ searchParams }) => {
           updatePostByUser(item, user?.accessToken)
             .then((result) => {
               message.success(result.message);
-              router.push("/account/library/post");
+              router.push(`/forum/topic/${categoryParent}/${category}`);
               setLoading(false);
             })
             .catch((err) => {
@@ -481,7 +481,7 @@ const PostWritePage = ({ searchParams }) => {
                 },
                 user?.accessToken
               ).then(() => {
-                 router.push("/account/library/post");
+                 router.push(`/forum/topic/${categoryParent}/${category}`);
                 setLoading(false);
               });
             })

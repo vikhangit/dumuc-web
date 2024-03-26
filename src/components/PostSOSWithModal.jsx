@@ -24,8 +24,6 @@ import { uploadImage } from "apis/other";
 import { Modal, Spinner } from "flowbite-react";
 import Image from "next/image";
 import { useWindowSize } from "@hooks/useWindowSize";
-import { useRecoilValue } from "recoil";
-import { userAtom } from "@recoils/atoms";
 import SOSMapGetLongLat from "./SOSMapGetLongLat";
 import { auth } from "@utils/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";

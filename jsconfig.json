@@ -15,8 +15,7 @@
       "@components/*": ["components/*"],
       "@hooks/*": ["hooks/*"],
       "@locales/*": ["locales/*"],
-      "@utils/*": ["utils/*"],
-      "@recoils/*": ["recoils/*"],
+      "@utils/*": ["utils/*"]
     }
   }
 }
