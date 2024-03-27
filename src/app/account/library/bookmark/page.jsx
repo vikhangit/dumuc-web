@@ -4,7 +4,7 @@ import Link from 'next/link'
 
 import { getProfile } from "@apis/users";
 import { getPost } from "@apis/posts";
-import { getFeed } from "@apis/feeds";
+import { getFeed, getFeeds } from "@apis/feeds";
 
 import Header from "@components/Header";
 import BannerRight from "@components/BannerRight";
@@ -25,23 +25,27 @@ const BookmarkPage = ({searchParams}) => {
     const [user, loading] = useAuthState(auth);
     const [usingUser, setUsingUser] = useState()
     useEffect(() =>{
-      getProfile(user?.accessToken).then((dataCall) => setUsingUser(dataCall)) 
+      getProfile(user?.accessToken).then((dataCall) => {
+        setUsingUser(dataCall)
+      }) 
     },[user])
 
     useEffect(() => {
       if (user && usingUser) {
-        usingUser?.bookmarks?.filter(x => x.bookmarkType === 'post').map(async (item, index) =>
-          await getPost({
-            postId: item?.bookmarkValue,
-          }).then((data) => setPostBookmarks([data, ...postBookmarks]))
-        )
-        usingUser?.bookmarks?.filter(x => x.bookmarkType === 'feed').map(async (item, index) =>
-         await getFeed({
-            feedId: item?.bookmarkValue,
-          }).then((data) => setFeedBookmarks([data, ...feedBookmarks]))
-        )
+        let postdata = []
+        usingUser?.bookmarks?.filter(x => x.bookmarkType === 'post').map(i => getPost({postId: i.bookmarkValue}).then(res => {
+          postdata.push(res)
+          setPostBookmarks(postdata)
+        }))
+        
+        let newArr = [];
+        usingUser?.bookmarks?.filter(x => x.bookmarkType === 'feed').map(i => getFeed({feedId: i.bookmarkValue}).then(res => {
+          newArr.push(res)
+          setFeedBookmarks(newArr)
+          return newArr
+        }))
         setLoadingSkeleton(false);
-      }
+      } 
     }, [user, usingUser, searchParams?.tab])
 
     return (
@@ -66,6 +70,14 @@ const BookmarkPage = ({searchParams}) => {
             <ArticleItems 
               data={postBookmarks} 
               layout="list"
+              onCallback={async () => await getProfile(user?.accessToken).then((dataCall) => {
+                setUsingUser(dataCall)
+                let postdata = []
+        usingUser?.bookmarks?.filter(x => x.bookmarkType === 'post').map(i => getPost({postId: i.bookmarkValue}).then(res => {
+          postdata.push(res)
+          setPostBookmarks(postdata)
+        }))
+              })            }
             />
           )}
 

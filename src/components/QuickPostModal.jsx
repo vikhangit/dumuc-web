@@ -144,11 +144,11 @@ export default function QuickPostModal({ visible,setEmotion, onCancel, emotion, 
     if(feed){
       updateFeedByUser({...feed, ...item, feedId: feed?.feedId, isPrivate: JSON.parse(localStorage.getItem("isPrivate")) ? JSON.parse(localStorage.getItem("isPrivate")) === "0" ? true : false : feed?.isPrivate  }, user?.accessToken)
     .then(async (result) => {
-      const findIndex = photos?.filter( ai => !usingUser
-        .photos.includes(ai));
+      // const findIndex = photos?.filter( ai => !usingUser
+      //   .photos.includes(ai));
       updateProfile({
         ...usingUser,
-        photos:usingUser?.photos?.length > 0 ? [...usingUser?.photos, ...findIndex] : [...findIndex],
+        photos:usingUser?.photos?.length > 0 ? [...usingUser?.photos, ...photos] : [...photos],
         userId: usingUser?.userId
       }, user?.accessToken)
       setLoading(false);

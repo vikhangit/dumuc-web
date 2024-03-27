@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import Link from 'next/link'
 
 import { getProfile } from "@apis/users";
-import { getPost } from "@apis/posts";
+import { getPost, getPosts } from "@apis/posts";
 import { getFeed } from "@apis/feeds";
 
 import Header from "@components/Header";
@@ -28,30 +28,21 @@ const LibraryPage = ({searchParams}) => {
     },[user])
     useEffect(() => {
       if (user && usingUser) {
-        const articleCommentsData = usingUser?.comments?.filter(x => x.commentType === 'post').map(async (item, index) => {
-          let post = await getPost({
-            postId: item?.postId,
-          })
-          return {
-            post,
-            ...item,
-          };
-        });
-        setArticleComments(articleCommentsData);
-        const feedCommentsData = usingUser?.comments?.filter(x => x.commentType === 'feed').map(async (item, index) => {
-          let feed = await getFeed({
-            feedId: item?.feedId,
-          })
-          return {
-            feed,
-            ...item,
-          };
-        })
-        setFeedComments(feedCommentsData);
+        let postdata = []
+        usingUser?.comments?.filter(x => x.commentType === 'post').map(i => getPost({postId: i.postId}).then(res => {
+          postdata.push(res)
+          setArticleComments(postdata)
+        }))
+        let newArr = []
+        usingUser?.comments?.filter(x => x.commentType === 'feed').map(i => getFeed({feedId: i.feedId}).then(res => {
+        newArr.push(res)
+          setFeedComments(newArr)
+        }))
         setLoadingSkeleton(false);
       }
     }, [user, usingUser, searchParams?.tab])
 
+console.log(feedComments)
     return (
       loadingSkeleton ? <Loading /> :
       <main className="w-full">

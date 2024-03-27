@@ -23,11 +23,15 @@ const LibraryPage = ({searchParams}) => {
       getProfile(user?.accessToken).then((dataCall) => setUsingUser(dataCall)) 
     },[user])
     useEffect(() => {
-      if (user && usingUser) {  
+      if (user && usingUser) {
+        let arr = []  
         usingUser?.follows?.map(async (item, index) =>
           await getAuthor({
             authorId: item?.authorId,
-          }).then((data) => setFollowings([data, ...followings]))
+          }).then((data) => {
+            arr.push(data)
+            setFollowings(arr)
+          })
         )
         setLoadingSkeleton(false);
       }

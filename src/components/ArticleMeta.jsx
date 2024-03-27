@@ -101,7 +101,7 @@ const ArticleMeta = ({ item, onCallback }) => {
               </div>
               </div>
              } 
-              <ArticleBookmark id={item?.postId} currentUrl={url} />
+              <ArticleBookmark id={item?.postId} onCallback={onCallback} currentUrl={url} />
               </div>
             </div>
   );

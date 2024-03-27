@@ -82,6 +82,40 @@ const ArticleItems = ({ data, title, authorId, category, tagId, layout='scroll',
     })
   }
 
+  const renderItemsBookmark = (items) => {
+    return  items?.map((item, index) => {
+      const url = `/forum/post/${item?.bookmark?.slug}/${item?.bookmark?.postId}`;
+      const photos = item?.bookmark?.body?.blocks.filter(x => x.type === "image");
+      const photo = photos && photos[0]?.data?.file?.url
+
+      return (
+        <div className='my-8 mx-4' key={index}>
+          <article className="article-item mb-14 flex gap-x-8 gap-y-4 flex-col sm:flex-row">
+            <div className="">
+              {
+                photo && <a href={url}>
+                <Image
+                width={0} height={0} sizes="100vw"
+                  alt={item?.bookmark?.title}
+                  className="w-full sm:w-[180px] h-full sm:h-[135px] object-cover"
+                  src={photo}
+                />
+              </a>
+              }
+            </div>
+            <div className='flex flex-col pr-4 w-full'>
+              <a href={url} className="mb-3 line-clamp-2 text-xl font-bold leading-tight text-gray-900">
+                {item?.bookmark?.title}
+              </a>
+              <div className="line-clamp-3 font-light text-base">{item?.description}</div>
+              <ArticleMeta item={item?.bookmark} onCallback={onCallback} />
+            </div>
+          </article>
+        </div>
+      )
+    })
+  }
+
   return (
     <div className="post-list">
       {title && (
@@ -119,6 +153,11 @@ const ArticleItems = ({ data, title, authorId, category, tagId, layout='scroll',
         {(layout === 'list' && items) && (
           <>
             {renderItems(items)}
+          </>
+        )}
+        {(layout === 'bookmark' && items) && (
+          <>
+            {renderItemsBookmark(items)}
           </>
         )}
       </div>

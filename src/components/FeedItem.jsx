@@ -164,7 +164,7 @@ const FeedItem = ({ item, index, onCallback }) => {
             setShowPostText(true);
           }}
         />
-      <FeedBookmark id={item?.feedId} currentUrl={url} />
+      <FeedBookmark id={item?.feedId}  currentUrl={url} />
       </div>
     </div>
     <div>

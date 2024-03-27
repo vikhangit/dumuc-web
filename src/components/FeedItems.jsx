@@ -73,7 +73,7 @@ const FeedItems = ({
       )}
       {layout === 'list' && items && (
         items?.map((item, index) => (
-          <FeedItem key={index} item={item} index={index} />
+          <FeedItem key={index} item={item} index={index} onCallback={onCallback} />
         ))
       )}
     </div>

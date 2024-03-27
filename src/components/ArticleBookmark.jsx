@@ -7,7 +7,7 @@ import {createUserBookmark, deleteUserBookmark, getProfile, updateProfile} from 
 import { useAuthState, useUpdateProfile } from "react-firebase-hooks/auth";
 import { auth } from "@utils/firebase";
 
-const ArticleBookmark = ({id, currentUrl = '/', style = 'article'}) => {
+const ArticleBookmark = ({id, currentUrl = '/', style = 'article', onCallback}) => {
     const icon = () => <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-900" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 20">
     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m13 19-6-5-6 5V2a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17Z"/>
 </svg>;
@@ -19,7 +19,7 @@ const iconActive = () => <svg class="w-4 h-4 sm:w-5 sm:h-5 text-[#c80000]" aria-
     const router = useRouter();
     const [setUser, updating, error] = useUpdateProfile(auth);    
     const [user] = useAuthState(auth);
-    const [usingUser, setUsingUser] = useState()
+    const [usingUser, setUsingUser] = useState({})
   useEffect(() =>{
     (async () => {
       try {
@@ -40,13 +40,9 @@ const iconActive = () => <svg class="w-4 h-4 sm:w-5 sm:h-5 text-[#c80000]" aria-
                         bookmarkValue: id,
                         }, user?.accessToken)
                         .then(async () => {
-                        //update recoil
-                        updateProfile({
-                            ...usingUser,
-                            bookmarks: usingUser?.bookmarks?.filter(x => x.bookmarkValue !== id && x.bookmarkType === 'post')
-                        },user?.accessToken)
                         const dataCall = await getProfile(user?.accessToken) 
-        setUsingUser(dataCall)
+                        setUsingUser(dataCall)
+                        onCallback();
                             message.success('Đã bỏ lưu thành công');
                     });
                 }} tooltip="Bỏ lưu">
@@ -62,18 +58,12 @@ const iconActive = () => <svg class="w-4 h-4 sm:w-5 sm:h-5 text-[#c80000]" aria-
                     createUserBookmark({
                         bookmarkType: 'post',
                         bookmarkValue: id,
+                     
                     }, user?.accessToken)
                     .then(async () => {
-                        //update recoil
-                        updateProfile({
-                        ...usingUser,
-                        bookmarks: [...usingUser?.bookmarks, {
-                            bookmarkType: 'post',
-                            bookmarkValue: id,
-                        }]
-                        } , user?.accessToken)
                         const dataCall = await getProfile(user?.accessToken) 
-        setUsingUser(dataCall)
+                        setUsingUser(dataCall)
+                        onCallback();
                         message.success('Đã lưu thành công')
                     });
                 }} tooltip="Lưu lại">

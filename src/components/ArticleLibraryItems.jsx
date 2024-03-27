@@ -12,7 +12,7 @@ const ArticleLibraryItems = ({ items, status = 0,onCallback }) => {
       <div className="post-list">
         <div>
             {items &&
-            items?.filter(x => x.status === parseInt(status)).map((item, index) => {
+            items?.map((item, index) => {
             const url = `/forum/post/${item?.slug}/${item?.postId}`;
             
             const photos = item?.body?.blocks?.filter(x => x.type === "image");
