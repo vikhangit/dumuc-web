@@ -118,15 +118,7 @@ const NewAuthorUI = ({ currentUrl = '/', params, searchParams }) => {
                                                                     }, user?.accessToken).then((e) => console.log(e)).catch(e => console.log(e))
                                                                   
                                                                 });
-                                                                await createUserFollow({
-                                                                    authorId: authorData?.authorId
-                                                                }, user?.accessToken)
-                                                                .then(async(result) => {
-                                                                  console.log(result)
-                                                                await createUserToFollowerList({
-                                                                  authorUserId: authorData?.userId
-                                                                 }, user?.accessToken).then((e) => console.log(e)).catch(e => console.log(e))
-                                                                })
+                                                               
                                                                 await getProfile(user?.accessToken).then((dataCall) => setUsingUser(dataCall))
                                                                 await getAuthor({authorId: id}).then((author) => setAuthorData(author))
                                                                     }} 
@@ -178,7 +170,7 @@ const NewAuthorUI = ({ currentUrl = '/', params, searchParams }) => {
                                                                      await   deleteUserInFollowerList({
                                                                           authorUserId: authorData?.userId
                                                                         }, user?.accessToken).then((e) => console.log(e)).catch(e => console.log(e))
-                                                                        
+                                                                        message.success('Hủy theo dõi thành công');
                                                                     });
                                                                 await getProfile(user?.accessToken).then((dataCall) => setUsingUser(dataCall))
                                                                 await getAuthor({authorId: id}).then((author) => setAuthorData(author))
@@ -202,6 +194,7 @@ const NewAuthorUI = ({ currentUrl = '/', params, searchParams }) => {
                                                                     });
                                                                 await getProfile(user?.accessToken).then((dataCall) => setUsingUser(dataCall))
                                                                 await getAuthor({authorId: id}).then((author) => setAuthorData(author))
+                                                                message.success('Theo dõi thành công');
                                                                     }} 
                                                                   className="hover:bg-[#c80000] text-black hover:text-white w-full rounded px-1.5 py-0.5 text-left"
                                                                 >
@@ -222,17 +215,7 @@ const NewAuthorUI = ({ currentUrl = '/', params, searchParams }) => {
                                                                         }, user?.accessToken).then((e) => console.log(e)).catch(e => console.log(e))
                                                                     
                                                                     });
-                                                                    await   deleteUserFollow({
-                                                                           authorId: authorData?.authorId,
-                                                                           }, user?.accessToken)
-                                                                           .then(async(result) => {
-                                                                             console.log(result)
-                                                                           //update recoil
-                                                                        await   deleteUserInFollowerList({
-                                                                             authorUserId: authorData?.userId
-                                                                           }, user?.accessToken).then((e) => console.log(e)).catch(e => console.log(e))
-                                                                           
-                                                                       });
+                                                
                                                                     await getProfile(user?.accessToken).then((dataCall) => setUsingUser(dataCall))
                                                                     await getAuthor({authorId: id}).then((author) => setAuthorData(author))
                                                                     }} 
@@ -272,15 +255,7 @@ const NewAuthorUI = ({ currentUrl = '/', params, searchParams }) => {
                                                             authorUserId: authorData?.userId
                                                             }, user?.accessToken).then((e) => console.log(e)).catch(e => console.log(e))
                                                             });
-                                                            await createUserFollow({
-                                                                authorId: authorData?.authorId
-                                                            }, user?.accessToken)
-                                                            .then(async(result) => {
-                                                              console.log(result)
-                                                            await createUserToFollowerList({
-                                                              authorUserId: authorData?.userId
-                                                             }, user?.accessToken).then((e) => console.log(e)).catch(e => console.log(e))
-                                                            });
+                                                            
                                                         await getProfile(user?.accessToken).then((dataCall) => setUsingUser(dataCall))
                                                         await getAuthor({authorId: id}).then((author) => setAuthorData(author))
                                                         message.success('Đã gữi yêu cầu kết bạn.')
@@ -337,15 +312,7 @@ const NewAuthorUI = ({ currentUrl = '/', params, searchParams }) => {
                                                 }, user?.accessToken).then((e) => console.log(e)).catch(e => console.log(e))
                                                 
                                             });
-                                            await createUserFollow({
-                                                authorId: authorData?.authorId
-                                            }, user?.accessToken)
-                                            .then(async(result) => {
-                                              console.log(result)
-                                            await createUserToFollowerList({
-                                              authorUserId: authorData?.userId
-                                             }, user?.accessToken).then((e) => console.log(e)).catch(e => console.log(e))
-                                            });
+        
                                             await getProfile(user?.accessToken).then((dataCall) => setUsingUser(dataCall))
                                             await getAuthor({authorId: id}).then((author) => setAuthorData(author))
                                                 }} 

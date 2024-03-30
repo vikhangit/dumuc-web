@@ -49,15 +49,7 @@ export default function RequestFriend({items, onCallback}) {
                                                 }, user?.accessToken).then((e) => console.log(e)).catch(e => console.log(e))
                                                 
                                             });
-                                            await createUserFollow({
-                                                authorId: author?.authorId
-                                            }, user?.accessToken)
-                                            .then(async(result) => {
-                                              console.log(result)
-                                            await createUserToFollowerList({
-                                              authorUserId: author?.userId
-                                             }, user?.accessToken).then((e) => console.log(e)).catch(e => console.log(e))
-                                            });
+                                  
                                             await onCallback()
                                                 }} 
                                              className="px-3 py-1 text-xs font-medium text-center text-white bg-[#c80000] rounded-[4px] hover:brightness-110 focus:ring-4 focus:outline-none focus:ring-blue-300 basis-1/2">Chấp nhận</button>

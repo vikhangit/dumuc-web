@@ -35,6 +35,7 @@ const Story = ({data, onCallback}) => {
   useEffect(() => {
     setStories(data);
   }, [data])
+  
   const handleChange =  (e) => {
     setLoading(true)
     if(e?.target?.files){
