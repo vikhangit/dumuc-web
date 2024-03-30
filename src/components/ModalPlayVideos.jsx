@@ -10,10 +10,12 @@ import { useEffect } from 'react';
 import Image from 'next/image';
 import StoryLikeShareComment from './Story/StoryLikeShareComment';
 import RenderComments from './Story/RenderComments';
+import { useRouter } from 'next/navigation';
 
 export default function ModalPlayVideos({openImage, setOpenImage, imageList, index, onCallback}) {
     const [swiper, setSwiper] = useState(null)
     const [activeSlide, setActiveSlide] = useState(0)
+    const router = useRouter();
     const sizes = useWindowSize();
     const [start, setStart] = useState(false)
     const [showComment, setShowComment] = useState(false);
@@ -109,15 +111,18 @@ export default function ModalPlayVideos({openImage, setOpenImage, imageList, ind
                         >
                             <div className='bg-white w-full'>
                                 {
-                                x.type === "file" ? <video 
+                                x?.type === "file" ? <video 
                                 className='w-full h-full object-contain' 
                                  controls loop
                                 >
                                 <source src={x.photos} type="video/mp4" />
                                 </video> : 
-                                <div dangerouslySetInnerHTML={{__html: x.description}}></div>
+                                <div dangerouslySetInnerHTML={{__html: x?.description}}></div>
                                 }
                                <div className='py-2 px-4'>
+                               <div className='flex justify-end text-indigo-500 font-medium hover:underline mb-4'>
+                                    <button onClick={() => router.push(`/author/${x?.author?.slug}/${x?.author?.authorId}`)}>Trang cá nhân tác giả</button>
+                                </div>
                                     <StoryLikeShareComment 
                                     item={x} 
                                     index={index} 

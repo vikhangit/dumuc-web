@@ -61,6 +61,13 @@ const Story = ({data, onCallback}) => {
     const timeToStart = (7 * 60) + 12.6;
     videoEl.current.seekTo(timeToStart, 'seconds');
   }, [videoEl.current])
+  console.log(stories.filter(x => {
+    if(user?.email === x?.author?.user?.email){
+      return x;
+    }else if(!x.isPrivate){
+      return x;
+    }
+  }))
 
   return (
     <>
@@ -227,7 +234,13 @@ const Story = ({data, onCallback}) => {
       <ModalPlayVideos 
         openImage={showImage} 
         setOpenImage={setShowImage} 
-        imageList={stories} 
+        imageList={stories.map(x => {
+          if(user?.email === x?.author?.user?.email){
+            return x;
+          }else if(!x.isPrivate){
+            return x;
+          }
+        })} 
         index={indexImage}
         onCallback={onCallback}
       />
