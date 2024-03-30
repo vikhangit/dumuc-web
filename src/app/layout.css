@@ -637,3 +637,15 @@ ul.tree:before {
 .ck.ck-editor__main{
   min-height: 200px;
 }
+
+.story iframe{
+  height: 210px !important;
+  border-radius: 10px 10px 0px 0px;
+  z-index: -1 !important;
+}
+.ytp-chrome-top.ytp-show-cards-title{
+  display: none !important;
+}
+.html iframe{
+  border-radius: 0.5rem !important;
+}

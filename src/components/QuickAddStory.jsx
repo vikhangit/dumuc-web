@@ -9,35 +9,19 @@ import dynamic from 'next/dynamic';
 import { useWindowSize } from "@hooks/useWindowSize";
 import { createUserStories, getProfile, updateProfile } from "@apis/users";
 import { createStoryByUser } from "@apis/feeds";
+const CustomEditor = dynamic( () => {
+  return import( './editorjs/CustomCKEditor' );
+}, { ssr: false } );
 
 
-export default function QuickAddStory({ visible, onCancel, onCallback, url}) {
+export default function QuickAddStory({ visible, onCancel, onCallback, url, type}) {
   const [user] = useAuthState(auth)
   const sizes = useWindowSize()
   const [loading, setLoading] = useState(false);
+  const [link, setLink] = useState("")
   const [usingUser, setUsingUser] = useState()
   const [active, setActive] = useState(0)
-  const handleChange =  (e) => {
-    setLoadingImage(true);
-   if(e?.target?.files){
-    let array = []
-    for (let index = 0; index < e?.target?.files?.length; index++) {
-      array.push(e?.target?.files[index])
-    }
-    let newPhoto = [];
-    array.map(async (x) => {
-      uploadImage(x, user?.accessToken).then((data) => {
-        newPhoto.push({
-          type: x?.type === "video/mp4" ? "video": "image",
-          url: `${data?.url}`
-        })
-        setPhotos([...photos, ...newPhoto]);
-      }
-      );
-    })
-  }
-  setLoadingImage(false)
-  };
+  
   useEffect(() =>{
     getProfile(user?.accessToken).then((dataCall) => setUsingUser(dataCall))
   },[user])
@@ -45,18 +29,21 @@ export default function QuickAddStory({ visible, onCancel, onCallback, url}) {
     setLoading(true);
    if(user){
     await createStoryByUser({
+      type: type,
+      description: link,
       photos: url,
       isPrivate: JSON.parse(localStorage.getItem("storyPrivate")) ? JSON.parse(localStorage.getItem("storyPrivate")) === "0" ? true : false : true
     }, user?.accessToken).then((result) => {
       let list = usingUser?.stories?.length > 0 ? usingUser?.stories : []
-      createUserStories({...result?.data}, user?.accessToken).then((re) => localStorage.removeItem("storyPrivate"))
+      createUserStories({...result?.data}, user?.accessToken)
       getProfile(user?.accessToken).then((dataCall) =>  setUsingUser(dataCall))
 
     })
    }
    setLoading(false);
    onCallback();
-   onCancel()
+   onCancel();
+   localStorage.removeItem("storyPrivate")
   }; 
   return (
     <Modal
@@ -136,9 +123,17 @@ export default function QuickAddStory({ visible, onCancel, onCallback, url}) {
       className="modal-quick-post private"
     >
       <div className="mt-8">
+        {
+          type === "file" ? 
         <video className={`rounded-md w-full h-full`} controls autoPlay>
           <source src={url} type="video/mp4" />
         </video>
+        : <CustomEditor
+        initialData={link}
+        setData={setLink}
+        placeholder={`Nhập link video`}
+      />
+        }
       </div> 
     </Modal>
     

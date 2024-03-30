@@ -11,25 +11,23 @@ import Loading from "app/loading";
 import Story from "./Dumuc/Story";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@utils/firebase";
+import RequestFriend from "./RequestFriend";
+import { getProfile } from "@apis/users";
 const HomePageContent = () => {
   const [user] = useAuthState(auth)
   const [feedData, setFeedData] = useState({});
   const [loading, setLoading] = useState(true);
   const [tags, setTags] = useState([])
   const [stories, setStories] = useState([])
+  const [usingUser, setUsingUser] = useState()
   useEffect(() => {
     getFeedsLoadMore({limit: 5}).then((result) => setFeedData(result))
     getTags().then((result) => setTags(result))
-    getStories().then((data) => {
-      const author = data?.find(x => x?.author?.user?.email === user?.email)
-      if(author){
-        setStories(data);
-      }else{
-        setStories(data?.filter(x => x?.isPrivate === false))
-      }
-    })
+    getStoriesLoadMore({limit: 5}).then((data) => setStories(data))
+    getProfile(user?.accessToken).then(data => setUsingUser(data))
     setLoading(false)
-  }, [])
+  }, [user])
+console.log(usingUser?.friendList)
   return (
     loading 
       ? <Loading /> 
@@ -44,6 +42,13 @@ const HomePageContent = () => {
                       <TrendingTopFive items={tags} limit={5} />
                     </div>
                   </div>
+                  {usingUser?.friendList?.filter(x => x.status === 1 && x.type === "recieve")?.length > 0 && <div className="bg-white rounded-lg shadow shadow-gray-400 py-2 px-2 w-[280px] mt-4 ">
+                    <div className="">
+                      <RequestFriend items={usingUser?.friendList?.filter(x => x.status === 1 && x.type === "recieve")}
+                      onCallback={async () => await  getProfile(user?.accessToken).then(data => setUsingUser(data))}  
+                      />
+                    </div>
+                  </div>}
                   <div className="rounded-lg w-[280px] shadow shadow-gray-400">
                     <Newsletter isFixed={false} isLeft={true} />
                   </div>
@@ -59,16 +64,8 @@ const HomePageContent = () => {
                     </div>
                   </div>
                   <div>
-                    { stories.length > 0 ?
-                    <Story stories={stories} onCallback={async (resut) =>  getStories().then((data) => setStories(data))} /> 
-                    : user && <Story stories={stories} onCallback={async (resut) =>  getStories().then((data) => {
-                      const author = data?.find(x => x?.author?.user?.email === user?.email)
-                        if(author){
-                          setStories(data);
-                        }else{
-                          setStories(data?.filter(x => x?.isPrivate === false))
-                        }
-                    })} /> 
+                    {
+                    <Story data={stories} onCallback={async () =>await  getStoriesLoadMore({limit: 5}).then((data) => setStories(data))} /> 
                     }
                   </div>
                   <FeedItems 

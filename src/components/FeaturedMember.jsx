@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import {createUserFollow, deleteUserFollow, getProfile, updateProfile} from '@apis/users';
+import {createUserFollow, createUserToFollowerList, deleteUserFollow, deleteUserInFollowerList, getProfile, updateProfile} from '@apis/users';
 import { getAuthorStatistics } from "@apis/posts";
 import { message } from "antd";
 import Image from 'next/image';
@@ -133,7 +133,7 @@ const FeaturedMember = ({items, limit}) => {
           if (index < limit) {
             return (
               <div key={index} class={`flex justify-between items-center sm:gap-x-4 py-3 ${index !==0  ? "border-t" : "border-0"} border-gray-400`}>
-                <Link href={`/author/${item?.slug}/${item?.authorId}`}>
+                <Link href={``}>
                 <div class="flex items-center gap-x-2">
                   <div class="flex-shrink-0">
                   <Image width={0} height={0} sizes="100vw"
@@ -153,14 +153,14 @@ const FeaturedMember = ({items, limit}) => {
                             deleteUserFollow({
                                 authorId: item?.authorId,
                                 }, user?.accessToken)
-                                .then(async() => {
+                                .then(async(result) => {
+                                  console.log(result)
                                 //update recoil
-                                updateProfile({
-                                    ...usingUser,
-                                    follows: usingUser.follows.filter(x => x.authorId !== item?.authorId)
-                                }, user?.accessToken)
+                                deleteUserInFollowerList({
+                                  authorUserId: item?.userId
+                                }, user?.accessToken).then((e) => console.log(e)).catch(e => console.log(e))
                                 const dataCall = await getProfile(user?.accessToken) 
-          setUsingUser(dataCall)
+                                setUsingUser(dataCall)
                                     message.success('Đã bỏ theo dõi thành công');
                             });
                         }}
@@ -173,18 +173,13 @@ const FeaturedMember = ({items, limit}) => {
                             createUserFollow({
                                 authorId: item?.authorId
                             }, user?.accessToken)
-                            .then(async() => {
-                                //update recoil
-                               updateProfile({
-                                ...usingUser,
-                                follows:usingUser?.follows.length > 0 ? [...usingUser?.follows, {
-                                    authorId: item?.authorId,
-                                }] :[{
-                                  authorId: item?.authorId,
-                              }]
-                                }, user?.accessToken)
+                            .then(async(result) => {
+                              console.log(result)
+                            await createUserToFollowerList({
+                              authorUserId: item?.userId
+                             }, user?.accessToken).then((e) => console.log(e)).catch(e => console.log(e))
                                 const dataCall = await getProfile(user?.accessToken) 
-          setUsingUser(dataCall)
+                                setUsingUser(dataCall)
                                 message.success('Đã theo dõi thành công.')
                             });
                         }} 

@@ -78,15 +78,15 @@ const FeedItem = ({ item, index, onCallback }) => {
       </div>
       <div className="flex justify-end items-center">
       {
-        item?.author?.user?.email === user?.email && <div className="relative cursor-pointer group">
+        <div className="relative cursor-pointer group">
         <IoMdMore size={24} />
         <div className="absolute z-40 hidden group-hover:flex flex-col top-full right-0 bg-white shadow-sm shadow-gray-500 text-[10px] sm:text-xs font-medium w-[80px] rounded p-1">
-         <Link href="" onClick={(e) => {
+         {item?.author?.user?.email === user?.email && <Link href="" onClick={(e) => {
             e.preventDefault();
             setShowPostText(true);
             setShowImage(true)
-          }} className="hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5">Sửa</Link>
-          <Link href="" 
+          }} className="hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5">Sửa</Link>}
+          {item?.author?.user?.email === user?.email &&<Link href="" 
           onClick={(e) => {
             e.preventDefault();
            if(item.isPrivate){
@@ -113,7 +113,7 @@ const FeedItem = ({ item, index, onCallback }) => {
             {
               item.isPrivate ? "Hủy ẩn" : "Ẩn"
             }
-          </Link>
+          </Link>}
           <Link href="" 
           onClick={(e) => {
             e.preventDefault();
@@ -182,7 +182,7 @@ const FeedItem = ({ item, index, onCallback }) => {
       <div
         className="text-base mt-2"
       >
-        <div dangerouslySetInnerHTML={{__html: item.description}}  className={`text-lg font-normal text-justify [&>figure]:mt-2`} > 
+        <div dangerouslySetInnerHTML={{__html: item.description}}  className={`text-lg font-normal text-justify [&>figure]:mt-2 html`} > 
         {/* {
           item.description.length > 70 && <a
             className="font-bold text-sm sm:text-base cursor-pointer hover:underline"

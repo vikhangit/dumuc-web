@@ -95,6 +95,7 @@ export default function CommentForm({
                       <MdFormatQuote size={28} className='text-gray-600' />
                       <div className="text-sm font-semibold">{item?.user?.name}</div>
                       <div className="text-sm">{item?.body}</div>
+                      <div className=''>{item?.photos?.length > 0 && <div className='italic'>[Hình ảnh]</div> }</div>
                     </div>
                     <div className='w-fit'>
                       <button 
@@ -119,6 +120,7 @@ export default function CommentForm({
                       <MdFormatQuote size={28} className='text-gray-600' />
                       <div className="text-sm font-semibold">{item?.user?.name}</div>
                       <div className="text-sm">{item?.body}</div>
+                      <div className=''>{item?.photos?.length > 0 && <div className='italic'>[Hình ảnh]</div> }</div>
                     </div>
                     <div className='w-fit'>
                       <button 

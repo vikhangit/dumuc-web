@@ -1,3 +1,4 @@
+"use client"
 import { getFeedsLoadMore } from '@apis/feeds';
 import { getAuthor, getPostsLoadMore } from '@apis/posts';
 import { useWindowSize } from '@hooks/useWindowSize';
@@ -6,135 +7,187 @@ import FeedItems from './FeedItems';
 import ArticleItems from './ArticleItems';
 import Image from 'next/image';
 import { IoIosArrowRoundBack } from 'react-icons/io';
+import { useAuthState } from 'react-firebase-hooks/auth';
+import { auth } from '@utils/firebase';
+import { HiPencil } from 'react-icons/hi';
+import { getUser } from '@apis/users';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
-export default function AuthorLibrary({active, setActive, id, slug, setOpenLibrary}) {
+export default function AuthorLibrary({active, setActive, id, slug, setOpenLibrary, usingUser, onCallback}) {
+    const [user] = useAuthState(auth)
     const [loading, setLoading] = useState(false)
     const [postsData, setPostsData] = useState();
     const [feedsData, setFeedsData] = useState();
     const [authorData, setAuthorData] = useState();
-
+    const [userAuthor, setUserAuthor] = useState();
+    const [tab, setTab] = useState(0)
+    const router = useRouter()
     const sizes = useWindowSize();
 
     useEffect(() => {
-        (async () => {
-            setLoading(true)
-            try {
-                let payload = {
-                    limit: 20,
-                    author: id,
-                };
-
-                const [posts, feeds, author] = await Promise.all([
-                    getPostsLoadMore(payload),
-                    getFeedsLoadMore(payload),
-                    getAuthor({
-                        authorId: id,
-                    }),
-                ]);
-                setPostsData(posts);
-                setFeedsData(feeds);
-                setAuthorData(author)
-                setLoading(false)
-            } catch (e) { }
-        })();
+        let payload = {
+            limit: 5,
+            author: id,
+        };
+        // getPostsLoadMore(payload).then((posts) => setPostsData(posts))
+        getPostsLoadMore(payload).then((data) => {
+            let newarr = data.items;
+            const myPost = newarr?.filter(a => a?.author?.user?.email === user?.email)
+            if(myPost && myPost?.length > 0){
+                setPostsData(newarr)
+            }else{
+              const publishPosts = newarr?.filter( a => a?.isPrivate === false)
+              setPostsData(publishPosts)
+            }
+          })
+        getFeedsLoadMore(payload).then((feeds) => setFeedsData(feeds))
+        getAuthor({
+            authorId: id,
+        }).then((author) => setAuthorData(author))
+        
+        setLoading(false)
     }, [id, slug])
+    useEffect(() => {
+        getUser({
+            userId: authorData?.userId
+        }).then((data)  => setUserAuthor(data))
+    }, [authorData])
     return (
         <div>
-            <div className='flex shadow-md shadow-gray-500 px-3 py-6 items-center'>
-                <button onClick={() => setOpenLibrary(false)}>
-                <IoIosArrowRoundBack size={42} color='#000000B2' />
-                </button>
-                {
-                    active === 2 ? <div className={`w-full flex justify-center text-lg sm:text-xl font-bold sm:font-semibold text=[#000000B2]`}>
-                    Giới thiệu về {authorData?.name}
-                </div>: <div className={`w-full flex justify-center text-lg sm:text-xl font-bold sm:font-semibold text=[#000000B2]`}>
-                    Thư viện {active == 3 ? "hình ảnh" : active === 4 ? "video": "bài viết"} 
-                </div>
-                }
-            </div>
+            
             <div className="px-3">
-        {
-            active !== 2 && (active === 0 || active === 1 ) &&   <>
-              <div class="text-sm font-medium text-center border-gray-200 mt-10 mb-6 mx-3">
-                    <ul class="flex items-center bg-[#D9D9D9] rounded-full px-[5px] py-[5px] sm:px-[10px] sm:py-[10px]">
-                        <li className="basis-1/2">
-                            <button
-                               onClick={() => setActive(0)}
-                                className={`${active === 0 ? "text-black bg-white": "bg-transparent text-transparent"} font-semibold w-full -full rounded-full py-[5px] sm:py-[10px] text-base sm:text-lg`}>
-                                 Bài Feed
-                            </button>
-                        </li>
-                        <li className="basis-1/2">
-                            <button
-                               onClick={() => setActive(1)}
-                                className={`${active === 1 ? "text-black bg-white": "bg-transparent text-transparent"} font-semibold w-full -full rounded-full py-[5px] sm:py-[10px] text-base sm:text-lg`}>
-                                Bài Forums
-                            </button>
-                        </li>
-                    </ul>
-                </div>
-                {active === 0 && (
+            {active === 0 && (
                     <div className=''>
                         <FeedItems data={feedsData} authorId={id} onCallback={async () => {
-                           await getFeedsLoadMore({limit: 20,author: id}).then((feeds) => setFeedsData(feeds))
+                           await getFeedsLoadMore({limit: 5,author: id}).then((feeds) => setFeedsData(feeds))
                         }} />
                     </div>
                 )}
                 {active === 1 && (
                     <div className='!bg-white'>
                         <ArticleItems data={postsData} authorId={id} onCallback={async () => {
-                            await getPostsLoadMore({limit: 20,author: id}).then((posts) => setPostsData(posts))
-                        }} />
+                             getPostsLoadMore({limit: 5,author: id}).then((data) => {
+                                let newarr = data.items;
+                                const myPost = newarr?.filter(a => a?.author?.user?.email === user?.email)
+                                if(myPost && myPost?.length > 0){
+                                    setPostsData(newarr)
+                                }else{
+                                  const publishPosts = newarr?.filter( a => a?.isPrivate === false)
+                                  setPostsData(publishPosts)
+                                }
+                              })   
+                        }}
+                         />
+                        
                     </div>
-                )}</>
+                )}
+                {
+            active === 2 && <div className="flex flex-col mt-6 justify-center">
+                <div className="bg-white rounded-xl shadow-md shadow-gray-400 px-[15px] py-[15px] sm:px-[25px] sm:py-[20px]">
+                            <div className="flex justify-end mt-3">
+                                    {user?.email === authorData?.user?.email && <button onClick={() => router.push("/account/profile")} className={`flex items-center justify-center rounded-lg bg-[#c80000] shadow-md shadow-gray-400 py-[5px] px-2 text-white text-sm  font-normal gap-x-2`}>
+                                        <HiPencil size={16} />
+                                        Chỉnh sửa
+                                        </button>}
+                                    </div>
+                                    <div className="flex flex-col gap-1 text-sm font-normal text-[#000000]">
+                                        <p><strong>ID:</strong> dumuc{authorData?.user?.username}</p>
+                                        {authorData?.user?.phone && <p><strong>Phone:</strong> {authorData?.user?.phone}</p>}
+                                        {authorData?.user?.email && <p><strong>Email:</strong> {authorData?.user?.email}</p>}
+                                        {authorData?.user?.numberPlate && <p><strong>Biển số xe:</strong> {authorData?.user?.numberPlate}</p>}
+                                        {authorData?.user?.address && <p><strong>Địa chỉ:</strong> {authorData?.user?.address}</p>}
+                                    </div>
+                                    
+                                </div>
+            </div>
+           
         }
-        {
-            active !== 2 && (active === 3 || active === 4 ) &&   <>
-              <div class="text-sm font-medium text-center border-gray-200 mt-10 mb-6 mx-3">
-                    <ul class="flex items-center bg-[#D9D9D9] rounded-full px-[5px] py-[5px] sm:px-[10px] sm:py-[10px]">
-                        <li className="basis-1/2">
-                            <button
-                               onClick={() => setActive(3)}
-                                className={`${active === 3 ? "text-black bg-white": "bg-transparent text-transparent"} font-semibold w-full -full rounded-full py-[5px] sm:py-[10px] text-base sm:text-lg`}>
-                                 Hình Ảnh
-                            </button>
-                        </li>
-                        <li className="basis-1/2">
-                            <button
-                               onClick={() => setActive(4)}
-                                className={`${active === 4 ? "text-black bg-white": "bg-transparent text-transparent"} font-semibold w-full -full rounded-full py-[5px] sm:py-[10px] text-base sm:text-lg`}>
-                                Video
-                            </button>
-                        </li>
-                    </ul>
+         {
+                active === 3 && <div className='px-5'>
+                    <div>
+                    <div className="flex text-dm font-semibold bg-white"> 
+                    <button onClick={() => setTab(0)} className={`px-3 py-3 ${tab === 0 && "border-b-2 border-[#c80000]"}`}>Bạn bè</button>
+                    <button onClick={() => setTab(1)} className={`px-3 py-3 ${tab === 1 && "border-b-2 border-[#c80000]"}`}>Người theo dõi</button>
+                    <button onClick={() => setTab(2)} className={`px-3 py-3 ${tab === 2 && "border-b-2 border-[#c80000]"}`}>Đang theo dõi</button>
+                                </div>
+                    </div>
+                   <div className='mt-5 grid grid-cols-2 gap-4'>
+                    { tab === 0 &&
+                            userAuthor?.friendList?.filter(x => x.status === 2)?.map(async (item, index) => {
+                                const author = await getAuthor({authorId: item?.authorId})
+                                return <div className='flex gap-x-3 items-center cursor-pointer'>
+                                <Image width={0} height={0} sizes="100vw" class="w-32 h-32" src={
+                                                author?.photo
+                                                    ? author?.photo
+                                                    : author?.user?.photo ? author?.user?.photo : "/dumuc/avatar.png"
+                                            } alt={author?.name} 
+                                            onClick={() => router.push(`/author/${author?.slug}/${author?.authorId}`)}
+                                            />
+                                <div  onClick={() => router.push(`/author/${author?.slug}/${author?.authorId}`)} className='text-base font-semibold'>{author?.name}</div>
+                            </div>
+                            })
+                        }
+                        { tab === 1 &&
+                            userAuthor?.follows?.map(async (item, index) => {
+                                let newarr = [];
+                                const author = await getAuthor({authorId: item?.authorId})
+                                return <div className='flex gap-x-3 justify-between items-center cursor-pointer' cursor-pointer>
+                                <div className='flex gap-x-3 items-center'>
+                                <Image width={0} height={0} sizes="100vw" class="w-32 h-32" src={
+                                                author?.photo
+                                                    ? author?.photo
+                                                    : author?.user?.photo ? author?.user?.photo : "/dumuc/avatar.png"
+                                            } alt={author?.name}
+                                            onClick={() => router.push(`/author/${author?.slug}/${author?.authorId}`)} 
+                                            />
+                                <div className='text-base font-semibold' onClick={() => router.push(`/author/${author?.slug}/${author?.authorId}`)}>{author?.name}</div>
+                                </div>
+                                
+                            </div>
+                            })
+                        }
+                        { tab === 2 &&
+                            userAuthor?.follower?.map(async (item, index) => {
+                                let newarr = [];
+                                const author = await getAuthor({authorId: item?.authorId})
+                                return <div className='flex gap-x-3 justify-between items-center cursor-pointer' cursor-pointer>
+                                            <div className='flex gap-x-3 items-center'>
+                                            <Image width={0} height={0} sizes="100vw" class="w-32 h-32" src={
+                                                            author?.photo
+                                                                ? author?.photo
+                                                                : author?.user?.photo ? author?.user?.photo : "/dumuc/avatar.png"
+                                                        } alt={author?.name}
+                                                        onClick={() => router.push(`/author/${author?.slug}/${author?.authorId}`)} 
+                                                        />
+                                            <div className='text-base font-semibold' onClick={() => router.push(`/author/${author?.slug}/${author?.authorId}`)}>{author?.name}</div>
+                                            </div>
+                                           
+                                        </div>
+                            })
+                        }
+                   </div>
                 </div>
-               { active === 3 && <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-2">
+            }
+        { active === 4 && <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-2">
                 {
                     authorData?.photos?.map((photo) =>
-                        <Image alt="" src={photo} sizes="100vw" width={0} height={0} className="w-full h-full rounded-md" />
+                        photo?.type === "image" && <Image alt="" src={photo?.url} sizes="100vw" width={0} height={0} className="w-full h-full rounded-md" />
                     )
                 }
             </div>
-               }
-            </>
-        }
-        {
-            active === 2 && <div className="flex flex-col mt-6 justify-center">
-                <p className="text-sm text-gray-800 px-4">{authorData?.description}</p>
-            </div>
-        }
-        {
-           
-        }
-        {
-            active === 2 && <div className="mt-14 grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4">
-                {/* {
+}      
+        { active === 5 && <div className="mt-6 grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-2">
+                {
                     authorData?.photos?.map((photo) =>
-                        <Image alt="" src={photo} sizes="100vw" width={0} height={0} className="w-full h-full rounded-md" />
+                    photo?.type === "video" 
+                    && <video className="rounded-lg w-full h-[200px]" controls loop>
+                    <source src={photo.url} type="video/mp4" />
+                  </video> 
                     )
-                } */}
+                }
             </div>
-        }
+}      
         </div>
         </div>
     

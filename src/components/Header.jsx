@@ -39,12 +39,12 @@ const Header = () => {
                   : "cursor-pointer ml-1 flex text-gray-500 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm items-center justify-center text-center md:mr-0"
                 }
             >
-              {
+                {
                 user 
                 ? user?.photoURL 
                     && user?.photoURL?.length > 0 
                       ? <Image width={0} height={0} sizes="100vw" src={user?.photoURL} className="w-full h-full" alt="Avatar" /> 
-                      : <span class="font-medium text-gray-600">
+                          : <span class="font-medium text-gray-600">
                           {user?.email?.charAt(0).toUpperCase()}
                         </span> 
                 : <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">

@@ -48,12 +48,12 @@ const ArticleMeta = ({ item, onCallback }) => {
               </div>
               <div className={`flex flex-end  ${sizes.width > 365 ? "w-auto" : "w-auto"}`}>
              {
-              item?.author?.user?.email === user?.email &&
+              
              <div className="relative cursor-pointer group">
               <IoMdMore size={24} />
               <div className="absolute hidden group-hover:flex flex-col top-full right-0 bg-white shadow-sm shadow-gray-500 text-[10px] sm:text-xs font-medium w-[80px] rounded p-1">
-                <Link href={`/forum/post?id=${item?.postId}`} className="hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5">Sửa</Link>
-                <Link href=""   
+                {item?.author?.user?.email === user?.email && <Link href={`/forum/post?id=${item?.postId}`} className="hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5">Sửa</Link>}
+                {item?.author?.user?.email === user?.email && <Link href=""   
                 onClick={(e) => {
                   e.preventDefault();
                   if(item?.isPrivate){
@@ -82,7 +82,7 @@ const ArticleMeta = ({ item, onCallback }) => {
                 }}  
                 className="hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5">
                   { item?.isPrivate ? "Hủy ẩn" :"Ẩn"}
-                </Link>
+                </Link>}
               <Link href={``} 
                 onClick={(e) => {
                   e.preventDefault();

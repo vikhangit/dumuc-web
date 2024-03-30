@@ -64,6 +64,7 @@ const ArticleLike = ({id, currentUrl, count = 0,  onCallback}) => {
                     {
                       likeType: 'post',
                       likeValue: id,
+                      user: usingUser
                     },
                     user?.accessToken
                   ).then(async () => {

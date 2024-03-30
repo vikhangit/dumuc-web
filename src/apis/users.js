@@ -21,6 +21,16 @@ export const getProfile = async token => {
     });
 };
 
+export const getUser = async (payload) => {
+  return request(`api/user/${payload.userId}`, {}, { method: "GET" })
+    .then((data) => {
+      return data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
 export const createUserBookmark = (payload, token) => {
   return request("api/user/bookmark", payload, { method: "POST", token })
     .then((data) => {
@@ -84,9 +94,95 @@ export const createUserFollow = (payload, token) => {
     });
 };
 
+export const createUserToFollowerList = (payload, token) => {
+  return request("api/user/follower", payload, { method: "POST", token })
+    .then((data) => {
+      return data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+
+export const sendRequestAddFriend = (payload, token) => {
+  return request("api/user/friend/add", payload, { method: "POST", token })
+    .then((data) => {
+      return data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+export const receiveRequestAddFriend = (payload, token) => {
+  return request("api/user/friend/receive", payload, { method: "POST", token })
+    .then((data) => {
+      return data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+export const acceptRequestAddFriend = (payload, token) => {
+
+  return request(`api/user/friend/addaccept`, payload, { method: "PUT", token })
+    .then((data) => {
+      return data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+export const acceptReceiveRequestAddFriend = (payload, token) => {
+  return request("api/user/friend/acceptreceive", payload, { method: "PUT", token })
+    .then((data) => {
+      return data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+
 export const deleteUserFollow = (payload, token) => {
   const {authorId} = payload;
   return request(`api/user/follow/${authorId}`, {}, { method: "DELETE", token })
+    .then((data) => {
+      return data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+export const deleteUserInFollowerList = (payload, token) => {
+  const {authorUserId} = payload;
+  return request(`api/user/follower/${authorUserId}`, {}, { method: "DELETE", token })
+    .then((data) => {
+      return data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+export const deleteAddFriend = (payload, token) => {
+  const {authorId} = payload;
+  return request(`api/user/friend/add/${authorId}`, {}, { method: "DELETE", token })
+    .then((data) => {
+      return data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+export const deleteRecieveFriend = (payload, token) => {
+  const {authorUserId} = payload;
+  return request(`api/user/friend/receive/${authorUserId}`, {}, { method: "DELETE", token })
     .then((data) => {
       return data;
     })

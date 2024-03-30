@@ -34,6 +34,7 @@ const PostDetailContent = ({ slug, id }) => {
     setLoading(false)
   }, [id, slug]);
   const url = `${process.env.NEXT_PUBLIC_HOMEPAGE_URL}/forum/post/${slug}/${id}`;
+  console.log(post)
   return (
     <div className="">
      {

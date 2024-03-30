@@ -13,8 +13,8 @@ export const getFeed = (payload) => {
 };
 
 export const getStory = (payload) => {
-  const {feedId} = payload;
-  return request(`api/story/${feedId}`, {}, { method: "GET" })
+  const {storyId} = payload;
+  return request(`api/story/${storyId}`, {}, { method: "GET" })
     .then((data) => {
       return data;
     })
@@ -86,6 +86,27 @@ export const updateComment = (payload, token) => {
       return err;
     });
 };
+
+export const createCommentStories = (payload, token) => {
+  return request("api/story/comment", payload, { method: "POST", token })
+    .then((data) => {
+      return data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
+export const updateCommentStories = (payload, token) => {
+  return request("api/story/comment", payload, { method: "PUT", token })
+    .then((data) => {
+      return data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
 
 export const createCommentReply = (payload, token) => {
   return request("api/feed/comment/reply", payload, { method: "POST", token })

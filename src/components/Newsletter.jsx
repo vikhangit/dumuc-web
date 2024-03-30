@@ -38,7 +38,7 @@ const Newsletter = ({isFixed = true, isAppInstall = false, isLeft=true}) => {
       return (
         <div className="banner-right banner-display-right">
           {isAppInstall && (
-            <a href="#"><Image width={0} height={0} sizes="100vw" src="/dumuc/appstore.gif" style={{ width: 280 }} alt="Appstore" /></a>
+            <Link href="/"><Image width={0} height={0} sizes="100vw" src="/dumuc/appstore.gif" style={{ width: 280 }} alt="Appstore" /></Link>
           )}
           <div class={`bg-white w-[280px] rounded-md mt-2`}>
             <div class="py-4 px-4">

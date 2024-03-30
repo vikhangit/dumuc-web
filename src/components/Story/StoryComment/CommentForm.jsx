@@ -1,4 +1,4 @@
-import { createComment, createCommentReply, getFeed, updateComment } from '@apis/feeds';
+import { createComment, createCommentReply, createCommentStories, getFeed, getStory, updateComment, updateCommentStories } from '@apis/feeds';
 import { uploadImage } from '@apis/other';
 import { getProfile } from '@apis/users';
 import { useWindowSize } from '@hooks/useWindowSize';
@@ -168,12 +168,12 @@ export default function CommentForm({
                     return;
                   }else{
                     if(item){
-                      updateComment({
+                      updateCommentStories({
                         ...item,
                         qoute,
                         photos,
                         body,
-                        feedId: feed?.feedId,
+                        storyId: feed?.storyId,
                         commentId: item?.commentId,
                       }, user?.accessToken)
                       .then((result) => {
@@ -184,20 +184,20 @@ export default function CommentForm({
                         setPhotos([])
                         setQoute()
                         setFocusComment(false)
-                        getFeed({
-                          feedId: feed?.feedId,
+                        getStory({
+                          storyId: feed?.storyId,
                         })
                         .then(results => {
                           completed()
                         })
                       });
                     }else{
-                      createComment({
+                      createCommentStories({
                         qoute,
                         replyToName,
                         photos,
                         body,
-                        feedId: feed?.feedId,
+                        storyId: feed?.storyId,
                         parentId
                       }, user?.accessToken)
                       .then((result) => {
@@ -207,8 +207,8 @@ export default function CommentForm({
                         setPhotos([])
                         setQoute()
                         setFocusComment(false)
-                        getFeed({
-                          feedId: feed?.feedId,
+                        getStory({
+                          storyId: feed?.storyId
                         })
                         .then(results => {
                           setShowReplyBox &&  setShowReplyBox(false)

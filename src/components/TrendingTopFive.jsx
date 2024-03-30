@@ -14,7 +14,7 @@ const TrendingTopFive = ({ items, tiltle = 'XU HƯỚNG HÀNG ĐẦU', limit = 1
               <div
                 key={index}
                 onClick={() => router.push(`/search?q=${item?.name}`)}
-                className="curor-pointer hover:underline whitespace-nowrap font-medium text-base"
+                className="cursor-pointer hover:underline whitespace-nowrap font-medium text-base"
               >
                 #{item?.name}
               </div>
