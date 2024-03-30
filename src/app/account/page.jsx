@@ -104,7 +104,7 @@ const AccountPage = () => {
             </div>
             <Image alt="" src="/icons/account/MdOutlineArrowRight.png" width={0} height={0} sizes="100vw" className="w-8 h-8" />
           </Link>
-          <Link
+          {/* <Link
           href={"/account/library/comment"}
           className="relative inline-flex justify-between items-center w-full px-4 py-2 text-sm sm:text-base  text-[#424141B2] font-medium border-b border-[#9C9C9CB2] hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700"
           >
@@ -113,8 +113,8 @@ const AccountPage = () => {
             Bình luận
             </div>
             <Image alt="" src="/icons/account/MdOutlineArrowRight.png" width={0} height={0} sizes="100vw" className="w-8 h-8" />
-        </Link>
-        <Link
+        </Link> */}
+        {/* <Link
           href={"/account/library/sos"}
           className="relative inline-flex justify-between items-center w-full px-4 py-2 text-sm sm:text-base  text-[#424141B2] font-medium border-b border-[#9C9C9CB2] hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700"
           >
@@ -123,8 +123,8 @@ const AccountPage = () => {
             <div><span className="bottom-link text-[#C82027] mr-1.5">SOS</span>đã gửi</div>
             </div>
             <Image alt="" src="/icons/account/MdOutlineArrowRight.png" width={0} height={0} sizes="100vw" className="w-8 h-8" />
-        </Link>
-        <Link
+        </Link> */}
+        {/* <Link
           href={"/account/library/sos-help"}
           className="relative inline-flex justify-between items-center w-full px-4 py-2 text-sm sm:text-base  text-[#424141B2] font-medium border-b border-[#9C9C9CB2] hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700"
         >
@@ -133,7 +133,7 @@ const AccountPage = () => {
             <div><span className="bottom-link text-[#C82027] mr-1.5">SOS</span>đã giúp đỡ</div>
             </div>
             <Image alt="" src="/icons/account/MdOutlineArrowRight.png" width={0} height={0} sizes="100vw" className="w-8 h-8" />
-        </Link>
+        </Link> */}
         </div>
         <div className="rounded-3xl shadow-md shadow-gray-400 px-4 sm:px-8  py-6 bg-white mb-3">
           <button

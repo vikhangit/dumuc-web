@@ -20,7 +20,7 @@ const AccountLibraryTabs = ({active = 'bookmark'}) => {
                 Bài viết
               </Link>
             </li>
-            <li className="mr-2">
+            {/* <li className="mr-2">
               <Link 
                 href={`/account/library/sos`}
                 className={active === 'sos' ? "inline-block p-4 font-semibold text-red-600 border-b-4 border-red-600 rounded-t-lg active" : "inline-block p-4 font-semibold border-b-4 border-transparent rounded-t-lg hover:text-red-600 hover:border-red-300"}>
@@ -33,7 +33,7 @@ const AccountLibraryTabs = ({active = 'bookmark'}) => {
                 className={active === 'sos-help' ? "inline-block p-4 font-semibold text-red-600 border-b-4 border-red-600 rounded-t-lg active" : "inline-block p-4 font-semibold border-b-4 border-transparent rounded-t-lg hover:text-red-600 hover:border-red-300"}>
                 S.O.S đã giúp
               </Link>
-            </li>
+            </li> */}
             <li className="mr-2">
               <Link 
                 href={`/account/library/following`}
@@ -41,13 +41,13 @@ const AccountLibraryTabs = ({active = 'bookmark'}) => {
                 Đang theo dõi
               </Link>
             </li>
-            <li className="mr-2">
+            {/* <li className="mr-2">
               <Link 
                 href={`/account/library/comment`}
                 className={active === 'comment' ? "inline-block p-4 font-semibold text-red-600 border-b-4 border-red-600 rounded-t-lg active" : "inline-block p-4 font-semibold border-b-4 border-transparent rounded-t-lg hover:text-red-600 hover:border-red-300"}>
                 Bình luận
               </Link>
-            </li>
+            </li> */}
             {/* <li className="mr-2">
               <Link 
                 href={`/account/library?tab=forbidden`}
