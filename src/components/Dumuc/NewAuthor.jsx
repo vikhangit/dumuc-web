@@ -368,7 +368,7 @@ const NewAuthorUI = ({ currentUrl = '/', params, searchParams }) => {
                                     <button onClick={() => setActive(3)} className={`px-3 py-3 ${active === 3 && "border-b-2 border-[#c80000]"}`}>Bạn bè</button>
                                     <button  className={`relative group px-3 py-3 ${(active === 4 || active === 5) &&  "border-b-2 border-[#c80000]"}`}>
                                         Thư viện
-                                        <div className="absolute hidden group-hover:flex flex-col justify-start items-start top-full left-0 bg-white shadow-sm shadow-gray-500 text-[10px] sm:text-xs font-medium w-[120px] rounded p-1">
+                                        <div className="absolute hidden group-hover:flex flex-col justify-start items-start top-full right-0 bg-white shadow-sm shadow-gray-500 text-[10px] sm:text-xs font-medium w-[120px] rounded p-1">
                                                                 <Link href={``} 
                                                                  onClick={async (e) => {
                                                                     e.preventDefault();
