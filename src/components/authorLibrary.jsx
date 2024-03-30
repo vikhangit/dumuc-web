@@ -108,23 +108,23 @@ export default function AuthorLibrary({active, setActive, id, slug, setOpenLibra
                     <div>
                     <div className="flex text-dm font-semibold bg-white"> 
                     <button onClick={() => setTab(0)} className={`px-3 py-3 ${tab === 0 && "border-b-2 border-[#c80000]"}`}>Bạn bè</button>
-                    <button onClick={() => setTab(1)} className={`px-3 py-3 ${tab === 2 && "border-b-2 border-[#c80000]"}`}>Người theo dõi</button>
-                    <button onClick={() => setTab(2)} className={`px-3 py-3 ${tab === 1 && "border-b-2 border-[#c80000]"}`}>Đang theo dõi</button>
+                    <button onClick={() => setTab(2)} className={`px-3 py-3 ${tab === 2 && "border-b-2 border-[#c80000]"}`}>Người theo dõi</button>
+                    <button onClick={() => setTab(1)} className={`px-3 py-3 ${tab === 1 && "border-b-2 border-[#c80000]"}`}>Đang theo dõi</button>
                                 </div>
                     </div>
-                   <div className='mt-5 grid grid-cols-2 gap-4'>
+                   <div className='mt-5 grid sm:grid-cols-2 gap-4'>
                     { tab === 0 &&
                             userAuthor?.friendList?.filter(x => x.status === 2)?.map(async (item, index) => {
                                 const author = await getAuthor({authorId: item?.authorId})
-                                return <div className='flex gap-x-3 items-center cursor-pointer'>
-                                <Image width={0} height={0} sizes="100vw" class="w-32 h-32" src={
+                                return <div className='flex gap-x-3 items-center cursor-pointer w-full'>
+                                <Image width={0} height={0} sizes="100vw" class="w-24 h-24 sm:w-32 sm:h-32 " src={
                                                 author?.photo
                                                     ? author?.photo
                                                     : author?.user?.photo ? author?.user?.photo : "/dumuc/avatar.png"
                                             } alt={author?.name} 
                                             onClick={() => router.push(`/author/${author?.slug}/${author?.authorId}`)}
                                             />
-                                <div  onClick={() => router.push(`/author/${author?.slug}/${author?.authorId}`)} className='text-base font-semibold'>{author?.name}</div>
+                                <p  onClick={() => router.push(`/author/${author?.slug}/${author?.authorId}`)} className='text-base font-semibold'>{author?.name}</p>
                             </div>
                             })
                         }
@@ -132,16 +132,15 @@ export default function AuthorLibrary({active, setActive, id, slug, setOpenLibra
                             userAuthor?.follows?.map(async (item, index) => {
                                 let newarr = [];
                                 const author = await getAuthor({authorId: item?.authorId})
-                                return <div className='flex gap-x-3  items-center cursor-pointer' cursor-pointer>
-                                <Image width={0} height={0} sizes="100vw" class="w-32 h-32" src={
+                                return <div className='flex gap-x-3 items-center cursor-pointer w-full'>
+                                <Image width={0} height={0} sizes="100vw" class="w-24 h-24 sm:w-32 sm:h-32 " src={
                                                 author?.photo
                                                     ? author?.photo
                                                     : author?.user?.photo ? author?.user?.photo : "/dumuc/avatar.png"
-                                            } alt={author?.name}
-                                            onClick={() => router.push(`/author/${author?.slug}/${author?.authorId}`)} 
+                                            } alt={author?.name} 
+                                            onClick={() => router.push(`/author/${author?.slug}/${author?.authorId}`)}
                                             />
-                                <div className='text-base font-semibold' onClick={() => router.push(`/author/${author?.slug}/${author?.authorId}`)}>{author?.name}</div>
-                                
+                                <p  onClick={() => router.push(`/author/${author?.slug}/${author?.authorId}`)} className='text-base font-semibold'>{author?.name}</p>
                             </div>
                             })
                         }
@@ -149,16 +148,15 @@ export default function AuthorLibrary({active, setActive, id, slug, setOpenLibra
                             userAuthor?.follower?.map(async (item, index) => {
                                 let newarr = [];
                                 const author = await getAuthor({authorId: item?.authorId})
-                                return <div className='flex gap-x-3  items-center cursor-pointer' cursor-pointer>
-                                <Image width={0} height={0} sizes="100vw" class="w-32 h-32" src={
+                                return <div className='flex gap-x-3 items-center cursor-pointer w-full'>
+                                <Image width={0} height={0} sizes="100vw" class="w-24 h-24 sm:w-32 sm:h-32 " src={
                                                 author?.photo
                                                     ? author?.photo
                                                     : author?.user?.photo ? author?.user?.photo : "/dumuc/avatar.png"
-                                            } alt={author?.name}
-                                            onClick={() => router.push(`/author/${author?.slug}/${author?.authorId}`)} 
+                                            } alt={author?.name} 
+                                            onClick={() => router.push(`/author/${author?.slug}/${author?.authorId}`)}
                                             />
-                                <div className='text-base font-semibold' onClick={() => router.push(`/author/${author?.slug}/${author?.authorId}`)}>{author?.name}</div>
-                                
+                                <p  onClick={() => router.push(`/author/${author?.slug}/${author?.authorId}`)} className='text-base font-semibold'>{author?.name}</p>
                             </div>
                             })
                         }
