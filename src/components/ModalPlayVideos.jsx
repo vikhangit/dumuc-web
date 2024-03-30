@@ -136,8 +136,8 @@ export default function ModalPlayVideos({openImage, setOpenImage, imageList, ind
                                 <div dangerouslySetInnerHTML={{__html: x?.description}}></div>
                                 }
                                <div className='py-2 px-4'>
-                                <div className='flex justify-between mb-4 items-center'>
-                                <div className='flex items-center gap-x-2'>
+                                <div className={`flex justify-between mb-4 ${sizes.width > 450 ? "items-center flex-row" : "flex-col items-start" } gap-2`}>
+                                <div className='flex items-center gap-x-2 '>
                                 <Image
                                     width={0}
                                     height={0}
