@@ -1,3 +1,4 @@
+
 import Script from 'next/script'
 import { Inter, Mulish, Saira_Stencil_One } from 'next/font/google'
 import "swiper/css";
@@ -15,9 +16,9 @@ export const metadata = {
 }
 
 export default function RootLayout({ children }) {
-  if(typeof window === "undefined") { 
-    return (<></>)
-  }
+  // if(typeof window === "undefined") { 
+  //   return (<></>)
+  // }
   return (
     <html lang="en">
       <body className={saira.className}>
