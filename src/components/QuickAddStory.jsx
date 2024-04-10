@@ -30,9 +30,15 @@ export default function QuickAddStory({ visible, onCancel, onCallback, url, type
   const refImage = useRef(null)
   const [loadingChange, setLoadingChage] = useState(false)
   const router = useRouter();
+  const [isMoout, setIsMount] = useState(false)
   useEffect(() =>{
     getProfile(user?.accessToken).then((dataCall) => setUsingUser(dataCall))
   },[user])
+  useEffect(() => {
+    if(typeof window !== "undefined"){
+      setIsMount(true)
+    }
+  }, [])
   useEffect(() => {
     if(activeItem){
       setLink(activeItem?.description)
@@ -87,7 +93,10 @@ export default function QuickAddStory({ visible, onCancel, onCallback, url, type
    setLoading(false);
    onCallback();
    onCancel();
-window.location.href = "/"
+   if(isMoout){
+    window.location = "/"
+   }
+
    localStorage.removeItem("storyPrivate")
   }; 
   return (
@@ -196,7 +205,7 @@ window.location.href = "/"
           </video>
           } 
         <div className="flex justify-center">
-        <Button  onClick={() => refImage.current.click()}  className="mt-3 mb-3" icon={loadingChange ? <Spinner /> : <UploadOutlined />}>Thay đổi video</Button>
+        <Button  onClick={() => refImage.current.click()}  className="mt-3 mb-3" icon={ <UploadOutlined />}>Thay đổi video</Button>
         <input id="photo" name="photo" ref={refImage} accept="video/mp4" onChange={(e) => handleChange(e)} className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 hidden" type="file"></input>
           </div>
         </div>

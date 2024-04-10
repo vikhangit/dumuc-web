@@ -15,6 +15,9 @@ export const metadata = {
 }
 
 export default function RootLayout({ children }) {
+  if(typeof window === "undefined") { 
+    return (<></>)
+  }
   return (
     <html lang="en">
       <body className={saira.className}>
@@ -28,5 +31,5 @@ export default function RootLayout({ children }) {
       defer
     ></Script>
     </html>
-  );
+  )
 }

@@ -236,10 +236,11 @@ export default function ChatGroupRight({userRecieved, setUserRecieved, mobile, s
                         {
                            item?.files?.map((photo, indexC) => {
                             return (
+                              <Link
+                              href={photo?.url} 
+                              target='_blank'>
                               <div 
-                              onClick={() => {
-                                window.open(`${photo?.url}`, "_blank");
-                              }}
+                              
                               className={`cursor-pointer w-full sm:w-3/4 lg:w-2/3 xl:w-7/12 2xl:w-1/2  text-base font-medium cursor-pointer ${item?.formAuthor?.userId === user?.uid ? "bg-[#e5efff] ml-auto" : "bg-gray-100"}  rounded-[10px] px-[10px] py-[20px] mb-2`}>
                                 
                                 <div className='flex items-center gap-x-2'>
@@ -266,6 +267,8 @@ export default function ChatGroupRight({userRecieved, setUserRecieved, mobile, s
                                 </div>
                         
                               </div>
+
+                              </Link>
                              
                             );
                           })
