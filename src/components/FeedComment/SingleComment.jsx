@@ -14,7 +14,7 @@ import { useRouter } from 'next/navigation';
 import { getFeed, updateComment } from '@apis/feeds';
 import ModalImageZoom from '@components/ModalImageZoom';
 
-export default function SingleComment({ item, feed, setComments, qoute, setQoute, onCallback }) {
+export default function SingleComment({ item, feed, setComments, qoute, setQoute, onCallback, setOpenLogin }) {
   const [user] = useAuthState(auth)
   const [showReplyBox, setShowReplyBox] = useState(false)
   const [editItem, setEditItem] = useState()
@@ -58,6 +58,7 @@ export default function SingleComment({ item, feed, setComments, qoute, setQoute
                   setEditItem()
                   onCallback()
                 }}
+                setOpenLogin={setOpenLogin}
               />
           </div> : <div className="flex justify-between my-2 w-full">
       <Image width={0} height={0} sizes="100vw" className="w-6 h-6 sm:w-8 sm:h-8 xl:w-10 xl:h-10 rounded-full" src={item?.user?.photo ? item?.user?.photo : '/dumuc/avatar.png'} alt={item?.user?.name} />
@@ -143,13 +144,14 @@ export default function SingleComment({ item, feed, setComments, qoute, setQoute
               if (user) {
                 setShowReplyBox(!showReplyBox)
               } else {
-                router.push('/auth')
+                setOpenLogin(true)
               }
             }}
           >
             Phản hồi
           </button>
-          <div className="relative cursor-pointer group flex items-center">
+          {
+            user && <div className="relative cursor-pointer group flex items-center">
             <IoMdMore size={18} />
             <div className="absolute hidden group-hover:flex flex-col top-full -right-10 z-50 bg-white shadow-sm shadow-gray-500 text-[10px] sm:text-xs font-medium w-[100px] rounded p-1">
             <Link 
@@ -208,6 +210,7 @@ export default function SingleComment({ item, feed, setComments, qoute, setQoute
                 </Link>}
             </div>
           </div>
+          }
         </div>
         {
           showReplyBox &&  <div className=''>
@@ -230,6 +233,7 @@ export default function SingleComment({ item, feed, setComments, qoute, setQoute
                 showReplyBox={showReplyBox}
                 root={false}
                 onCallback={onCallback}
+                setOpenLogin={setOpenLogin}
               />
           </div>
         }

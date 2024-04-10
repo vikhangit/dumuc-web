@@ -2,13 +2,13 @@ import { useEffect, useState } from "react";
 import { Comments } from "./FeedComment/Comments";
 import { nestedComment } from "@utils/covertCommets";
 
-const FeedComments = ({ feed, items, onCallback}) => {
+const FeedComments = ({ feed, items, onCallback, setOpenLogin}) => {
   const [comments, setComments] = useState(nestedComment(items))
   useEffect(() => {
     setComments(nestedComment(items))
   }, [items])
   return (
-    <Comments comments={comments} setComments={setComments} feed={feed} onCallback={onCallback}/>
+    <Comments comments={comments} setComments={setComments} feed={feed} onCallback={onCallback} setOpenLogin={setOpenLogin}/>
   );
 };
 

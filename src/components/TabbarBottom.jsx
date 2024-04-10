@@ -82,7 +82,7 @@ export default function TabbarBottom({ active = 'home' }) {
         </div>
         <div
           href={"/chat"}
-          onClick={() => router.push("/chat")}
+          onClick={() => user ? router.push("/chat") : router.push(`/auth?url_return=${process.env.NEXT_PUBLIC_HOMEPAGE_URL}/chat/`)}
           className="cursor-pointer inline-flex flex-col items-center justify-center px-0 sm:px-2 hover:bg-gray-50 dark:hover:bg-gray-800 group"
         >
           <Image width={0} height={0} sizes="100vw" src="/icons/comment-1.jpeg" alt="" className='w-8 h-8' />

@@ -7,11 +7,12 @@ import { auth } from "@utils/firebase";
 import { message } from "antd";
 import { Spinner } from "flowbite-react";
 
-const FeedLike = ({id, currentUrl, onCallback, renderCountComment, item}) => {
+const FeedLike = ({id, currentUrl, onCallback, renderCountComment, item, setOpenLogin}) => {
     const router = useRouter();
     const [user] = useAuthState(auth);
   const [usingUser, setUsingUser] = useState()
   const [loading, setLoading] = useState(false)
+ 
   useEffect(() =>{
     (async () => {
       setLoading(true)
@@ -118,7 +119,8 @@ const FeedLike = ({id, currentUrl, onCallback, renderCountComment, item}) => {
           <button
             type="button"
             onClick={() => {
-              router.push(`/auth?url_return=${currentUrl}`);
+              // router.push(`/auth?url_return=${currentUrl}`);
+              setOpenLogin(true)
             }}
             tooltip="Thích"
           >

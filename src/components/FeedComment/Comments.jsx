@@ -3,13 +3,13 @@ import Comment from "./Comment"
 import CommentForm from "./CommentForm"
 import { nestedComment } from "@utils/covertCommets"
 
-export const Comments = ({ comments, setComments, feed, onCallback}) => {
+export const Comments = ({ comments, setComments, feed, onCallback, setOpenLogin}) => {
     const [qoute, setQoute] = useState([])
     console.log(comments)
 
     return (
         <div>
-            <CommentForm feed={feed} setComments={setComments} qoute={qoute} setQoute={setQoute} root={true} onCallback={onCallback} />
+            <CommentForm feed={feed} setComments={setComments} qoute={qoute} setQoute={setQoute} root={true} onCallback={onCallback} setOpenLogin />
             <div className="mt-[10px]">
                 {comments?.length > 0 &&
                     comments.map((comment, index) => {
@@ -22,6 +22,7 @@ export const Comments = ({ comments, setComments, feed, onCallback}) => {
                                     qoute={qoute}
                                     setQoute={setQoute}
                                     onCallback={onCallback}
+                                    setOpenLogin={setOpenLogin}
                                 />
                             )
                         })}

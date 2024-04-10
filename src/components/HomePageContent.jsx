@@ -27,7 +27,6 @@ const HomePageContent = () => {
     getProfile(user?.accessToken).then(data => setUsingUser(data))
     setLoading(false)
   }, [user])
-console.log(usingUser?.friendList)
   return (
     loading 
       ? <Loading /> 
@@ -65,7 +64,7 @@ console.log(usingUser?.friendList)
                   </div>
                   <div>
                     {
-                    <Story data={stories} onCallback={async () =>await  getStoriesLoadMore({limit: 5}).then((data) => setStories(data))} /> 
+                    <Story  /> 
                     }
                   </div>
                   <FeedItems 

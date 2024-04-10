@@ -19,6 +19,8 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@utils/firebase";
 import { faLessThanEqual } from "@fortawesome/free-solid-svg-icons";
 import ModalImageZoomFeed from "./ModalImageZoomFeed";
+import { Modal } from "flowbite-react";
+import LoginWithModal from "./LoginWithModal";
 
 const FeedItem = ({ item, index, onCallback }) => {
   const [user, loading, error] = useAuthState(auth);
@@ -33,13 +35,14 @@ const FeedItem = ({ item, index, onCallback }) => {
   const [showImage, setShowImage] = useState(false)
   const [imageList, setImageList] = useState([]);
   const [indexImage, setIndexImage] = useState(0);
+  const [openLogin, setOpenLogin] = useState(false)
   const url = "/"
   useCallback(() => {
     const timeToStart = (7 * 60) + 12.6;
     videoEl.current.seekTo(timeToStart, 'seconds');
   }, [videoEl.current])
   return (
-    <div key={item?.feedId} className="p-4 bg-white rounded-lg shadow shadow-gray-300 dark:bg-gray-800 xl:p-6 2xl:p-8 lg:space-y-3 mb-4">
+    <div key={item?.feedId} id={item?.feedId} className="p-4 bg-white rounded-lg shadow shadow-gray-300 dark:bg-gray-800 xl:p-6 2xl:p-8 lg:space-y-3 mb-4">
     <div class="flex items-center space-x-4">
       <div class="flex-shrink-0">
         <a
@@ -164,6 +167,7 @@ const FeedItem = ({ item, index, onCallback }) => {
             setShowPostText(true);
           }}
         />
+        
       <FeedBookmark id={item?.feedId}  currentUrl={url} />
       </div>
     </div>
@@ -264,7 +268,16 @@ const FeedItem = ({ item, index, onCallback }) => {
       index={index}
       url={url}
       onCallback={onCallback}
+      setOpenLogin={setOpenLogin}
     />
+    <Modal show={openLogin} onClose={() => setOpenLogin(false)}>
+          <Modal.Header className="bg-[#c80000] bg-opacity-60 rounded-b-xl justify-center text-center  text-white [&>h3]:text-white [&>h3]:w-full [&>h3]:text-base [&>h3]:sm:text-xl  [&>button]:ml-auto p-2.5 [&>button]:text-white">
+            Xin mời đăng nhập
+          </Modal.Header>
+          <Modal.Body className="px-4 py-0 pb-6">
+            <LoginWithModal close={() => setOpenLogin(false)} item = {item} />
+          </Modal.Body>
+        </Modal>
     <ModalImageZoomFeed openImage={showSlide} setOpenImage={setshowSlide} imageList={imageList} index={indexImage}/>
   </div>
   );

@@ -7,42 +7,87 @@ import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '@utils/firebase';
 import dynamic from 'next/dynamic';
 import { useWindowSize } from "@hooks/useWindowSize";
-import { createUserStories, getProfile, updateProfile } from "@apis/users";
-import { createStoryByUser } from "@apis/feeds";
+import { createUserStories, deleteUserStories, getProfile, updateProfile } from "@apis/users";
+import { createStoryByUser, updateStoryByUser } from "@apis/feeds";
+import { Button, message } from "antd";
+import { UploadOutlined } from '@ant-design/icons';
+import {Spinner} from "flowbite-react"
+import { useRouter } from "next/navigation";
 const CustomEditor = dynamic( () => {
   return import( './editorjs/CustomCKEditor' );
 }, { ssr: false } );
 
 
-export default function QuickAddStory({ visible, onCancel, onCallback, url, type}) {
+export default function QuickAddStory({ visible, onCancel, onCallback, url, type, data, activeItem,setVideoChange}) {
   const [user] = useAuthState(auth)
   const sizes = useWindowSize()
   const [loading, setLoading] = useState(false);
   const [link, setLink] = useState("")
+  const [photo, setPhoto] = useState("")
+  const [photoChange, setPhotoChange] = useState("")
   const [usingUser, setUsingUser] = useState()
   const [active, setActive] = useState(0)
-  
+  const refImage = useRef(null)
+  const [loadingChange, setLoadingChage] = useState(false)
+  const router = useRouter();
   useEffect(() =>{
     getProfile(user?.accessToken).then((dataCall) => setUsingUser(dataCall))
   },[user])
-  const save =async () => {
+  useEffect(() => {
+    if(activeItem){
+      setLink(activeItem?.description)
+      setPhoto(activeItem?.photos)
+      setActive(activeItem?.isPrivate ? 0 : 1)
+    }
+  }, [activeItem])
+  const handleChange = e => {
+    setLoadingChage(true)
+    if (e.target.files[0]) {
+      uploadImage(e.target.files[0], user?.accessToken).then((data) => {
+        setPhotoChange(data?.url)
+        setLoadingChage(false)
+        
+      });
+    }
+  }
+  const save = async () => {
     setLoading(true);
    if(user){
-    await createStoryByUser({
-      type: type,
-      description: link,
-      photos: url,
-      isPrivate: JSON.parse(localStorage.getItem("storyPrivate")) ? JSON.parse(localStorage.getItem("storyPrivate")) === "0" ? true : false : true
-    }, user?.accessToken).then((result) => {
-      let list = usingUser?.stories?.length > 0 ? usingUser?.stories : []
-      createUserStories({...result?.data}, user?.accessToken)
-      getProfile(user?.accessToken).then((dataCall) =>  setUsingUser(dataCall))
+    if(activeItem) {
+      await updateStoryByUser({
+        ...activeItem,
+        description: link,
+        photos: photoChange.length > 0 ? photoChange : photo,
+        isPrivate: JSON.parse(localStorage.getItem("storyPrivate")) ? JSON.parse(localStorage.getItem("storyPrivate")) === "0" ? true : false : true
+      }, user?.accessToken).then((result) => {
+        let list = usingUser?.stories?.length > 0 ? usingUser?.stories : []
+        deleteUserStories({
+          type: activeItem?.type,
+          storyId: activeItem?.storyId
+        }, )
+        createUserStories({...result?.data}, user?.accessToken)
+        setVideoChange(photoChange.length > 0 ? photoChange : photo)
+        getProfile(user?.accessToken).then((dataCall) =>  setUsingUser(dataCall))
 
-    })
+      })
+    }else{
+      await createStoryByUser({
+        type: type,
+        description: link,
+        photos: url,
+        isPrivate: JSON.parse(localStorage.getItem("storyPrivate")) ? JSON.parse(localStorage.getItem("storyPrivate")) === "0" ? true : false : true
+      }, user?.accessToken).then((result) => {
+        let list = usingUser?.stories?.length > 0 ? usingUser?.stories : []
+        createUserStories({...result?.data}, user?.accessToken)
+        getProfile(user?.accessToken).then((dataCall) =>  setUsingUser(dataCall))
+
+      })
+    }
    }
    setLoading(false);
    onCallback();
    onCancel();
+window.location.href = "/"
    localStorage.removeItem("storyPrivate")
   }; 
   return (
@@ -104,7 +149,7 @@ export default function QuickAddStory({ visible, onCancel, onCallback, url, type
                     fill="currentColor"
                   />
                 </svg>
-                Chia sẽ...
+                {activeItem ? "Cập nhật" : "Chia sẽ"}...
               </button>
             ) : (
               <button
@@ -114,7 +159,9 @@ export default function QuickAddStory({ visible, onCancel, onCallback, url, type
                 type="button"
                 class={`text-white bg-[#c80000] hover:brightness-110 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5`}
               >
-                Chia sẽ
+               {
+                activeItem ? "Cập nhật" : "Chia sẽ"
+               } 
               </button>
             )}
         </div>
@@ -124,7 +171,8 @@ export default function QuickAddStory({ visible, onCancel, onCallback, url, type
     >
       <div className="mt-8">
         {
-          type === "file" ? 
+          !activeItem && (
+            type === "file" ? 
         <video className={`rounded-md w-full h-full`} controls autoPlay>
           <source src={url} type="video/mp4" />
         </video>
@@ -133,6 +181,39 @@ export default function QuickAddStory({ visible, onCancel, onCallback, url, type
         setData={setLink}
         placeholder={`Nhập link video`}
       />
+          )
+        }
+        {
+          activeItem && (
+            activeItem?.type === "file" ? 
+        <div>
+          
+          {
+            photoChange.length > 0 ? loadingChange ? <Spinner /> : <video className={`rounded-md w-full h-full`} controls autoPlay>
+            <source src={photoChange} type="video/mp4" />
+          </video>: loadingChange ? <Spinner /> : <video className={`rounded-md w-full h-full`} controls autoPlay>
+            <source src={photo} type="video/mp4" />
+          </video>
+          } 
+        <div className="flex justify-center">
+        <Button  onClick={() => refImage.current.click()}  className="mt-3 mb-3" icon={loadingChange ? <Spinner /> : <UploadOutlined />}>Thay đổi video</Button>
+        <input id="photo" name="photo" ref={refImage} accept="video/mp4" onChange={(e) => handleChange(e)} className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 hidden" type="file"></input>
+          </div>
+        </div>
+        : <div>
+          <div className="flex justify-end text-[#c80000]">
+
+          {
+            link !== "" && <button className="ml-auto" onClick={() => setLink("")}>Xóa</button>
+          }
+          </div>
+          <CustomEditor
+        initialData={link}
+        setData={setLink}
+        placeholder={`Nhập link video`}
+          />
+        </div>
+          )
         }
       </div> 
     </Modal>

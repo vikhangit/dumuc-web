@@ -137,6 +137,15 @@ export const createStoryByUser = (payload, token) => {
       return err;
     });
 };
+export const updateStoryByUser = (payload, token) => {
+  return request("api/user/story", payload, { method: "PUT", token })
+    .then((data) => {
+      return data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
 
 export const updateFeedByUser = (payload, token) => {
   console.log("Payload", payload)

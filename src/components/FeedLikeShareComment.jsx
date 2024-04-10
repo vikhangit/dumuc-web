@@ -12,7 +12,7 @@ import FeedComments from "./FeedComments";
 import { useAuthState, useUpdateProfile } from "react-firebase-hooks/auth";
 import { auth } from "@utils/firebase";
 
-const FeedLikeShareComment = ({ item, url, index, onCallback}) => {
+const FeedLikeShareComment = ({ item, url, index, onCallback, setOpenLogin}) => {
   const sizes = useWindowSize();
   const [user] = useAuthState(auth)
   const [showLike, setShowLike] = useState(false)
@@ -150,6 +150,7 @@ const FeedLikeShareComment = ({ item, url, index, onCallback}) => {
             setShowComment(!showComment)
           }}
           count={item?.commentsCount}
+          setOpenLogin={setOpenLogin}
         />
         <FeedLike
           style={"feed"}
@@ -159,6 +160,7 @@ const FeedLikeShareComment = ({ item, url, index, onCallback}) => {
           onCallback={onCallback}
           renderCountComment={renderCountComment}
           item={item}
+          setOpenLogin={setOpenLogin}
         />
 
           <FeedShare item={item} />
@@ -171,7 +173,7 @@ const FeedLikeShareComment = ({ item, url, index, onCallback}) => {
             Ẩn
           </button>
         </div>
-          <FeedComments items={item?.comments} feed={item} onCallback={onCallback} />
+          <FeedComments items={item?.comments} feed={item} onCallback={onCallback} setOpenLogin={setOpenLogin} />
       </div>
       }
     </div>

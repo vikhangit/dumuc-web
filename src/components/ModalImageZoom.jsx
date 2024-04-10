@@ -89,7 +89,18 @@ export default function ModalImageZoom({openImage, setOpenImage, imageList, inde
                 >
                     {
                         imageList?.map((x) => <SwiperSlide>
-                            <Image src={x} alt='' width={0} height={0} sizes="100vw" className='w-full h-full object-contain' />
+                           {
+                            type === "image" ?  
+                            <Image src={x} alt='' width={0} height={0} sizes="100vw" className='w-full h-full object-contain' />:
+                            type === "video" ? 
+                                x.type?.includes("image") ? 
+                                    <Image src={x?.url} alt='' width={0} height={0} sizes="100vw" className='w-full h-full object-contain' /> : 
+                                x.type?.includes("video") ? 
+                                <video className='w-full h-full object-contain' controls loop>
+                                    <source src={x?.url} type="video/mp4" />
+                                </video>:<div></div>
+                                :<div></div>
+                           }
                         </SwiperSlide>)
                     }
                 </Swiper>

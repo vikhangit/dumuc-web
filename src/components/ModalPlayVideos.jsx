@@ -11,15 +11,16 @@ import Image from 'next/image';
 import StoryLikeShareComment from './Story/StoryLikeShareComment';
 import RenderComments from './Story/RenderComments';
 import { useRouter } from 'next/navigation';
-import { FaUserCheck, FaUserPlus } from "react-icons/fa6";
+import { FaPencil, FaUserCheck, FaUserPlus } from "react-icons/fa6";
 import { FaUserTimes } from "react-icons/fa";
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '@utils/firebase';
 import { createUserFollow, createUserToFollowerList, deleteAddFriend, deleteRecieveFriend, deleteUserFollow, deleteUserInFollowerList, getProfile, receiveRequestAddFriend, sendRequestAddFriend } from '@apis/users';
 import Link from 'next/link';
 import { Spinner } from 'flowbite-react';
+import QuickAddStory from './QuickAddStory';
 
-export default function ModalPlayVideos({openImage, setOpenImage, imageList, index, onCallback}) {
+export default function ModalPlayVideos({openImage, setOpenImage, imageList, index, onCallback, setVideoChange}) {
     const [user] = useAuthState(auth)
     const [swiper, setSwiper] = useState(null)
     const [activeSlide, setActiveSlide] = useState(0)
@@ -31,21 +32,15 @@ export default function ModalPlayVideos({openImage, setOpenImage, imageList, ind
     const [loading1, setLoading1] = useState(false)
     const [loading2, setLoading2] = useState(false)
     const [usingUser, setUsingUser] = useState()
+    const [showEdit, setShowEdit] = useState(false)
+    const [activeEdit, setActiveEdit] = useState()
+    const [newImage, setNewImage] = useState([])
     useEffect(() =>{
       getProfile(user?.accessToken).then((dataCall) => setUsingUser(dataCall)) 
     },[user])
     useEffect(() => {
-        if(start){
-            const timeOut = setTimeout(() => {
-                setPercent(percent + 10)
-            }, 200);
-            if(percent === 100){
-                setPercent(0)
-                swiper.slideNext();
-            }
-            return () => clearTimeout(timeOut);
-        }
-    })
+     setNewImage(imageList)  
+    }, [imageList])
   return (
     openImage &&
     <div className='wrap-modal-image fixed w-full h-full left-0 top-0 z-[999] bg-black bg-opacity-90 flex justify-center items-center py-2 '
@@ -111,9 +106,9 @@ export default function ModalPlayVideos({openImage, setOpenImage, imageList, ind
                     initialSlide={index}
                 >
                     {
-                        imageList?.map((x, index) => 
+                        newImage?.map((x, indexa) => 
                         <SwiperSlide 
-                            key={index} 
+                            key={indexa} 
                             style={{
                                 display: "flex",
                                 alignItems: "center",
@@ -158,10 +153,10 @@ export default function ModalPlayVideos({openImage, setOpenImage, imageList, ind
                                 </a>
                                 </div>
                                 {
-                                            x?.author?.user?.email !== user?.email && <div className="flex items-center gap-x-2 mt-2">
+                                            x?.author?.user?.email !== user?.email ? <div className="flex items-center gap-x-2 mt-2">
                                                 {
                                                  usingUser?.friendList?.length > 0 ?   usingUser?.friendList?.map((item, index) => {
-                                                        if(item?.type === "send" && item.authorId === x?.author?.authorId && item?.status === 1){
+                                                        if(item?.type === "send" && item?.authorId === x?.author?.authorId && item?.status === 1){
                                                             return <button onClick={() => {
                                                                 setLoading1(true)
                                                                 deleteAddFriend({
@@ -276,10 +271,45 @@ export default function ModalPlayVideos({openImage, setOpenImage, imageList, ind
                                                             <FaUserCheck size={16} />
                                                                 Bạn bè
                                                            </button>
+                                                        }else{
+                                                        //   return  <button onClick={async () => {
+                                                        //         if(user){
+                                                        //             setLoading1(true)
+        
+                                                        //             await sendRequestAddFriend({
+                                                        //                 authorId: x?.author?.authorId
+                                                        //             }, user?.accessToken)
+                                                        //             .then(async(result) => {
+                                                        //             console.log(result)
+                                                        //             await receiveRequestAddFriend({
+                                                        //             authorUserId: x?.author?.userId
+                                                        //             }, user?.accessToken).then((e) => console.log(e)).catch(e => console.log(e))
+                                                        //             });
+                                                                    
+                                                        //             await getProfile(user?.accessToken).then((dataCall) => setUsingUser(dataCall))
+                                                                    
+                                                        //             message.success('Đã gữi yêu cầu kết bạn.')
+                                                        //             setLoading1(false)
+                                                        //         }else{
+                                                        //             router.push(`/auth?url_return=${process.env.NEXT_PUBLIC_HOMEPAGE_URL}/author/${slug}/${id}`)
+                                                        //         }
+                                                        //    }} 
+                                                        //     type="button" 
+                                                        //     class="flex items-center gap-x-1 px-2 py-1 text-xs font-medium text-center text-white bg-[#c80000] rounded-[4px] hover:brightness-110 focus:ring-4 focus:outline-none focus:ring-blue-300"
+                                                        //     >
+                                                        //         {
+                                                        //                     loading1 ? <Spinner className='w-4 h-4' /> : 
+                                                        //                     <>
+                                                        //                      <FaUserPlus size={16} />Thêm bạn bè
+                                                        //                     </>
+                                                        //                 }
+                                                               
+                                                        //     </button>
                                                         }
                                                         
                                                     })
-                                                    :<button onClick={async () => {
+                                                    :
+                                                    <button onClick={async () => {
                                                         if(user){
                                                             setLoading1(true)
 
@@ -298,7 +328,7 @@ export default function ModalPlayVideos({openImage, setOpenImage, imageList, ind
                                                             message.success('Đã gữi yêu cầu kết bạn.')
                                                             setLoading1(false)
                                                         }else{
-                                                            router.push(`/auth?url_return=${process.env.NEXT_PUBLIC_HOMEPAGE_URL}/author/${slug}/${id}`)
+                                                            router.push(`/auth?url_return=${process.env.NEXT_PUBLIC_HOMEPAGE_URL}`)
                                                         }
                                                    }} 
                                                     type="button" 
@@ -367,7 +397,17 @@ export default function ModalPlayVideos({openImage, setOpenImage, imageList, ind
                                                                 </Link>
                                                                 }
                                         </div>
-                                        }
+                                        : <button
+                                        onClick={() => {
+                                            setShowEdit(true)
+                                            setActiveEdit(x)
+                                            // oncancel()
+                                        }}
+                                         className='flex items-center gap-x-2 text-sm font-medium bg-sky-600 text-white px-4 py-2 rounded-md'>
+                                            <FaPencil />
+                                            Chỉnh sửa
+                                        </button>
+                            }
                                 </div>
                                {/* <div className='flex justify-end text-indigo-500 font-medium hover:underline mb-4'>
                                     <button onClick={() => router.push(`/author/${x?.author?.slug}/${x?.author?.authorId}`)}>Trang cá nhân tác giả</button>
@@ -395,6 +435,11 @@ export default function ModalPlayVideos({openImage, setOpenImage, imageList, ind
                     }
                 </Swiper>
             </div>
+            <QuickAddStory visible={showEdit} onCallback={onCallback}
+             onCancel={() => setShowEdit(false)}
+             data={imageList} activeItem={activeEdit} 
+             setVideoChange={setVideoChange}
+             />
     </div>
     </div>
   )

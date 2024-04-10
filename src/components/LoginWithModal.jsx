@@ -3,27 +3,22 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from 'next/navigation';
 
 import { message  } from "antd";
-
 import Header from "@components/Header";
-
 import { createUser } from '@apis/auth';
-import { getProfile } from "@apis/users";
 
-//import useReferral from '@hooks/useReferral';
-import { auth, providerGoogle } from '@utils/firebase';;
+import { useAuthState } from 'react-firebase-hooks/auth';
 import isEmail from 'validator/lib/isEmail';
+
+import { auth, providerGoogle } from 'utils/firebase';
+import { signInWithPopup, isSignInWithEmailLink, signInWithEmailLink, sendSignInLinkToEmail, onAuthStateChanged } from "firebase/auth";
 import { useWindowSize } from "@hooks/useWindowSize";
-import { useAuthState, useUpdateProfile } from "react-firebase-hooks/auth";
 
-const LoginWithModal = ({searchParams, setClose}) => {
+const LoginWithModal = ({searchParams, close, item}) => {
     const query = searchParams;
-
-    const [user] = useAuthState(auth)
-    const [setUser, updating, error] = useUpdateProfile(auth);
+    const [user, loading] = useAuthState(auth);
     const router = useRouter();
-    //const refId = useReferral();
     
-    const [loading, setLoading] = useState(false);
+    const [loadingAction, setLoadingAction] = useState(false);
     const [email, setEmail] = useState();
     const [emailError, setEmailError] = useState('');
     const [errorMsg, setErrorMsg] = useState();
@@ -35,8 +30,8 @@ const LoginWithModal = ({searchParams, setClose}) => {
     const sizes = useWindowSize()
 
     const loginGoogle = () => {
-        setLoading(true)
-        auth.signInWithPopup(providerGoogle)
+        setLoadingAction(true)
+        signInWithPopup(auth, providerGoogle)
         .then(result => {
             // This gives you a Google Access Token. You can use it to access the Google API.
             //let token = result.credential.accessToken;
@@ -48,42 +43,34 @@ const LoginWithModal = ({searchParams, setClose}) => {
                 name: userCreate.displayName,
                 phone: userCreate.phoneNumber,
                 photo: userCreate.photoURL,
-                //usernameReferral: refId ? parseInt(refId) : undefined,
             })
             .then(result => {
-                setLoading(false);
+                setLoadingAction(false);
                 message.success('Đăng nhập thành công');
-                auth.onAuthStateChanged(auth => { 
-                    if (auth) {
-                        //userAtom
-                        auth
-                        .getIdToken(true)
-                        .then(async(token) => {
-                            //getProfile
-                            let profile = await getProfile(token);
-                            setUser(profile);
-        
-                            //redirect
-                            setClose()
-                            
-                        });
-                    }
-                });
+                onAuthStateChanged(auth, user => { 
+                    if (user) {
+                        //redirect
+                        close()
+                        router.push(`#${item?.feedId}`)
+                }});
             })
             .catch(err => {
-                setLoading(false);
+                setLoadingAction(false);
                 message.error(err.message);
             })
         })
         .catch(function(error) {
-            setLoading(false);
+            setLoadingAction(false);
             message.error(error.message);
         });
     }
+    const subEmail= (str) => {
+        const findIndex = str?.indexOf("@")
+        return str.substring(0, findIndex)
+    }
 
     const loginWithPasswordless = () => {
-        setLoading(true);
-
+        setLoadingAction(true);
         //signin with email (passwordless)
         const actionCodeSettings = {
             // URL you want to redirect back to. The domain (www.example.com) for this
@@ -97,14 +84,14 @@ const LoginWithModal = ({searchParams, setClose}) => {
         setEmailForSignIn(email)
 
         auth.languageCode = 'vi';
-        auth.sendSignInLinkToEmail(email, actionCodeSettings)
+        sendSignInLinkToEmail(auth, email, actionCodeSettings)
             .then((result) => {
                 // The link was successfully sent. Inform the user.
                 // Save the email locally so you don't need to ask the user for it again
                 // if they open the link on the same device.
                 window.localStorage.setItem('emailForSignIn', email);
                 setIsModalOpen(true);
-                setLoading(false);
+                setLoadingAction(false);
                 // ...
             })
             .catch((error) => {
@@ -112,94 +99,86 @@ const LoginWithModal = ({searchParams, setClose}) => {
                 var errorMessage = error.message;
                 setIsModalOpen(false);
                 setErrorMsg(error.message)
-                setLoading(false);
-                // ...ckground
+                setLoadingAction(false);
             });
     }
 
     useEffect(() => {
-        setLoading(true)
+        setLoadingAction(true)
         const saved_email = window.localStorage.getItem("emailForSignIn");
-
-        if (auth.isSignInWithEmailLink(window.location.href) && !!saved_email) {
+        if (isSignInWithEmailLink(auth, window.location.href) && !!saved_email) {
             //sign in with email link (Passwordless)
-            auth.signInWithEmailLink(saved_email, window.location.href)
+            signInWithEmailLink(auth, saved_email, window.location.href)
                 .then(async (result) => {
                     let userCreate = result.user;
-
                     // Clear email from storage.
                     window.localStorage.removeItem('emailForSignIn');
                     createUser({
                         uid: userCreate.uid,
                         email: userCreate.email,
-                        name: userCreate.displayName,
+                        name: userCreate.displayName || subEmail(userCreate.email || "No name"),
                         phone: userCreate.phoneNumber,
                         photo: userCreate.photoURL,
                     })
-                        .then(() => {
-                            setLoading(true);
-                        })
-                        .catch(error => console.log(error))
+                    .then((result) => {
+                        console.log("Create User", result)
+                            setLoadingAction(true);
+                    })
+                        .catch(error => {})
                 })
                 .catch((error) => {
+                    // console.log('error', error)
                     setErrorCode(error.code)
-                    setLoading(false)
+                    setLoadingAction(false)
                     // Some error occurred, you can inspect the code: error.code
                     // Common errors could be invalid email and invalid or expired OTPs.
                 });
         } else {
-            setLoading(false)
+            setLoadingAction(false)
         }
 
-        auth.onAuthStateChanged(auth => {
-            if (auth) {
-                //userAtom
-                auth
-                .getIdToken(true)
-                .then(async(token) => {
-                    //getProfile
-                    let profile = await getProfile(token);
-                    setUser(profile);
-
-                    //redirect
-                    setClose()
-                    
-                });
+        onAuthStateChanged(auth, user => {
+            if (user) {
+                close()
+                router.push(`#${item?.feedId}`)
             }
         });
     }, [])
 
     useEffect(() => {
-        setLoading(true)
-        auth.onAuthStateChanged(auth => { 
-            if (auth) {
+        setLoadingAction(true)
+        onAuthStateChanged(auth, user => { 
+            if (user) {
                 //userAtom
-                auth
+                user
                 .getIdToken(true)
                 .then(async(token) => {
-                    //getProfile
-                    let profile = await getProfile(token);
-                    setUser(profile);
-
                     //redirect
-                    setClose()
-                    setLoading(false)
+                    close()
+                    router.push(`#${item?.feedId}`)                    
+                    setLoadingAction(false)
                 })
                 .catch(err => {
-                    setLoading(false)
+                    console.log(err)
+                    setLoadingAction(false)
                 })
             } else {
-                setLoading(false)
+                setLoadingAction(false)
             }
         });
     }, [])
 
+    //redirect already login
     useEffect(() => {
+        
         const saved_email = window.localStorage.getItem("emailForSignIn");
-        if (user && (saved_email === null)) {
-            router.push('/account')
+        if (user && loading === false && (saved_email === null)) {
+            //redirect
+            close()
+            router.push(`#${item?.feedId}`)
         }
-    }, [user])
+    }, [user, loading])
+
 
     return (
         <div  className={`${sizes.width > 400 ? "px-6" : "px-0"} `}>
@@ -215,10 +194,10 @@ const LoginWithModal = ({searchParams, setClose}) => {
             <svg class="w-5 h-5 mr-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 18 19">
                 <path fill-rule="evenodd" d="M8.842 18.083a8.8 8.8 0 0 1-8.65-8.948 8.841 8.841 0 0 1 8.8-8.652h.153a8.464 8.464 0 0 1 5.7 2.257l-2.193 2.038A5.27 5.27 0 0 0 9.09 3.4a5.882 5.882 0 0 0-.2 11.76h.124a5.091 5.091 0 0 0 5.248-4.057L14.3 11H9V8h8.34c.066.543.095 1.09.088 1.636-.086 5.053-3.463 8.449-8.4 8.449l-.186-.002Z" clip-rule="evenodd"/>
             </svg>
-            Bắt đầu với Google
+            Đăng nhập bằng Google
         </button>
     </div>
-    <div className="text-center text-base font-semibold mt-6 mb-2 text-gray-500">Hoặc bằng email</div>
+    {/* <div className="text-center text-base font-semibold mt-6 mb-2 text-gray-500">Hoặc bằng email</div>
     <form className="flex flex-col gap-4">
         <div className="">
             <input 
@@ -291,7 +270,8 @@ const LoginWithModal = ({searchParams, setClose}) => {
                 </p>
             </div>
         )}
-    </form></div>
+    </form> */}
+    </div>
     );
 };
 

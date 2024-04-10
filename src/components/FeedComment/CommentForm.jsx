@@ -26,7 +26,8 @@ export default function CommentForm({
   root,
   item,
   onCallback,
-  completed
+  completed,
+  setOpenLogin
 }) {
   const [user] = useAuthState(auth)
   const router = useRouter();
@@ -139,7 +140,7 @@ export default function CommentForm({
           </div>
           <textarea 
             value={body}
-            onClick={() => user ? setFocusComment(true) : router.push("/auth")}
+            onClick={() => user ? setFocusComment(true) : setOpenLogin(true)}
             onChange={e => {
               setBody(e.target.value)
             }}
@@ -153,7 +154,7 @@ export default function CommentForm({
             placeholder="Bạn đang nghĩ gì?" 
           />
           <div className="flex justify-end gap-2">
-            <label className='cursor-pointer' onClick={() =>  user ? refImage.current.click() : router.push("/auth")}>
+            <label className='cursor-pointer' onClick={() =>  user ? refImage.current.click() : setOpenLogin(true)}>
               <IoImageOutline size={24} color="rgb(107 114 128)" />
             </label>
             {

@@ -50,6 +50,16 @@ export const createUserStories = (payload, token) => {
       return err;
     });
 };
+export const deleteUserStories = (payload, token) => {
+  const { type, storyId} = payload;
+  return request(`api/user/stories/${type}/${storyId}`, {}, { method: "DELETE", token })
+    .then((data) => {
+      return data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
 
 export const deleteUserBookmark = (payload, token) => {
   const { bookmarkType, bookmarkValue} = payload;

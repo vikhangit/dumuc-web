@@ -32,9 +32,18 @@ const Story = ({data, onCallback}) => {
   const refStory = useRef()
   const videoEl = useRef(null);
   const [showTool, setShowTool] = useState(false)
+  const [videoChange, setVideoChange] = useState("")
   useEffect(() => {
-    setStories(data);
-  }, [data])
+    getStoriesLoadMore({limit: 10}).then((data) => setStories(
+      data?.map(x => {
+        if(user?.email === x?.author?.user?.email){
+          return x;
+        }else if(!x?.isPrivate){
+          return x;
+        }
+      })))
+    
+  }, [])
   
   const handleChange =  (e) => {
     setLoading(true)
@@ -57,18 +66,12 @@ const Story = ({data, onCallback}) => {
     };
     const [showImage, setShowImage] = useState(false)
   const [imageList, setImageList] = useState([]);
-  const [indexImage, setIndexImage] = useState(0);
+  const [indexImage, setIndexImage] = useState(-1);
   React.useCallback(() => {
     const timeToStart = (7 * 60) + 12.6;
     videoEl.current.seekTo(timeToStart, 'seconds');
   }, [videoEl.current])
-  console.log(stories.filter(x => {
-    if(user?.email === x?.author?.user?.email){
-      return x;
-    }else if(!x.isPrivate){
-      return x;
-    }
-  }))
+  console.log(videoChange)
 
   return (
     <>
@@ -168,22 +171,19 @@ const Story = ({data, onCallback}) => {
               >
                  <Image width={0} height={0} sizes="100vw" src={item?.author?.user?.photo || "/dumuc/avatar.png"} alt="" className='absolute z-20 top-2 left-2 w-10 h-10 rounded-full border border-sky-700 p-0.5' />
                  {
-                item.type === "file" ?
-                   <video className={`w-full h-full rounded-t-[10px] relative z-10 h-[210px]`}  
-                  // controls
-                  loop
-                  ref={videoEl}
-                  >
-                    <source src={`${item.photos}`} type="video/mp4" />
-                  </video>
+                item?.type === "file" ?
+                  <video className={`w-full h-full rounded-t-[10px] relative z-10 h-[210px]`}  
+                   >
+                    <source src={item?.photos} type="video/mp4" />
+                   </video> 
                   :
-                  <div className='w-full h-full story' dangerouslySetInnerHTML={{__html: item.description}}></div>
+                  <div className='w-full h-full story' dangerouslySetInnerHTML={{__html: item?.description}}></div>
                  }
                   <span className={`absolute bottom-2 left-2 text-sm font-medium z-20 ${type === "link" ? "text-white" : "text-black"}`}>{item?.author?.name || "No name"}</span>
               </div>
               
           </SwiperSlide> 
-          : !item.isPrivate ? <SwiperSlide 
+          : !item?.isPrivate ? <SwiperSlide 
           style={{
             height: 250,
             cursor: "pointer"
@@ -198,16 +198,13 @@ const Story = ({data, onCallback}) => {
               >
                  <Image width={0} height={0} sizes="100vw" src={item?.author?.user?.photo || "/dumuc/avatar.png"} alt="" className='absolute z-20 top-2 left-2 w-10 h-10 rounded-full border border-sky-700 p-0.5' />
                  {
-                item.type === "file" ?
+                item?.type === "file" ?
                    <video className={`w-full h-full rounded-t-[10px] relative z-10 h-[210px]`}  
-                  // controls
-                  loop
-                  ref={videoEl}
                   >
-                    <source src={`${item.photos}`} type="video/mp4" />
+                    <source src={item?.photos} type="video/mp4" />
                   </video>
                   :
-                  <div className='w-full h-full story' dangerouslySetInnerHTML={{__html: item.description}}></div>
+                  <div className='w-full h-full story' dangerouslySetInnerHTML={{__html: item?.description}}></div>
                  }
                   <span className={`absolute bottom-2 left-2 text-sm font-medium z-20 ${type === "link" ? "text-white" : "text-black"}`}>{item?.author?.name || "No name"}</span>
               </div>
@@ -220,35 +217,48 @@ const Story = ({data, onCallback}) => {
       {
         activeSlide > 0 && 
         <button className='absolute top-1/2 left-1 -translate-y-1/2' 
-          onClick={() => swiper.slidePrev() }
+          onClick={() => swiper?.slidePrev() }
         >
           <HiChevronDoubleLeft size={18} />
         </button>
       }
       {
-       stories.length > 0 && activeSlide < stories?.length - 1 &&
-        <button className='absolute top-1/2 right-1 -translate-y-1/2' onClick={() => swiper.slideNext()}>
+       stories?.length > 0 && activeSlide < stories?.length - 1 &&
+        <button className='absolute top-1/2 right-1 -translate-y-1/2' onClick={() => swiper?.slideNext()}>
           <HiChevronDoubleRight size={18} />
         </button>
       }
       </div>
       <ModalPlayVideos 
+        setVideoChange={setVideoChange}
         openImage={showImage} 
         setOpenImage={setShowImage} 
-        imageList={stories.map(x => {
-          if(user?.email === x?.author?.user?.email){
-            return x;
-          }else if(!x.isPrivate){
-            return x;
-          }
-        })} 
+        imageList={stories} 
         index={indexImage}
-        onCallback={onCallback}
+        onCallback={() => {
+          // setShowImage(false)
+          // setShowModal(false)
+          getStoriesLoadMore({limit: 10}).then((data) => setStories(
+            data?.map(x => {
+              if(user?.email === x?.author?.user?.email){
+                return x;
+              }else if(!x?.isPrivate){
+                return x;
+              }
+            })))
+        }}
       />
       <QuickAddStory 
         onCallback={ () => {
           setVideo("")
-          onCallback();
+          getStoriesLoadMore({limit: 10}).then((data) => setStories(
+            data?.map(x => {
+              if(user?.email === x?.author?.user?.email){
+                return x;
+              }else if(!x?.isPrivate){
+                return x;
+              }
+            })))
         }
         }
         onCancel={() => setShowModal(false)}
