@@ -24,9 +24,9 @@ const HomePageContent = () => {
   const [stories, setStories] = useState([])
   const [usingUser, setUsingUser] = useState()
   useEffect(() => {
-    getFeedsLoadMore({limit: 5}).then((result) => setFeedData(result))
+    getFeedsLoadMore({limit: 100}).then((result) => setFeedData(result))
     getTags().then((result) => setTags(result))
-    getStoriesLoadMore({limit: 5}).then((data) => setStories(data))
+    getStoriesLoadMore({limit: 100}).then((data) => {setStories(data)})
     getProfile(user?.accessToken).then(data => setUsingUser(data))
     setLoading(false)
   }, [user])
@@ -67,7 +67,9 @@ const HomePageContent = () => {
                   </div>
                   <div>
                     {
-                    <Story  /> 
+                    <Story data={stories} onCallback={async () => {
+                      await getStoriesLoadMore({limit: 100}).then((data) => {setStories(data)})
+                    }}  /> 
                     }
                   </div>
                   <FeedItems 
@@ -75,7 +77,7 @@ const HomePageContent = () => {
                     data={feedData} 
                     onCallback={
                       async () => {
-                        await getFeedsLoadMore({limit: 5}).then((result) => setFeedData(result))
+                        await getFeedsLoadMore({limit: 100}).then((result) => setFeedData(result))
                         await getTags().then((result) => setTags(result))
                       }
                     } 

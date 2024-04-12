@@ -72,7 +72,6 @@ export default function QuickAddStory({ visible, onCancel, onCallback, url, type
         createUserStories({...result?.data}, user?.accessToken)
         setVideoChange(photoChange.length > 0 ? photoChange : photo)
         getProfile(user?.accessToken).then((dataCall) =>  setUsingUser(dataCall))
-
       })
     }else{
       await createStoryByUser({
@@ -88,12 +87,12 @@ export default function QuickAddStory({ visible, onCancel, onCallback, url, type
       })
     }
    }
-   setLoading(false);
-   onCallback();
    onCancel();
-   window.location = "/"
-
    localStorage.removeItem("storyPrivate")
+   onCallback();
+   setLoading(false);
+   window.location.reload()
+
   }; 
   return (
     <Modal

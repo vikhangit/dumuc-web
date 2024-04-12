@@ -35,16 +35,8 @@ const Story = ({data, onCallback}) => {
   const [showTool, setShowTool] = useState(false)
   const [videoChange, setVideoChange] = useState("")
   useEffect(() => {
-    getStoriesLoadMore({limit: 10}).then((data) => setStories(
-      data?.map(x => {
-        if(user?.email === x?.author?.user?.email){
-          return x;
-        }else if(!x?.isPrivate){
-          return x;
-        }
-      })))
-    
-  }, [])
+    setStories(data)
+  }, [data])
   
   const handleChange =  (e) => {
     setLoading(true)
@@ -210,7 +202,7 @@ const Story = ({data, onCallback}) => {
                   <span className={`absolute bottom-2 left-2 text-sm font-medium z-20 ${type === "link" ? "text-white" : "text-black"}`}>{item?.author?.name || "No name"}</span>
               </div>
       </SwiperSlide> 
-          : <div></div>
+          : null
           
           )
         }
@@ -236,30 +228,12 @@ const Story = ({data, onCallback}) => {
         setOpenImage={setShowImage} 
         imageList={stories} 
         index={indexImage}
-        onCallback={() => {
-          // setShowImage(false)
-          // setShowModal(false)
-          getStoriesLoadMore({limit: 10}).then((data) => setStories(
-            data?.map(x => {
-              if(user?.email === x?.author?.user?.email){
-                return x;
-              }else if(!x?.isPrivate){
-                return x;
-              }
-            })))
-        }}
+        onCallback={onCallback}
       />
       <QuickAddStory 
         onCallback={ () => {
           setVideo("")
-          getStoriesLoadMore({limit: 10}).then((data) => setStories(
-            data?.map(x => {
-              if(user?.email === x?.author?.user?.email){
-                return x;
-              }else if(!x?.isPrivate){
-                return x;
-              }
-            })))
+          onCallback()
         }
         }
         onCancel={() => setShowModal(false)}

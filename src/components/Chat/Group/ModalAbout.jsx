@@ -61,7 +61,7 @@ export default function ModalAbout({ visible, onCancel, about, type, authors}) {
         {
           type === "member" && <div>
             {
-              about?.member?.map((item, index) => {
+              about?.member?.filter( (ele, ind) => ind === about?.member?.findIndex( elem => elem?.user === ele?.user ))?.map((item, index) => {
                 const author = authors?.find(x => x?.userId === item?.user)
              return <div
              key={index}
@@ -74,7 +74,7 @@ export default function ModalAbout({ visible, onCancel, about, type, authors}) {
                       item?.user === about?.createdBy && <p className='text-[13px] text-[#00000080] mt-1'>Trưởng nhóm</p>
                      }
                  </div>
-                 <button><MdDelete size={18} color="red" /></button>
+               
              </div>
          </div>
               })

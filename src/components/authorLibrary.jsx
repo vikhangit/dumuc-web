@@ -1,5 +1,5 @@
 "use client"
-import { getFeedsLoadMore } from '@apis/feeds';
+import { getFeedsLoadMore, getStoriesLoadMore } from '@apis/feeds';
 import { getAuthor, getPostsLoadMore } from '@apis/posts';
 import React, { useEffect, useState } from 'react';
 import FeedItems from './FeedItems';
@@ -10,20 +10,24 @@ import { auth } from '@utils/firebase';
 import { HiPencil } from 'react-icons/hi';
 import { getUser } from '@apis/users';
 import { useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
+const Story = dynamic( () => {
+    return import( './Dumuc/Story' );
+  }, { ssr: false } );
 
-export default function AuthorLibrary({active, setActive, id, slug, setOpenLibrary, usingUser, onCallback}) {
+export default function AuthorLibrary({active, id, slug, setOpenLibrary, usingUser, onCallback, authorData, authors}) {
     const [user] = useAuthState(auth)
     const [loading, setLoading] = useState(false)
     const [postsData, setPostsData] = useState();
     const [feedsData, setFeedsData] = useState();
-    const [authorData, setAuthorData] = useState();
+    const [stories, setStories] = useState([])
     const [userAuthor, setUserAuthor] = useState();
     const [tab, setTab] = useState(0)
     const router = useRouter()
 
     useEffect(() => {
         let payload = {
-            limit: 5,
+            limit: 100,
             author: id,
         };
         // getPostsLoadMore(payload).then((posts) => setPostsData(posts))
@@ -37,11 +41,9 @@ export default function AuthorLibrary({active, setActive, id, slug, setOpenLibra
               setPostsData(publishPosts)
             }
           })
-        getFeedsLoadMore(payload).then((feeds) => setFeedsData(feeds))
-        getAuthor({
-            authorId: id,
-        }).then((author) => setAuthorData(author))
+        getFeedsLoadMore(payload).then((feeds) => setFeedsData(feeds))  
         
+        getStoriesLoadMore(payload).then((data) => {setStories(data)})
         setLoading(false)
     }, [id, slug])
     useEffect(() => {
@@ -56,14 +58,21 @@ export default function AuthorLibrary({active, setActive, id, slug, setOpenLibra
             {active === 0 && (
                     <div className=''>
                         <FeedItems data={feedsData} authorId={id} onCallback={async () => {
-                           await getFeedsLoadMore({limit: 5,author: id}).then((feeds) => setFeedsData(feeds))
+                           await getFeedsLoadMore({limit: 100, author: id}).then((feeds) => setFeedsData(feeds))
                         }} />
+                    </div>
+                )}
+                {active === 6 && (
+                    <div className='pt-5'>
+                        <Story data={stories} onCallback={async () => {
+                      await getStoriesLoadMore({limit: 100}).then((data) => {setStories(data)})
+                    }}  />
                     </div>
                 )}
                 {active === 1 && (
                     <div className='!bg-white'>
                         <ArticleItems data={postsData} authorId={id} onCallback={async () => {
-                             getPostsLoadMore({limit: 5,author: id}).then((data) => {
+                             getPostsLoadMore({limit: 100,author: id}).then((data) => {
                                 let newarr = data.items;
                                 const myPost = newarr?.filter(a => a?.author?.user?.email === user?.email)
                                 if(myPost && myPost?.length > 0){
@@ -110,46 +119,47 @@ export default function AuthorLibrary({active, setActive, id, slug, setOpenLibra
                     </div>
                    <div className='mt-5 grid sm:grid-cols-2 gap-4'>
                     { tab === 0 &&
-                            userAuthor?.friendList?.filter(x => x.status === 2)?.map(async (item, index) => {
+                            userAuthor?.friendList?.filter(x => x.status === 2)?.map((item, index) => {
+                                const author = authors?.find(x => x?.authorId  === item?.authorId)
                                 return <div className='flex gap-x-3 items-center cursor-pointer w-full'>
                                 <Image width={0} height={0} sizes="100vw" class="w-24 h-24 sm:w-32 sm:h-32 " src={
-                                                item?.author?.photo
-                                                    ? item?.author?.photo
-                                                    : item?.author?.user?.photo ? item?.author?.user?.photo : "/dumuc/avatar.png"
-                                            } alt={item?.author?.name} 
-                                            onClick={() => router.push(`/author/${item?.author?.slug}/${item?.author?.authorId}`)}
+                                                author?.photo
+                                                    ? author?.photo
+                                                    : author?.user?.photo ? author?.user?.photo : "/dumuc/avatar.png"
+                                            } alt={author?.name} 
+                                            onClick={() => router.push(`/author/${ author?.slug}/${author?.authorId}`)}
                                             />
-                                <p  onClick={() => router.push(`/author/${item?.author?.slug}/${item?.author?.authorId}`)} className='text-base font-semibold'>{item?.author?.name}</p>
+                                <p  onClick={() => router.push(`/author/${author?.slug}/${author?.authorId}`)} className='text-base font-semibold'>{author?.name}</p>
                             </div>
                             })
                         }
                         { tab === 1 &&
-                            userAuthor?.follows?.map(async (item, index) => {
-                               
+                            userAuthor?.follows?.map((item, index) => {
+                                const author = authors?.find(x => x?.authorId  === item?.authorId)
                                 return <div className='flex gap-x-3 items-center cursor-pointer w-full'>
                                 <Image width={0} height={0} sizes="100vw" class="w-24 h-24 sm:w-32 sm:h-32 " src={
-                                                item?.author?.photo
-                                                    ? item?.author?.photo
-                                                    : item?.author?.user?.photo ? item?.author?.user?.photo : "/dumuc/avatar.png"
+                                                author?.photo
+                                                    ? author?.photo
+                                                    : author?.user?.photo ? author?.user?.photo : "/dumuc/avatar.png"
                                             } alt={item?.author?.name} 
-                                            onClick={() => router.push(`/author/${item?.author?.slug}/${item?.author?.authorId}`)}
+                                            onClick={() => router.push(`/author/${author?.slug}/${author?.authorId}`)}
                                             />
-                                <p  onClick={() => router.push(`/author/${item?.author?.slug}/${item?.author?.authorId}`)} className='text-base font-semibold'>{item?.author?.name}</p>
+                                <p  onClick={() => router.push(`/author/${author?.slug}/${author?.authorId}`)} className='text-base font-semibold'>{author?.name}</p>
                             </div>
                             })
                         }
                         { tab === 2 &&
-                            userAuthor?.follower?.map(async (item, index) => {
-                                
+                            userAuthor?.follower?.map((item, index) => {
+                                const author = authors?.find(x => x?.authorId  === item?.authorId)
                                 return <div className='flex gap-x-3 items-center cursor-pointer w-full'>
                                 <Image width={0} height={0} sizes="100vw" class="w-24 h-24 sm:w-32 sm:h-32 " src={
-                                                item?.author?.photo
-                                                    ? item?.author?.photo
-                                                    : item?.author?.user?.photo ? item?.author?.user?.photo : "/dumuc/avatar.png"
+                                                author?.photo
+                                                    ? author?.photo
+                                                    : author?.user?.photo ? author?.user?.photo : "/dumuc/avatar.png"
                                             } alt={item?.author?.name} 
-                                            onClick={() => router.push(`/author/${item?.author?.slug}/${item?.author?.authorId}`)}
+                                            onClick={() => router.push(`/author/${author?.slug}/${author?.authorId}`)}
                                             />
-                                <p  onClick={() => router.push(`/author/${item?.author?.slug}/${item?.author?.authorId}`)} className='text-base font-semibold'>{item?.author?.name}</p>
+                                <p  onClick={() => router.push(`/author/${author?.slug}/${author?.authorId}`)} className='text-base font-semibold'>{author?.name}</p>
                             </div>
                             })
                         }

@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from 'next/navigation';
 import Image from "next/image";
-import {getAuthor } from "@apis/posts";
+import {getAuthor, getAuthors } from "@apis/posts";
 const TabbarBottom = dynamic( () => {
     return import( '@components/TabbarBottom' );
   }, { ssr: false } );
@@ -28,6 +28,7 @@ const NewAuthorUI = ({ currentUrl = '/', params, searchParams }) => {
     const [user] = useAuthState(auth)
     const [active, setActive] = useState(0)
     const [loading, setLoading] = useState(true)
+    const [authors, setAuthors] = useState()
     const [authorData, setAuthorData] = useState();
     const [openLibrary, setOpenLibrary] = useState(false)
     const [loadingAdd, setLoadingAdd] = useState(false);
@@ -36,7 +37,11 @@ const NewAuthorUI = ({ currentUrl = '/', params, searchParams }) => {
       getProfile(user?.accessToken).then((dataCall) => setUsingUser(dataCall)) 
     },[user])
     useEffect(() => {
-        getAuthor({authorId: id}).then((author) => setAuthorData(author))
+        // getAuthor({authorId: id}).then((author) => setAuthorData(author))
+        getAuthors().then((data) => {
+            setAuthors(data)
+            setAuthorData(data?.find(x => x?.authorId === id))
+        })
         setLoading(false)
     }, [id, slug])
     return (
@@ -69,15 +74,15 @@ const NewAuthorUI = ({ currentUrl = '/', params, searchParams }) => {
                                                 {
                                                  usingUser?.friendList?.length > 0 ?   usingUser?.friendList?.map((item, index) => {
                                                         if(item?.type === "send" && item?.authorId === authorData?.authorId && item?.status === 1){
-                                                            return <button onClick={() => {
+                                                            return <button onClick={async () => {
                                                                 setLoadingAdd(true)
-                                                                deleteAddFriend({
+                                                               await deleteAddFriend({
                                                                     authorId: authorData?.authorId,
                                                                     }, user?.accessToken)
                                                                     .then(async(result) => {
                                                                       console.log(result)
                                                                     //update recoil
-                                                                    deleteRecieveFriend({
+                                                                   await deleteRecieveFriend({
                                                                       authorUserId: authorData?.userId
                                                                     }, user?.accessToken).then((e) => console.log(e)).catch(e => console.log(e))
                                                                     const dataCall = await getProfile(user?.accessToken) 
@@ -142,16 +147,16 @@ const NewAuthorUI = ({ currentUrl = '/', params, searchParams }) => {
                                                                     Xác nhận
                                                                 </Link>
                                                                 <Link href={``} 
-                                                                    onClick={(e) => {
+                                                                    onClick={async (e) => {
                                                                     e.preventDefault();
                                                                     setLoadingAdd(true)
-                                                                    deleteAddFriend({
+                                                                  await  deleteAddFriend({
                                                                         authorId: authorData?.authorId,
                                                                         }, user?.accessToken)
                                                                         .then(async(result) => {
                                                                           console.log(result)
                                                                         //update recoil
-                                                                        deleteRecieveFriend({
+                                                                       await deleteRecieveFriend({
                                                                           authorUserId: authorData?.userId
                                                                         }, user?.accessToken).then((e) => console.log(e)).catch(e => console.log(e))
                                                                         const dataCall = await getProfile(user?.accessToken) 
@@ -359,14 +364,14 @@ const NewAuthorUI = ({ currentUrl = '/', params, searchParams }) => {
                                             await getAuthor({authorId: id}).then((author) => setAuthorData(author))
                                                 }} 
                                              className="px-3 py-1 text-xs font-medium text-center text-white bg-[#c80000] rounded-[4px] hover:brightness-110 focus:ring-4 focus:outline-none focus:ring-blue-300">Chấp nhận</button>
-                                            <button onClick={() => {
-                                                deleteAddFriend({
+                                            <button onClick={async () => {
+                                             await   deleteAddFriend({
                                                     authorId: authorData?.authorId,
                                                     }, user?.accessToken)
                                                     .then(async(result) => {
                                                       console.log(result)
                                                     //update recoil
-                                                    deleteRecieveFriend({
+                                                   await  deleteRecieveFriend({
                                                       authorUserId: authorData?.userId
                                                     }, user?.accessToken).then((e) => console.log(e)).catch(e => console.log(e))
                                                     const dataCall = await getProfile(user?.accessToken) 
@@ -388,7 +393,7 @@ const NewAuthorUI = ({ currentUrl = '/', params, searchParams }) => {
                                         
                                     >
                                         Bài viết
-                                        <div className="absolute hidden group-hover:flex flex-col justify-start items-start top-full left-0 bg-white shadow-sm shadow-gray-500 text-[10px] sm:text-xs font-medium w-[120px] rounded p-1">
+                                        <div className="absolute z-[9999] hidden group-hover:flex flex-col justify-start items-start top-full left-0 bg-white shadow-sm shadow-gray-500 text-[10px] sm:text-xs font-medium w-[120px] rounded p-1">
                                                                 <Link href={``} 
                                                                  onClick={async (e) => {
                                                                     e.preventDefault();
@@ -404,6 +409,12 @@ const NewAuthorUI = ({ currentUrl = '/', params, searchParams }) => {
                                                                     setActive(1)
                                                                     }} 
                                                                     className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left ${active === 1 ? "text-white bg-[#c80000] bg-opacity-60": "text-black"}`}>Forum</Link>
+                                                                    <Link href={``} 
+                                                                    onClick={(e) => {
+                                                                    e.preventDefault();
+                                                                    setActive(6)
+                                                                    }} 
+                                                                    className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left ${active === 6 ? "text-white bg-[#c80000] bg-opacity-60": "text-black"}`}>Tin video</Link>
                                         </div>
                                     </button>
                                     <button onClick={() => setActive(2)} className={`px-3 py-3 ${active === 2 && "border-b-2 border-[#c80000]"}`}>Giới thiệu</button>
@@ -433,6 +444,8 @@ const NewAuthorUI = ({ currentUrl = '/', params, searchParams }) => {
                         </div>
                        <div className="mt-[60px]">
                        <AuthorLibrary
+                       authorData={authorData}
+                       authors={authors}
                        onCallback= {async () => {
                         await getProfile(user?.accessToken).then((dataCall) => setUsingUser(dataCall))
                         await getAuthor({authorId: id}).then((author) => setAuthorData(author))

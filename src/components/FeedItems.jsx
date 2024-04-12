@@ -7,6 +7,7 @@ import { Spinner } from "flowbite-react";
 import NewQuickPost from "./Dumuc/NewQuickPost";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@utils/firebase";
+import { getAuthors } from "@apis/posts";
 
 const FeedItems = ({
   data, 
@@ -16,11 +17,17 @@ const FeedItems = ({
   onCallback
 }) => {
   const [items, setItems] = useState(data?.items);
+  const [authors, setAuthors] = useState()
   const [user, loading, error] = useAuthState(auth);
   const [hasLoadMore, setHasLoadMore] = useState(true);
   useEffect(() => {
     setItems(data?.items)
   },[data])
+  useEffect(() =>{
+    getAuthors().then((data) => {
+      setAuthors(data)
+  })
+  }, [])
   const loadMore = async () => {
     setHasLoadMore(true)
     let payload = {};
@@ -42,12 +49,11 @@ const FeedItems = ({
       }
     });
   };
-
   return (
     <div>      { 
         !authorId 
         ? <NewQuickPost onCallback={onCallback} /> 
-        : authorId === user?.author?.authorId 
+        : authors?.find(x => x?.userId === user?.uid && x?.authorId === authorId) 
           ? <NewQuickPost onCallback={onCallback} /> 
           : ""
       }

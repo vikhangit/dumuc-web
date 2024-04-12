@@ -273,7 +273,7 @@ export default function QuickPostModal({ visible,setEmotion, onCancel, emotion, 
             />
             <div className='flex flex-col'>
             <p className="text-sm font-medium">
-              {usingUser?.name} {emotion && emotion.length > 0 ? emotion : ""}
+              {user?.displayName} {emotion && emotion.length > 0 ? emotion : ""}
             </p>
             <div className='relative rounded-[6px] mt-1 w-fit'>
             <select className='w-full h-full bg-[#e5e5e5] border-0 text-sm font-medium' value={active} onChange={(e) => {
@@ -307,7 +307,7 @@ export default function QuickPostModal({ visible,setEmotion, onCancel, emotion, 
         <CustomEditor
           initialData={description}
           setData={setDescription}
-          placeholder={`${usingUser?.name} ơi bạn đang nghĩ gì?`}
+          placeholder={`${user?.displayName} ơi bạn đang nghĩ gì?`}
         />
         {descriptionError !== "" && (
           <p class="mt-1.5 text-sm text-[#c80000] font-semibold">

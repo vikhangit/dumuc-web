@@ -35,7 +35,6 @@ export default function ModalAddMember({ visible, onCancel, onCallback, authors,
    setLoading(false);
    onCallback();
    setName("")
-   setAvatar("")
    onCancel();
   }; 
   const searchField = (value) => {
