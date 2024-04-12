@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from 'next/navigation';
 import {createUserLike, deleteUserLike, getProfile, updateProfile} from '@apis/users';
-import { useAuthState, useUpdateProfile } from "react-firebase-hooks/auth";
+import { useAuthState} from "react-firebase-hooks/auth";
 import { auth } from "@utils/firebase";
 
 const ArticleLike = ({id, currentUrl, count = 0,  onCallback}) => {

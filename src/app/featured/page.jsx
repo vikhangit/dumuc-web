@@ -1,16 +1,29 @@
+"use client"
 import { getPopularAuthors, getPopularPosts } from '@apis/posts';
 import { getUsersRanking } from '@apis/users';
 // import { getHelperSossByMember } from '@apis/soss';
 
 import BannerRight from '@components/BannerRight';
-import FeaturedPost from '@components/FeaturedPost';
-import FeaturedMember from '@components/FeaturedMember';
-import FeaturedTab from '@components/FeaturedTab';
+const FeaturedPost = dynamic( () => {
+  return import( '@components/FeaturedPost' );
+}, { ssr: false } );
+const FeaturedTab = dynamic( () => {
+  return import( '@components/FeaturedTab' );
+}, { ssr: false } );
+const FeaturedMember = dynamic( () => {
+  return import( '@components/FeaturedMember' );
+}, { ssr: false } );
+
 import Header from '@components/Header';
-import TabbarBottom from '@components/TabbarBottom';
+import dynamic from 'next/dynamic';
+const TabbarBottom = dynamic( () => {
+  return import( '@components/TabbarBottom' );
+}, { ssr: false } );
 import Link from 'next/link'
 import React from 'react';
-import FeaturedKnights from '@components/FeaturedKnights';
+const FeaturedKnights = dynamic( () => {
+  return import( '@components/FeaturedKnights' );
+}, { ssr: false } );
 
 const Featured =  async ({searchParams}) => {
   const [authors, popular, usersRanking] = await Promise.all([

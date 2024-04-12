@@ -1,13 +1,14 @@
 "use client"
 import React, { useState } from 'react'
-import Link from "next/link";
-import QuickPostModal from './QuickPostModal';
+const QuickPostModal = dynamic( () => {
+  return import( './QuickPostModal' );
+}, { ssr: false } );
 import QuickPostModalEmoji from './QuickPostModlEmoji';
 import { useRouter } from 'next/navigation';
-import { generateCustomToken } from "apis/users";
 import { auth } from 'utils/firebase';
 import Image from 'next/image';
 import { useAuthState } from 'react-firebase-hooks/auth';
+import dynamic from 'next/dynamic';
 
 export default function QucickPost({onCallback}) {
   const router = useRouter();

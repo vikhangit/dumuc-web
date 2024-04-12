@@ -10,9 +10,8 @@ import { auth } from "@utils/firebase";
 import StoryLike from "./StoryLike";
 import StoryShare from "./StoryShare";
 import StoryComment from "./StoryComment";
-import RenderComments from "./RenderComments";
 
-const StoryLikeShareComment = ({ item, url, index, onCallback, showComment, setShowComment}) => {
+export default function StoryLikeShareComment({ item, url, index, onCallback, showComment, setShowComment}) {
   const sizes = useWindowSize();
   const [user] = useAuthState(auth)
   const [showLike, setShowLike] = useState(false)
@@ -166,5 +165,3 @@ const StoryLikeShareComment = ({ item, url, index, onCallback, showComment, setS
     </div>
   );
 };
-
-export default StoryLikeShareComment;

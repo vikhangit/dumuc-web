@@ -1,6 +1,8 @@
 "use client"
-import { getCategories, getPostsLoadMore, getPopularPosts } from "@apis/posts";
-import TabbarBottom from "@components/TabbarBottom";
+import { getCategories, getPostsLoadMore} from "@apis/posts";
+const TabbarBottom = dynamic( () => {
+  return import( '@components/TabbarBottom' );
+}, { ssr: false } );
 import Header from "@components/Header";
 import BannerRight from "@components/BannerRight";
 import ArticleForumItems from "@components/ArticleForumItems";
@@ -11,6 +13,7 @@ import { auth } from "@utils/firebase";
 import Link from "next/link";
 import { IoMdAddCircleOutline } from "react-icons/io";
 import Loading from "app/forum/topic/[slug]/[id]/loading";
+import dynamic from "next/dynamic";
 
 export default function ({ params, searchParams }) {
     const [category, setCategory] = useState([])

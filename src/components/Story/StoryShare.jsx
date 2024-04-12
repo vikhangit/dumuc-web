@@ -1,7 +1,5 @@
 "use client";
 import { FacebookShareButton } from "react-share";
-import { PiShareFatLight } from "react-icons/pi";
-import Image from "next/image";
 import { CiShare2 } from "react-icons/ci";
 const StoryShare = ({ item }) => {
   return (

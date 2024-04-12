@@ -1,7 +1,5 @@
 "use client";
-import BannerCenterSkeleton from "@components/skeleton/BannerCenterSkeleton";
 import BannerRight from "@components/BannerRight";
-import BottomToolBarSkeleton from "@components/skeleton/BottomToolBarSkeleton";
 import Header from "@components/Header";
 import { Card } from "antd";
 import { Spinner } from "flowbite-react";

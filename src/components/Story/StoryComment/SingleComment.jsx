@@ -1,4 +1,3 @@
-import FeedCommentReplyModal from '@components/FeedCommentReplyModal';
 import moment from 'moment';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -7,12 +6,14 @@ import { IoMdMore } from 'react-icons/io';
 import CommentForm from './CommentForm';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '@utils/firebase';
-import vi from "moment/locale/vi";
 import { message } from 'antd';
 import { MdFormatQuote } from 'react-icons/md';
 import { useRouter } from 'next/navigation';
-import { getFeed, getStory, updateComment, updateCommentStories } from '@apis/feeds';
-import ModalImageZoom from '@components/ModalImageZoom';
+import {  getStory, updateCommentStories } from '@apis/feeds';
+import dynamic from 'next/dynamic';
+const ModalImageZoom = dynamic( () => {
+  return import( '@components/ModalImageZoom' );
+}, { ssr: false } );
 
 export default function SingleComment({ item, feed, setComments, qoute, setQoute, onCallback }) {
   const [user] = useAuthState(auth)

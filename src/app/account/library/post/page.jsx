@@ -8,7 +8,6 @@ import Header from "@components/Header";
 import BannerRight from "@components/BannerRight";
 import ArticleLibraryItems from "@components/ArticleLibraryItems";
 import AccountLibraryTabs from "@components/AccountLibraryTabs";
-import router from "next/router";
 import Loading from "./loading";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@utils/firebase";

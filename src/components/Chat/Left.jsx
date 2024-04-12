@@ -1,35 +1,20 @@
 
 "use client"
-import TabbarBottom from '@components/TabbarBottom';
-import TabbarBottomChat from '@components/TabbarBottomChat';
 import { useWindowSize } from '@hooks/useWindowSize';
 import Image from 'next/image';
 import Link from 'next/link';
 import React, { useEffect, useRef, useState } from 'react'
-import { HiVideoCamera } from 'react-icons/hi';
-import { IoIosCall, IoMdSearch } from 'react-icons/io';
-import { IoCall, IoChevronBackOutline, IoCloseCircle, IoImageOutline, IoImages, IoSend, IoVideocam } from 'react-icons/io5';
-import { MdEmojiEmotions, MdOutlinePersonAddAlt } from 'react-icons/md';
-import { RiFolderVideoFill, RiFolderVideoLine } from 'react-icons/ri';
-import { GoFileDirectory, GoFileDirectoryFill } from "react-icons/go";
-import { LuFileVideo } from "react-icons/lu";
-import { HiArrowLongLeft } from "react-icons/hi2";
-import { PrettyChatWindow } from 'react-chat-engine-pretty';
+import { IoMdSearch } from 'react-icons/io';
+import { IoCloseCircle } from 'react-icons/io5';
+import { MdOutlinePersonAddAlt } from 'react-icons/md';;
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth, db } from '@utils/firebase';;
-import { getFirestore, collection, addDoc, serverTimestamp,query, orderBy,onSnapshot,
-  limit,} from 'firebase/firestore';import { getProfile } from '@apis/users';
-import { getAuthor, getAuthors } from '@apis/posts';
-import { useRouter } from 'next/navigation';
-import ChatListItem from './ChatListItem';
-import { moveArr } from '@utils/covertCommets';
-import { Spinner } from 'flowbite-react';
+  import { getProfile } from '@apis/users';
 ;
 
 export default function ChatLeft({setUserRecieved, userRecieved, mobile, setMobile, messages, authors}) {
     const [user] = useAuthState(auth)
     const sizes = useWindowSize()
-    const router = useRouter()
     const [friendList, setFriendList] = useState([])
     const [valueSearch, setValueSearch] = useState("");
     const [searchFunction, setSearchFunction] = useState(false)

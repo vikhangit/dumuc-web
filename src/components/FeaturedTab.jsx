@@ -1,11 +1,8 @@
 "use client"
 import { useWindowSize } from '@hooks/useWindowSize';
 import Link from 'next/link';
-import { getPopularAuthors, getPopularPosts } from '@apis/posts';
-import { getUsersRanking } from '@apis/users';
-import React, { useState } from 'react';
+import React from 'react';
 import Image from 'next/image';
-import { Dropdown, Select } from 'flowbite-react';
 
 const FeaturedTab = ({ searchParams }) => {
   const sizes = useWindowSize()
@@ -42,62 +39,6 @@ const FeaturedTab = ({ searchParams }) => {
           <button type="button">Top bài viết</button>
         </Link>
       </div>
-    </div>
-    <div>
-    {/* <div className={`flex justify-between ${sizes.width > 340 ? "px-2 sm:px-4" : "px-0.5"} gap-x-1 sm:gap-x-4 bg-gray-200`}>
-      <div className="basis-1/4">
-      <select 
-      style={{
-       boxShadow: "0 0 #0000", 
-       paddingRight: sizes.width > 500 ? "2.5rem" : "0.5rem",
-       paddingLeft: sizes.width > 500 ? "0.75rem" : "0.5rem"
-      }} 
-      className={`w-full border-0 text-[#c80000] bg-transparent ${sizes.width > 350 ? "text-xs sm:text-sm" : "text-[10px] font-medium"} cursor-pointer focus:border-0 focus:outline-0 
-      ${sizes.width > 500 ? "[&:not([size])]:bg-[url('/icons/MdKeyboardArrowDown.png')]" : "[&:not([size])]:bg-none"} [&:not([size])]:bg-[length:1.75rem]`}>
-        <option className="text-xs">Tuần này</option>
-        <option className="text-xs">Tuần trước</option>
-      </select>
-      </div>
-      <div className="basis-1/4">
-      <select 
-      style={{
-       boxShadow: "0 0 #0000", 
-       paddingRight: sizes.width > 500 ? "2.5rem" : "0.5rem",
-       paddingLeft: sizes.width > 500 ? "0.75rem" : "0.5rem"
-      }} 
-      className={`w-full border-0 text-[#c80000] bg-transparent ${sizes.width > 350 ? "text-xs sm:text-sm" : "text-[10px] font-medium"} cursor-pointer focus:border-0 focus:outline-0 
-      ${sizes.width > 500 ? "[&:not([size])]:bg-[url('/icons/MdKeyboardArrowDown.png')]" : "[&:not([size])]:bg-none"} [&:not([size])]:bg-[length:1.75rem]`}>
-        <option className="text-xs">Tháng này</option>
-        <option className="text-xs">Tháng trước</option>
-      </select>
-      </div>
-      <div className="basis-1/4">
-      <select 
-      style={{
-       boxShadow: "0 0 #0000", 
-       paddingRight: sizes.width > 500 ? "2.5rem" : "0.5rem",
-       paddingLeft: sizes.width > 500 ? "0.75rem" : "0.5rem"
-      }} 
-      className={`w-full border-0 text-[#c80000] bg-transparent ${sizes.width > 350 ? "text-xs sm:text-sm" : "text-[10px] font-medium"} cursor-pointer focus:border-0 focus:outline-0 
-      ${sizes.width > 500 ? "[&:not([size])]:bg-[url('/icons/MdKeyboardArrowDown.png')]" : "[&:not([size])]:bg-none"} [&:not([size])]:bg-[length:1.75rem]`}>
-        <option className="text-xs">Qúy này</option>
-        <option className="text-xs">Quý trước</option>
-      </select>
-      </div>
-      <div className="basis-1/4">
-      <select 
-      style={{
-       boxShadow: "0 0 #0000", 
-       paddingRight: sizes.width > 500 ? "2.5rem" : "0.5rem",
-       paddingLeft: sizes.width > 500 ? "0.75rem" : "0.5rem"
-      }} 
-      className={`w-full border-0 text-[#c80000] bg-transparent ${sizes.width > 350 ? "text-xs sm:text-sm" : "text-[10px] font-medium"} cursor-pointer focus:border-0 focus:outline-0 
-      ${sizes.width > 500 ? "[&:not([size])]:bg-[url('/icons/MdKeyboardArrowDown.png')]" : "[&:not([size])]:bg-none"} [&:not([size])]:bg-[length:1.75rem]`}>
-        <option className="text-xs">Năm này</option>
-        <option className="text-xs">Năm trước</option>
-      </select>
-      </div>
-    </div> */}
     </div>
     </>
   );

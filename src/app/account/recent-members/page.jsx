@@ -12,8 +12,11 @@ import { RangeSlider, Spinner } from "flowbite-react";
 import { useWindowSize } from "@hooks/useWindowSize";
 import Clock from "@components/Clock";
 import { FaArrowLeftLong } from "react-icons/fa6";
-import TabbarBottomChat from "@components/TabbarBottomChat";
 import { useAuthState, useUpdateProfile } from "react-firebase-hooks/auth";
+import dynamic from "next/dynamic";
+const TabbarBottomChat = dynamic( () => {
+  return import( '@components/TabbarBottomChat' );
+}, { ssr: false } );
 
 const theme = {
     "root": {

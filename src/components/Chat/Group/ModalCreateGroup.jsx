@@ -1,14 +1,10 @@
 "use client"
 import React, { useState, useEffect, useRef } from "react";
 import { Modal} from "antd";
-import { CaretDownOutlined} from '@ant-design/icons';
 import { uploadImage } from "apis/other";
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth, db } from '@utils/firebase';
-import dynamic from 'next/dynamic';
-import { useWindowSize } from "@hooks/useWindowSize";
-import { createUserStories, getProfile, updateProfile } from "@apis/users";
-import { createStoryByUser } from "@apis/feeds";
+import { getProfile} from "@apis/users";
 import { FaCamera } from "react-icons/fa6";
 import { Spinner } from 'flowbite-react';
 import Image from 'next/image';
@@ -16,11 +12,8 @@ import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 
 export default function ModalCreateGroup({ visible, onCancel, onCallback, authors}) {
   const [user] = useAuthState(auth)
-  const sizes = useWindowSize()
   const [loading, setLoading] = useState(false);
-  const [link, setLink] = useState("")
   const [usingUser, setUsingUser] = useState()
-  const [active, setActive] = useState(0)
   const [avatar, setAvatar] = useState("")
   const refAvatar = useRef(null)
   const [loadingAvatar, setLoadingAvatar] = useState(false)

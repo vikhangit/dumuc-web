@@ -3,23 +3,23 @@ import React, { useState, useEffect } from "react";
 import { useRouter } from 'next/navigation';
 import Image from "next/image";
 import {getAuthor } from "@apis/posts";
-import TabbarBottom from "@components/TabbarBottom";
+const TabbarBottom = dynamic( () => {
+    return import( '@components/TabbarBottom' );
+  }, { ssr: false } );
 import Header from "@components/Header";
 import BannerRight from "@components/BannerRight";
-import {MdOutlinePhoto, MdOutlinePlayCircleOutline, MdPending} from "react-icons/md";
+import { MdPending} from "react-icons/md";
 import Loading from "app/author/[slug]/[id]/loading";
-import { useWindowSize } from "@hooks/useWindowSize";
-import { IoEyeOutline } from "react-icons/io5";
-import { HiPencil } from "react-icons/hi";
 import AuthorLibrary from "@components/authorLibrary";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@utils/firebase";
 import { FaUserCheck, FaUserPlus } from "react-icons/fa6";
 import { FaUserTimes } from "react-icons/fa";
-import { acceptReceiveRequestAddFriend, acceptRequestAddFriend, createUserFollow, createUserToFollowerList, deleteAddFriend, deleteRecieveFriend, deleteUserFollow, deleteUserInFollowerList, getProfile, receiveRequestAddFriend, sendRequestAddFriend } from "@apis/users";
+import {  createUserFollow, createUserToFollowerList, deleteAddFriend, deleteRecieveFriend, deleteUserFollow, deleteUserInFollowerList, getProfile, receiveRequestAddFriend, sendRequestAddFriend } from "@apis/users";
 import { message } from "antd";
 import Link from "next/link";
 import { Spinner } from "flowbite-react";
+import dynamic from "next/dynamic";
 
 const NewAuthorUI = ({ currentUrl = '/', params, searchParams }) => {
     const id = params?.id || '';
@@ -30,7 +30,6 @@ const NewAuthorUI = ({ currentUrl = '/', params, searchParams }) => {
     const [loading, setLoading] = useState(true)
     const [authorData, setAuthorData] = useState();
     const [openLibrary, setOpenLibrary] = useState(false)
-    const sizes = useWindowSize();
     const [loadingAdd, setLoadingAdd] = useState(false);
     const [usingUser, setUsingUser] = useState()
     useEffect(() =>{

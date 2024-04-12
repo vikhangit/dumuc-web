@@ -1,6 +1,8 @@
 
 "use client"
-import TabbarBottomChat from '@components/TabbarBottomChat';
+const TabbarBottomChat = dynamic( () => {
+  return import( '@components/TabbarBottomChat' );
+}, { ssr: false } );
 import { useWindowSize } from '@hooks/useWindowSize';
 import React, { useEffect, useRef, useState } from 'react';
 import { useAuthState } from 'react-firebase-hooks/auth';
@@ -8,8 +10,13 @@ import { auth, db } from '@utils/firebase';;
 import {collection, query, orderBy,onSnapshot,
   limit,} from 'firebase/firestore';
 import { getAuthors } from '@apis/posts';
-import ChatLeft from '@components/Chat/Left';
-import ChatRight from '@components/Chat/Right';
+import dynamic from 'next/dynamic';
+const ChatLeft = dynamic( () => {
+  return import( '@components/Chat/Left' );
+}, { ssr: false } );
+const ChatRight = dynamic( () => {
+  return import( '@components/Chat/Right' );
+}, { ssr: false } );
 
 
 export default function ChatGroup() {

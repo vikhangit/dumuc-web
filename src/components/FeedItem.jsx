@@ -1,30 +1,33 @@
 "use client";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useRef, useCallback } from "react";
 import Image from "next/image";
 import "@fancyapps/ui/dist/fancybox/fancybox.css";
-import {createFeedView, deleteFeedByUser, updateFeedByUser} from 'apis/feeds';
+import { updateFeedByUser} from 'apis/feeds';
 import FeedBookmark from "@components/FeedBookmark";
-import FeedLikeShareComment from "./FeedLikeShareComment";
+import dynamic from "next/dynamic";
+const FeedLikeShareComment = dynamic( () => {
+  return import( './FeedLikeShareComment' );
+}, { ssr: false } );
 import moment from "moment";
 import "@fancyapps/ui/dist/fancybox/fancybox.css";
 import { useRouter } from "next/navigation";
 import { message } from "antd";
-import { useWindowSize } from "@hooks/useWindowSize";
 import { IoMdMore } from "react-icons/io";
 import Link from "next/link";
-import QuickPostModal from "./QuickPostModal";
+const QuickPostModal = dynamic( () => {
+  return import( './QuickPostModal' );
+}, { ssr: false } );
 import QuickPostModalEmoji from "./QuickPostModlEmoji";
-import ModalImageZoom from "./ModalImageZoom";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@utils/firebase";
-import { faLessThanEqual } from "@fortawesome/free-solid-svg-icons";
-import ModalImageZoomFeed from "./ModalImageZoomFeed";
+const ModalImageZoomFeed = dynamic( () => {
+  return import( './ModalImageZoomFeed' );
+}, { ssr: false } );
 import { Modal } from "flowbite-react";
 import LoginWithModal from "./LoginWithModal";
 
 const FeedItem = ({ item, index, onCallback }) => {
   const [user, loading, error] = useAuthState(auth);
-  const sizes = useWindowSize();
   const router = useRouter()
   const videoEl = useRef(null)
   const [showMore, setShowMore] = useState(false)

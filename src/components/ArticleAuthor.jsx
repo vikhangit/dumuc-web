@@ -1,5 +1,4 @@
 "use client"
-import { Avatar } from "antd";
 import moment from "moment";
 import Image from "next/image";
 

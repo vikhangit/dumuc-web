@@ -1,9 +1,9 @@
 "use client";
-import BottomToolBarSkeleton from "@components/skeleton/BottomToolBarSkeleton";
 import Header from "@components/Header";
-import NewsletterSkeleton from "@components/skeleton/NewsletterSkeleton";
-import TabbarBottom from "@components/TabbarBottom";
-import Newsletter from "@components/Newsletter";
+import dynamic from "next/dynamic";
+const TabbarBottom = dynamic( () => {
+  return import( '@components/TabbarBottom' );
+}, { ssr: false } );
 import BannerRight from "@components/BannerRight";
 
 export default function Loading() {

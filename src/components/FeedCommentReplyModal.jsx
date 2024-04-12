@@ -7,8 +7,6 @@ import { Spinner } from "flowbite-react";
 import { IoImageOutline, IoSend } from "react-icons/io5";
 import { useWindowSize } from "@hooks/useWindowSize";
 import { IoMdCloseCircle } from "react-icons/io";
-import { useAuthState } from "react-firebase-hooks/auth";
-import { auth } from "@utils/firebase";
 
 const FeedCommentReplyModal = ({ setIsCommentModal, onCreateReply,replyToName, commentId, onCallback, user }) => {
   const [loading, setLoading] = useState(false);

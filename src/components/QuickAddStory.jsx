@@ -6,7 +6,6 @@ import { uploadImage } from "apis/other";
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '@utils/firebase';
 import dynamic from 'next/dynamic';
-import { useWindowSize } from "@hooks/useWindowSize";
 import { createUserStories, deleteUserStories, getProfile, updateProfile } from "@apis/users";
 import { createStoryByUser, updateStoryByUser } from "@apis/feeds";
 import { Button, message } from "antd";
@@ -20,7 +19,6 @@ const CustomEditor = dynamic( () => {
 
 export default function QuickAddStory({ visible, onCancel, onCallback, url, type, data, activeItem,setVideoChange}) {
   const [user] = useAuthState(auth)
-  const sizes = useWindowSize()
   const [loading, setLoading] = useState(false);
   const [link, setLink] = useState("")
   const [photo, setPhoto] = useState("")
@@ -93,9 +91,7 @@ export default function QuickAddStory({ visible, onCancel, onCallback, url, type
    setLoading(false);
    onCallback();
    onCancel();
-   if(isMoout){
-    window.location = "/"
-   }
+   window.location = "/"
 
    localStorage.removeItem("storyPrivate")
   }; 

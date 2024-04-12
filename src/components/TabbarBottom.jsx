@@ -4,8 +4,6 @@ import React, { useEffect, useState } from "react";
 import { Drawer } from "antd";
 import Image from 'next/image';
 import { Modal, Spinner } from 'flowbite-react';
-import PostSOSWithModal from './PostSOSWithModal';
-import { useWindowSize } from '@hooks/useWindowSize';
 import { getSossByUser } from '@apis/soss';
 import moment from 'moment';
 import { DateTimeLog } from "@utils/dateFormat";
@@ -13,6 +11,11 @@ import { MdPeople } from 'react-icons/md';
 import { useRouter } from 'next/navigation';
 import { auth } from 'utils/firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
+import dynamic from 'next/dynamic';
+const PostSOSWithModal = dynamic( () => {
+  return import( './PostSOSWithModal' );
+}, { ssr: false } );
+import {useWindowSize} from '@hooks/useWindowSize';
 export default function TabbarBottom({ active = 'home' }) {
   const [user, loading, error] = useAuthState(auth);
   const [isOpenMenu, setIsOpenMenu] = useState(false);

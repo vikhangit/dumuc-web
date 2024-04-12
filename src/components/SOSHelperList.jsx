@@ -4,8 +4,11 @@ import moment from "moment";
 import {completeSosHelper, cancelSosHelper} from '@apis/soss';
 import {message} from 'antd'
 import Image from "next/image";
-import Timer from "./Timer";
+const Timer = dynamic( () => {
+  return import( './Timer' );
+}, { ssr: false } );
 import { DateTimeLog } from "@utils/dateFormat";
+import dynamic from "next/dynamic";
 
 const SOSHelperList = ({ items, onCallback }) => {
   const [user, loading, error] = useAuthState(auth);

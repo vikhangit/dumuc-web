@@ -23,12 +23,12 @@ import { getAddressFromLatLng } from "@apis/other";
 import { uploadImage } from "apis/other";
 import { Modal, Spinner } from "flowbite-react";
 import Image from "next/image";
-import { useWindowSize } from "@hooks/useWindowSize";
 import SOSMapGetLongLat from "./SOSMapGetLongLat";
 import { auth } from "@utils/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
+import {useWindowSize} from "@hooks/useWindowSize";
 
-const PostSOSWithModal = ({ searchParams, setModalSuccess,setCloseForm}) => {
+function PostSOSWithModal({ searchParams, setModalSuccess,setCloseForm})  {
   const sosId = searchParams?.id;
   const router = useRouter();
   const pathname = usePathname();
@@ -655,7 +655,7 @@ const PostSOSWithModal = ({ searchParams, setModalSuccess,setCloseForm}) => {
 
                   generateCustomToken(token)
                   .then(result => {
-                    window.open(`${process.env.NEXT_PUBLIC_COMMUNICAION_URL}/livestream/${result?.token}`, "_blank");
+                    // window.open(`${process.env.NEXT_PUBLIC_COMMUNICAION_URL}/livestream/${result?.token}`, "_blank");
                   })
                   }
               });

@@ -1,13 +1,12 @@
 
 import React, { useState } from 'react'
-import { Autoplay, Navigation } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import 'swiper/css/navigation';
-import { Modal, Progress } from 'antd';
-import { useWindowSize } from '@hooks/useWindowSize';
+import {  Progress } from 'antd';
 import { useEffect } from 'react';
 import Image from 'next/image';
+import {useWindowSize} from '@hooks/useWindowSize';
 
 export default function ModalImageZoomFeed({openImage, setOpenImage, imageList, index, type="image"}) {
     const [swiper, setSwiper] = useState(null)
@@ -100,15 +99,7 @@ export default function ModalImageZoomFeed({openImage, setOpenImage, imageList, 
                     }
                 </Swiper>
         </div>
-        {/* <div className='absolute z-[9999] bottom-2 py-2 left-0 w-full bg-black bg-black bg-opacity-50 flex justify-center gap-x-2'>
-            {
-                imageList.map((x, index) => <div className={`${activeSlide == index ? "border-2 border-white" : "border-2 border-black opacity-40"} relative z-[9999] ${sizes.height > 450 ? "h-[40px] md:h-60px lg:h-[80px]" : "h-[40px] md:h-60px lg:h-[80px]"}`} onClick={() => {
-                    swiper.slideTo(index)
-                }}>
-                    <img src={x} className={`w-full h-full object-contain`} />
-                </div>)
-            }
-        </div> */}
+        
     </div>
     </div>
   )

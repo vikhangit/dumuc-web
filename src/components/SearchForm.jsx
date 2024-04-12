@@ -110,7 +110,7 @@ const SearchForm = () => {
       )
     }
     localStorage.setItem("RecentSearch", JSON.stringify(recentSearch))
-    window.location = url
+    // window.location = url
   }
 
   const removeRecentSearch = () => {

@@ -1,13 +1,6 @@
 "use client";
-import BannerCenter from "@components/BannerCenter";
 import BannerRight from "@components/BannerRight";
 import Header from "@components/Header";
-import Newsletter from "@components/Newsletter";
-import BannerCenterSkeleton from "@components/skeleton/BannerCenterSkeleton";
-import BannerRightSkeleton from "@components/skeleton/BannerRightSkeleton";
-import HeaderSkeleton from "@components/skeleton/HeaderSkeleton";
-import { Spinner } from "flowbite-react";
-import Image from "next/image";
 
 export default function Loading({isPreview = false}) {
   // You can add any UI inside Loading, including a Skeleton.

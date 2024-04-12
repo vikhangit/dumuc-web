@@ -1,6 +1,6 @@
 "use client"
 import React, { useState, useEffect } from "react";
-import { useRouter } from 'next/navigation';
+import { useParams, usePathname, useRouter } from 'next/navigation';
 
 import { message  } from "antd";
 import Header from "@components/Header";
@@ -11,14 +11,18 @@ import isEmail from 'validator/lib/isEmail';
 
 import { auth, providerGoogle } from 'utils/firebase';
 import { signInWithPopup, isSignInWithEmailLink, signInWithEmailLink, sendSignInLinkToEmail, onAuthStateChanged } from "firebase/auth";
-import TabbarBottom from "@components/TabbarBottom";
+const TabbarBottom = dynamic( () => {
+    return import( '@components/TabbarBottom' );
+  }, { ssr: false } );
 import BannerRight from "@components/BannerRight";
+import dynamic from "next/dynamic";
 
 const PasswordlessPage = ({searchParams}) => {
     const query = searchParams;
     const [user, loading] = useAuthState(auth);
     const router = useRouter();
-    
+    const params = useParams()
+    const pathname = usePathname()
     const [loadingAction, setLoadingAction] = useState(false);
     const [email, setEmail] = useState();
     const [emailError, setEmailError] = useState('');
@@ -92,7 +96,7 @@ const PasswordlessPage = ({searchParams}) => {
                 // The link was successfully sent. Inform the user.
                 // Save the email locally so you don't need to ask the user for it again
                 // if they open the link on the same device.
-                window.localStorage.setItem('emailForSignIn', email);
+                localStorage.setItem('emailForSignIn', email);
                 setIsModalOpen(true);
                 setLoadingAction(false);
                 // ...
@@ -105,17 +109,18 @@ const PasswordlessPage = ({searchParams}) => {
                 setLoadingAction(false);
             });
     }
-
+    console.log()
     useEffect(() => {
         setLoadingAction(true)
-        const saved_email = window.localStorage.getItem("emailForSignIn");
-        if (isSignInWithEmailLink(auth, window.location.href) && !!saved_email) {
-            //sign in with email link (Passwordless)
-            signInWithEmailLink(auth, saved_email, window.location.href)
+        const saved_email = localStorage.getItem("emailForSignIn");
+        const link = `${process.env.NEXT_PUBLIC_HOMEPAGE_URL}/auth?email=${searchParams?.email}&url_return=${searchParams?.url_return}&apiKey=${searchParams?.apiKey}&oobCode=${searchParams?.oobCode}&mode=${searchParams?.mode}&lang=${searchParams?.lang}`
+        if (isSignInWithEmailLink(auth, link) && !!saved_email) {
+        
+            signInWithEmailLink(auth, saved_email, link)
                 .then(async (result) => {
                     let userCreate = result.user;
                     // Clear email from storage.
-                    window.localStorage.removeItem('emailForSignIn');
+                    localStorage.removeItem('emailForSignIn');
                     createUser({
                         uid: userCreate.uid,
                         email: userCreate.email,
@@ -184,7 +189,7 @@ const PasswordlessPage = ({searchParams}) => {
     //redirect already login
     useEffect(() => {
         
-        const saved_email = window.localStorage.getItem("emailForSignIn");
+        const saved_email = localStorage.getItem("emailForSignIn");
         if (user && loading === false && (saved_email === null)) {
             //redirect
             if (query?.url_return !== undefined && query?.url_return !== "undefined") {

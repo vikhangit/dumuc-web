@@ -1,10 +1,9 @@
 "use client"
 import Link from 'next/link';
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Image from 'next/image';
 import { useWindowSize } from '@hooks/useWindowSize';
-import { getSossByUser } from '@apis/soss';
-import { MdAccountCircle, MdOutlineAccountBox, MdOutlineSupervisedUserCircle, MdPending, MdPeople } from 'react-icons/md';
+import { MdAccountCircle, MdOutlineSupervisedUserCircle, MdPending } from 'react-icons/md';
 import { useRouter } from 'next/navigation';
 
 import { auth } from 'utils/firebase';

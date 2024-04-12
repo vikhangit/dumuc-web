@@ -1,24 +1,21 @@
 "use client"
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from 'next/navigation';
-
 import { Button, message } from "antd";
-
 import { updateProfile, getProfile, updateCCCDFrontPhoto, updateCCCDBackSidePhoto } from "@apis/users";
 import Header from "@components/Header";
 import { MdOutlineControlPoint } from "react-icons/md";
-
 import BannerRight from "@components/BannerRight";
-//apis
 import { uploadImage } from "apis/other";
 import Image from "next/image";
-import TabbarBottom from "@components/TabbarBottom";
-import { useWindowSize } from "@hooks/useWindowSize";
 import { UploadOutlined } from '@ant-design/icons';
 import { Spinner } from "flowbite-react";
-import { useAuthState, useUpdateProfile } from "react-firebase-hooks/auth";
+const TabbarBottom = dynamic( () => {
+  return import( '@components/TabbarBottom' );
+}, { ssr: false } );import { useAuthState, useUpdateProfile } from "react-firebase-hooks/auth";
 import { auth } from "@utils/firebase";
-
+import "./profile.css"
+import dynamic from "next/dynamic";
 const ProfilePage = () => {
   const router = useRouter();
 
@@ -69,9 +66,6 @@ const ProfilePage = () => {
     setNumberPlate(plateArray[0])
     setNumberPlate2(plateArray[1])
   },[plateArray])
-  
-
-  const size = useWindowSize()
   const handleChange = name => e => {
     setLoadigAvatar(true)
     if (name === 'photo' && e.target.files[0]) {
@@ -428,10 +422,10 @@ const ProfilePage = () => {
               <div class="bg-white rounded-lg p-4 sm:p-6 xl:p-8 dark:bg-gray-800 mb-3 border-b" style={{
                 boxShadow: "0px 4px 4px 0px #00000040 inset"
               }}>
-                <div class={`items-center flex justify-center mb-3  ${size.width > 340 ? "gap-x-4" : "gap-x-2"}`}>
-                  <div className={` flex flex-col items-center ${size.width > 340 ? "basis-auto" : "basis-1/2"}`}>
+                <div class={`items-center flex justify-center mb-3  gap-x-4 profile1`}>
+                  <div className={` flex flex-col items-center profile2 basis-auto`}>
                     <div class={`items-center flex justify-center w-full`}>
-                      <label  onClick={() => refFontSide.current.click()}  class={`flex justify-center items-center ${size.width > 340 ? "w-[150px] h-[120px] sm:w-[200px] sm:h-[160px]" : "w-full h-[120px]"} border border-[#00000033] rounded-lg cursor-pointer`}>
+                      <label  onClick={() => refFontSide.current.click()}  class={`flex justify-center items-center w-[150px] h-[120px] sm:w-[200px] sm:h-[160px] fontSide border border-[#00000033] rounded-lg cursor-pointer`}>
                         {
                          loadingFontSide ? <Spinner /> : usingUser?.cccdFrontPhoto ? <Image width={0} height={0} sizes="100vw" className="w-full h-full rounded-lg" src={usingUser?.cccdFrontPhoto} alt={usingUser?.name} /> :  <MdOutlineControlPoint color="#00000033" size="24" />
                         }
@@ -441,9 +435,9 @@ const ProfilePage = () => {
                     <div className="mt-2 text-sm sm:text-md text-[#424141B2] font-semibold text-center">CCCD mặt trước</div>
                     {user?.cccdFrontPhoto && <Button  onClick={() => refFontSide.current.click()}  className="mt-2 mb-3" icon={<UploadOutlined />}>Thay đổi</Button>}
                   </div>
-                  <div className={`flex flex-col items-center ${size.width > 340 ? "basis-auto" : "basis-1/2"}`}>
+                  <div className={`flex flex-col items-center profile2`}>
                     <div class={`items-center flex justify-center w-full`}>
-                      <label  onClick={() => refBackSide.current.click()} class={`flex justify-center items-center ${size.width > 340 ? "w-[150px] h-[120px] sm:w-[200px] sm:h-[160px]" : "w-full h-[120px]"} border border-[#00000033] rounded-lg cursor-pointer`}>
+                      <label  onClick={() => refBackSide.current.click()} class={`flex justify-center items-center w-[150px] h-[120px] sm:w-[200px] sm:h-[160px] fontSide border border-[#00000033] rounded-lg cursor-pointer`}>
                         {
                         loadingBackSide ?  <Spinner /> : usingUser?.cccdBackPhoto ? <Image width={0} height={0} sizes="100vw" className="w-full h-full rounded-lg" src={usingUser?.cccdBackPhoto} alt={usingUser?.name} /> : <MdOutlineControlPoint color="#00000033" size="24" />
                         }

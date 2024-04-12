@@ -1,8 +1,8 @@
 "use client";
 import Link from "next/link";
 import { register } from "swiper/element/bundle";
-import React, { useState,  useEffect } from "react";
-import { Navigation, Pagination, Scrollbar, A11y } from "swiper/modules";
+import React, { useEffect } from "react";
+import { Navigation } from "swiper/modules";
 
 import { Swiper, SwiperSlide } from "swiper/react";
 import Image from "next/image";

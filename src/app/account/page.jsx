@@ -6,7 +6,9 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { MdArtTrack, MdContactless, MdFavorite, MdOutlineBookmarks, MdOutlineExitToApp, MdOutlineFileCopy, MdOutlineMessage, MdOutlinePermContactCalendar, MdOutlinePhoneInTalk, MdOutlinePrivacyTip, MdOutlineSettingsAccessibility } from "react-icons/md";
 
-import TabbarBottom from "@components/TabbarBottom";
+const TabbarBottom = dynamic( () => {
+  return import( '@components/TabbarBottom' );
+}, { ssr: false } );
 import Header from "@components/Header";
 import BannerRight from "@components/BannerRight";
 
@@ -14,6 +16,7 @@ import { getProfile } from "@apis/users";
 import { auth } from '@utils/firebase';
 import { useAuthState, useSignOut } from 'react-firebase-hooks/auth';
 import { message } from "antd";
+import dynamic from "next/dynamic";
 
 const AccountPage = () => {
   const router = useRouter();

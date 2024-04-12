@@ -1,5 +1,8 @@
 "use client"
-import TabbarBottom from "@components/TabbarBottom";
+import dynamic from "next/dynamic";
+const TabbarBottom = dynamic( () => {
+  return import( '@components/TabbarBottom' );
+}, { ssr: false } );
 import Header from "@components/Header";
 import BannerRight from "@components/BannerRight";
 import { getCategories } from "@apis/posts";

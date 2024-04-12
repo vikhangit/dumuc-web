@@ -1,14 +1,14 @@
 
 import React, { useState } from 'react'
-import { Autoplay, Navigation } from 'swiper/modules';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import 'swiper/css/navigation';
-import { Modal, Progress, message } from 'antd';
-import { useWindowSize } from '@hooks/useWindowSize';
+import {  message } from 'antd';
 import { useEffect } from 'react';
 import Image from 'next/image';
-import StoryLikeShareComment from './Story/StoryLikeShareComment';
+const StoryLikeShareComment = dynamic( () => {
+    return import( './Story/StoryLikeShareComment' );
+  }, { ssr: false } );
 import RenderComments from './Story/RenderComments';
 import { useRouter } from 'next/navigation';
 import { FaPencil, FaUserCheck, FaUserPlus } from "react-icons/fa6";
@@ -18,7 +18,11 @@ import { auth } from '@utils/firebase';
 import { createUserFollow, createUserToFollowerList, deleteAddFriend, deleteRecieveFriend, deleteUserFollow, deleteUserInFollowerList, getProfile, receiveRequestAddFriend, sendRequestAddFriend } from '@apis/users';
 import Link from 'next/link';
 import { Spinner } from 'flowbite-react';
-import QuickAddStory from './QuickAddStory';
+const QuickAddStory = dynamic( () => {
+    return import( './QuickAddStory' );
+  }, { ssr: false } );
+import {useWindowSize} from '@hooks/useWindowSize';
+import dynamic from 'next/dynamic';
 
 export default function ModalPlayVideos({openImage, setOpenImage, imageList, index, onCallback, setVideoChange}) {
     const [user] = useAuthState(auth)

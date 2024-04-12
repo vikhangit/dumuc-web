@@ -2,7 +2,6 @@ import { uploadImage } from '@apis/other';
 import { createComment, getPost, updateComment } from '@apis/posts';
 import { getProfile } from '@apis/users';
 import { useWindowSize } from '@hooks/useWindowSize';
-import { nestedComment } from '@utils/covertCommets';
 import { auth } from '@utils/firebase';
 import { message } from 'antd';
 import { Spinner } from 'flowbite-react';
@@ -38,7 +37,6 @@ export default function CommentForm({
   },[user])
 
   const [body, setBody] = useState('');
-  const [bodyError, setBodyError] = useState('');
   const [loadingImage, setLoadingImage] = useState(false)
   const [focusComment, setFocusComment] = useState(false)
   const sizes = useWindowSize()

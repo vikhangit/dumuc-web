@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react";
 import { getFeedsLoadMore } from "@apis/feeds";
 import FeedItem from "@components/FeedItem";
-import "@fancyapps/ui/dist/fancybox/fancybox.css";
 import InfiniteScroll from "react-infinite-scroller";
 import { Spinner } from "flowbite-react";
 import NewQuickPost from "./Dumuc/NewQuickPost";

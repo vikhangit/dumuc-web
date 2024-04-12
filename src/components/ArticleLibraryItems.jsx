@@ -1,13 +1,12 @@
 "use client"
 import React from "react";
-import Link from 'next/link';
-import moment from "moment";
-import ArticleMeta from "@components/ArticleMeta";
+const ArticleMeta = dynamic( () => {
+  return import( '@components/ArticleMeta' );
+}, { ssr: false } );
 import Image from "next/image";
-import { useWindowSize } from "@hooks/useWindowSize";
+import dynamic from "next/dynamic";
 
 const ArticleLibraryItems = ({ items, status = 0,onCallback }) => {
-  const sizes = useWindowSize()
     return (
       <div className="post-list">
         <div>

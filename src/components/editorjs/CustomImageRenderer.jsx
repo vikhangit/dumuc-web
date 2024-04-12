@@ -1,8 +1,6 @@
 'use client'
 
-import Image from 'next/image'
-
-import { Fancybox } from "@fancyapps/ui";
+import Image from 'next/image';
 import "@fancyapps/ui/dist/fancybox/fancybox.css";
 
 function CustomImageRenderer({ data }) {

@@ -1,7 +1,10 @@
 "use client"
 import Header from "@components/Header";
 import BannerRight from "@components/BannerRight";
-import TabbarBottom from "@components/TabbarBottom";
+import dynamic from "next/dynamic";
+const TabbarBottom = dynamic( () => {
+  return import( '@components/TabbarBottom' );
+}, { ssr: false } );
 
 export default function Loading() {
     // You can add any UI inside Loading, including a Skeleton.

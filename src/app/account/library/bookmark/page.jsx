@@ -12,8 +12,6 @@ import ArticleItems from "@components/ArticleItems";
 import FeedItems from "@components/FeedItems";
 
 import AccountLibraryTabs from "@components/AccountLibraryTabs";
-
-import router from "next/router";
 import Loading from "./loading";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@utils/firebase";

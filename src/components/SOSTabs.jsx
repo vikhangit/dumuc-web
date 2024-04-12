@@ -1,13 +1,14 @@
 "use client"
 import { useWindowSize } from '@hooks/useWindowSize';
-import Link from "next/link"
-import { getPopularAuthors, getPopularPosts } from '@apis/posts';
-import { getUsersRanking } from '@apis/users';
 import React, { useState, useEffect } from 'react';
-import Image from 'next/image';
 import { Dropdown, Modal, Select } from 'flowbite-react';
-import PostSOSWithModal from './PostSOSWithModal';
-import LoginWithModal from './LoginWithModal';
+import dynamic from 'next/dynamic';
+const PostSOSWithModal = dynamic( () => {
+  return import( './PostSOSWithModal' );
+}, { ssr: false } );
+const LoginWithModal = dynamic( () => {
+  return import( './LoginWithModal' );
+}, { ssr: false } );
 import { message } from 'antd';
 import moment from "moment";
 import { DateTimeLog } from "@utils/dateFormat";

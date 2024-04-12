@@ -1,13 +1,10 @@
 "use client";
 import BannerRight from "@components/BannerRight";
 import Header from "@components/Header";
-import Newsletter from "@components/Newsletter";
-import TabbarBottom from "@components/TabbarBottom";
-import BottomToolBarSkeleton from "@components/skeleton/BottomToolBarSkeleton";
-import HeaderSkeleton from "@components/skeleton/HeaderSkeleton";
-import NewsletterSkeleton from "@components/skeleton/NewsletterSkeleton";
-import { Spinner } from "flowbite-react";
-
+import dynamic from "next/dynamic";
+const TabbarBottom = dynamic( () => {
+  return import( '@components/TabbarBottom' );
+}, { ssr: false } );
 export default function Loading() {
   // You can add any UI inside Loading, including a Skeleton.
   return (

@@ -1,44 +1,17 @@
 "use client"
-import React, { useState, useEffect, useRef } from "react";
+import React, { useRef } from "react";
 import { Modal} from "antd";
-import { CaretDownOutlined} from '@ant-design/icons';
-import { uploadImage } from "apis/other";
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth, db } from '@utils/firebase';
-import dynamic from 'next/dynamic';
-import { useWindowSize } from "@hooks/useWindowSize";
-import { createUserStories, getProfile, updateProfile } from "@apis/users";
-import { createStoryByUser } from "@apis/feeds";
-import { FaCamera, FaCheck } from "react-icons/fa6";
-import { Spinner } from 'flowbite-react';
+import { FaCamera} from "react-icons/fa6";
 import Image from 'next/image';
 import Link from 'next/link';
-import { addDoc, collection, serverTimestamp, updateDoc } from "firebase/firestore";
-import { IoMdCloseCircle } from "react-icons/io";
-import { Button, message } from "antd";
-import { UploadOutlined } from '@ant-design/icons';
 import { MdDelete } from "react-icons/md";
 
 export default function ModalAbout({ visible, onCancel, about, type, authors}) {
   const [user] = useAuthState(auth)
   const userCreated = authors?.find(x => x?.userId === about?.createdBy)
-
   const refImage = useRef(null)
-  const [loadingAvatar, setLoadingAvatar] = useState(false)
-  // const handleChangeIamge = (e) => {
-  //   setLoadingAvatar(true)
-  //   if(e?.target?.files)
-  //   {
-  //     uploadImage(e?.target?.files[0], user?.accessToken).then(async (data) => {
-  //       setPhoto(data?.url)
-  //       await updateDoc(collection(db, "chat-groups", about?.id), {
-  //         ...about,
-  //         avatar:
-  //       })
-  //       setLoadingAvatar(false)
-  //     })
-  //   }
-  // } 
    return( <Modal
       visible={visible}
       title={type === "about" ? `Thông tin nhóm` : "Thành viên nhóm"}

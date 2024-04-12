@@ -1,7 +1,9 @@
 "use client"
 import React, { useEffect, useState } from "react";
 import { getFeedsLoadMore, getStories, getStoriesLoadMore, getTags } from "@apis/feeds";
-import TabbarBottom from "@components/TabbarBottom";
+const TabbarBottom = dynamic( () => {
+  return import( '@components/TabbarBottom' );
+}, { ssr: false } );
 import Header from "@components/Header";
 import FeedItems from "@components/FeedItems";
 import Newsletter from "@components/Newsletter";
@@ -13,6 +15,7 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@utils/firebase";
 import RequestFriend from "./RequestFriend";
 import { getProfile } from "@apis/users";
+import dynamic from "next/dynamic";
 const HomePageContent = () => {
   const [user] = useAuthState(auth)
   const [feedData, setFeedData] = useState({});

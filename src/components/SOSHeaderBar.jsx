@@ -14,13 +14,16 @@ import {
   cancelSosHelper,
   completeConfirmSosHelper,
 } from "@apis/soss";
-import Timer from "@components/Timer";
+const Timer = dynamic( () => {
+  return import( '@components/Timer' );
+}, { ssr: false } );
 import { DateTimeLog } from "@utils/dateFormat";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
 import ModalRating from "@components/ModalRating";
 import TimerHome from "./TimmerHome";
 import { useAuthState } from "react-firebase-hooks/auth";
+import dynamic from "next/dynamic";
 export default function SOSHeaderBar() {
   const [loadingSubmit, setLoadingSubmit] = useState(false);
   const [user] = useAuthState(auth);
@@ -68,17 +71,17 @@ export default function SOSHeaderBar() {
   }, [user]);
 
   const onDirectionClick = (userLocation, sosLocation) => {
-    window.open(
-      "https://www.google.com/maps/dir/?api=1&origin=" +
-        userLocation.lat +
-        "," +
-        userLocation.lng +
-        "&destination=" +
-        sosLocation.lat +
-        "," +
-        sosLocation.lng +
-        "&travelmode=driving"
-    );
+    // window.open(
+    //   "https://www.google.com/maps/dir/?api=1&origin=" +
+    //     userLocation.lat +
+    //     "," +
+    //     userLocation.lng +
+    //     "&destination=" +
+    //     sosLocation.lat +
+    //     "," +
+    //     sosLocation.lng +
+    //     "&travelmode=driving"
+    // );
   };
 
   const calculateDistance = (lat1, lon1, lat2, lon2) => {

@@ -14,8 +14,6 @@ import { message } from "antd";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@utils/firebase";
 
-
-// category, minRead, bookmark, block
 const ArticleMeta = ({ item, onCallback }) => {
   const sizes = useWindowSize()
   const [user, loading, error] = useAuthState(auth);

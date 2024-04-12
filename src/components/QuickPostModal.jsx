@@ -9,16 +9,17 @@ import { uploadImage } from "apis/other";
 import { createFeedByUser, updateFeedByUser } from "@apis/feeds";
 import { updateProfile, getProfile } from "@apis/users";
 import { CaretDownOutlined} from '@ant-design/icons';
-import { useWindowSize } from '@hooks/useWindowSize';
 import { IoMdCloseCircle } from 'react-icons/io';
 import { useAuthState, useUpdateProfile } from 'react-firebase-hooks/auth';
 import { auth } from '@utils/firebase';
 import dynamic from 'next/dynamic';
 import ModalWating from './Dumuc/ModalWating';
+import {useWindowSize} from '@hooks/useWindowSize';
 const CustomEditor = dynamic( () => {
   return import( './editorjs/CustomCKEditor' );
 }, { ssr: false } );
-export default function QuickPostModal({ visible,setEmotion, onCancel, emotion, setShowPostEmotion, showImage, setShowImage, onCallback, feed}) {
+export default function QuickPostModal({ visible,setEmotion, onCancel, emotion, setShowPostEmotion, showImage, setShowImage, onCallback, feed}){
+  
   const [user] = useAuthState(auth)
   const [loading, setLoading] = useState(false);
   const [usingUser, setUsingUser] = useState()
@@ -27,7 +28,7 @@ export default function QuickPostModal({ visible,setEmotion, onCancel, emotion, 
   const [descriptionError, setDescriptionError] = useState();
   const [photos, setPhotos] = useState([]);
   const [loadingImage, setLoadingImage] = useState(false)
-  const sizes = useWindowSize()
+  const sizes = useWindowSize();
   const handleChange =  (e) => {
     setLoadingImage(true);
    if(e?.target?.files){
@@ -198,7 +199,7 @@ export default function QuickPostModal({ visible,setEmotion, onCancel, emotion, 
       destroyOnClose={true}
       footer={
         <div>
-          <div className={`flex justify-between items-center border border-gray-400 rounded-md ${sizes > 300 ? "px-2 sm:px-3 " : "px-1.5"}  mb-2 py-3`}>
+          <div className={`flex justify-between items-center border border-gray-400 rounded-md ${sizes.width > 300 ? "px-2 sm:px-3 " : "px-1.5"}  mb-2 py-3`}>
             <div className="font-bold text-xs sm:text-sm">Thêm vào bài viết của bạn</div>
             <div className="flex gap-x-2 sm:gap-x-3">
               <Image width={0} height={0} sizes="100vw"

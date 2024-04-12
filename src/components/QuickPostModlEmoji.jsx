@@ -1,10 +1,7 @@
 "use client"
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import * as emoji from "emoji-api";
 const { arrange } = require("emoji-api");
-
-import axios from "axios";
 import { Spinner } from 'flowbite-react';
 import { Modal } from "antd";
 import { emotionData } from "@utils/emotionData";
@@ -14,11 +11,6 @@ export default function QuickPostModalEmoji({ visible, onCancel, setEmotion, onS
   const [emojiData, setEmojiData] = useState(arrange()['Smileys & Emotion']?.filter((x) => {
   return x
   }));
-  // useEffect(() => {
-  //   let data = emojiData.slice(0,30)  //98
-  //   data.splice(18, 4)
-  //    setEmojiData([...data]);
-  // }, []);
   return (
     <Modal
       visible={visible}

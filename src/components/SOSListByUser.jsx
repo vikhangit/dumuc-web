@@ -7,7 +7,9 @@ import { ExclamationCircleOutlined } from '@ant-design/icons';
 
 import moment from "moment";
 import Image from "next/image";
-import Timer from "./Timer";
+const Timer = dynamic( () => {
+  return import( './Timer' );
+}, { ssr: false } );
 import { DateTimeLog } from "@utils/dateFormat";
 
 //apis
@@ -21,6 +23,7 @@ import { useRouter } from "next/navigation";
 import { generateCustomToken } from "apis/users";
 import { auth } from 'utils/firebase';
 import { useAuthState } from "react-firebase-hooks/auth";
+import dynamic from "next/dynamic";
 
 const SOSListByUser = ({ items, onCallback }) => {
   const [user, loading, error] = useAuthState(auth);
@@ -40,17 +43,17 @@ const SOSListByUser = ({ items, onCallback }) => {
     );
   }, []);
   const onDirectionClick = (userLocation, sosLocation) => {
-    window.open(
-      "https://www.google.com/maps/dir/?api=1&origin=" +
-        userLocation.lat +
-        "," +
-        userLocation.lng +
-        "&destination=" +
-        sosLocation.lat +
-        "," +
-        sosLocation.lng +
-        "&travelmode=driving", "_blank"
-    );
+    // window.open(
+    //   "https://www.google.com/maps/dir/?api=1&origin=" +
+    //     userLocation.lat +
+    //     "," +
+    //     userLocation.lng +
+    //     "&destination=" +
+    //     sosLocation.lat +
+    //     "," +
+    //     sosLocation.lng +
+    //     "&travelmode=driving", "_blank"
+    // );
   };
 
   const calculateDistance = (lat1, lon1, lat2, lon2) => {
@@ -265,7 +268,7 @@ const SOSListByUser = ({ items, onCallback }) => {
 
                                           generateCustomToken(token)
                                           .then(result => {
-                                            window.open(`${process.env.NEXT_PUBLIC_COMMUNICAION_URL}/chat/${result?.token}/${helper?.user?.id}`, "_blank");
+                                            // window.open(`${process.env.NEXT_PUBLIC_COMMUNICAION_URL}/chat/${result?.token}/${helper?.user?.id}`, "_blank");
                                           })
                                           }
                                       });

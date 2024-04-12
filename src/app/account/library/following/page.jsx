@@ -9,7 +9,6 @@ import AccountLibraryTabs from "@components/AccountLibraryTabs";
 
 import BannerRight from "@components/BannerRight";
 import AuthorLibraryItems from "@components/AuthorLibraryItems";
-import router from "next/router";
 import Loading from "./loading";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@utils/firebase";

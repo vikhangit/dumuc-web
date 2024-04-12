@@ -5,12 +5,13 @@ import FeedShare from "./FeedShare";
 import {  Modal } from 'flowbite-react';
 import Image from "next/image";
 import { message } from "antd";
-import { useWindowSize } from "@hooks/useWindowSize";
+import dynamic from 'next/dynamic';
 import {createUserFollow, deleteUserFollow, getProfile, updateProfile} from '@apis/users';
 import Link from "next/link";
 import FeedComments from "./FeedComments";
-import { useAuthState, useUpdateProfile } from "react-firebase-hooks/auth";
+import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@utils/firebase";
+import {useWindowSize} from "@hooks/useWindowSize";
 
 const FeedLikeShareComment = ({ item, url, index, onCallback, setOpenLogin}) => {
   const sizes = useWindowSize();

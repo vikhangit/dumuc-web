@@ -3,9 +3,8 @@
 import { useWindowSize } from '@hooks/useWindowSize';
 import Image from 'next/image';
 import Link from 'next/link';
-import React, { useEffect, useRef, useState } from 'react'
-import { HiVideoCamera } from 'react-icons/hi';
-import { IoIosCall, IoMdPersonAdd} from 'react-icons/io';
+import React, { useEffect, useRef, useState } from 'react';
+import { IoMdPersonAdd} from 'react-icons/io';
 import { IoChevronBackOutline, IoImageOutline, IoInformationCircleSharp} from 'react-icons/io5';
 import { RiFileVideoFill } from 'react-icons/ri';
 import { useAuthState } from 'react-firebase-hooks/auth';
@@ -14,28 +13,27 @@ import { collection, addDoc, serverTimestamp} from 'firebase/firestore';;
 import { uploadImage } from '@apis/other';
 import ModalWating from '@components/Dumuc/ModalWating';
 import {message} from "antd";
-import ModalImageZoom from '@components/ModalImageZoom';
+const ModalImageZoom = dynamic( () => {
+  return import( '@components/ModalImageZoom' );
+}, { ssr: false } );
 import { MdAttachFile } from 'react-icons/md';
 import { FaFile, FaFileAudio, FaFileImage, FaFileLines } from 'react-icons/fa6';
 import { BiSolidFilePdf, BiSolidFileTxt } from "react-icons/bi";
 import { BsFileEarmarkWordFill } from "react-icons/bs";
 import { SiMicrosoftpowerpoint } from "react-icons/si";
-import ModalViewFile from '@components/ModalViewFile';
 import ModalAddMember from './ModalAddMember';
-import { FaInfoCircle } from 'react-icons/fa';
 import ModalAbout from './ModalAbout';
+import dynamic from 'next/dynamic';
 
 export default function ChatGroupRight({userRecieved, setUserRecieved, mobile, setMobile, messages, authors, activeGroup, setActiveGroup}) {
     const [user] = useAuthState(auth)
     const refImg = useRef();
     const refVideo = useRef();
-    const refFile = useRef();
     const scroll = useRef();
     const sizes = useWindowSize()
     const [newMessage, setNewMessage] = useState("");
     const [showWatting, setShowWating] = useState(false)
     const [photos, setPhotos] = useState([])
-    const [videos, setVideos] = useState([])
     const [myMessage, setMyMessage] = useState(
       []
     )

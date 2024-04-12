@@ -1,0 +1,12 @@
+@media only screen and (max-width: 340px)  {
+    .fontSide{
+        width: 100% !important;
+        height: 120px !important;
+    }
+    .profile1{
+        column-gap: 0.5rem !important;
+    }
+    .profile2{
+        flex-basis: 50% !important;
+    }
+}

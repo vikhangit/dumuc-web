@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import {createUserBookmark, deleteUserBookmark, getProfile} from '@apis/users';
 import { useAuthState, useUpdateProfile } from "react-firebase-hooks/auth";
 import { auth } from "@utils/firebase";
-import { updateProfile } from "firebase/auth";
 import { Spinner } from "flowbite-react";
 
 const FeedBookmark = ({id, currentUrl = '/' , item}) => {

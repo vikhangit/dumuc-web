@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { message } from "antd";
 import { useRouter } from 'next/navigation';
-import {createUserBookmark, deleteUserBookmark, getProfile, updateProfile} from '@apis/users';
+import {createUserBookmark, deleteUserBookmark, getProfile} from '@apis/users';
 
 import { useAuthState, useUpdateProfile } from "react-firebase-hooks/auth";
 import { auth } from "@utils/firebase";

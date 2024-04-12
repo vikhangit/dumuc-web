@@ -25,7 +25,10 @@ import BannerRight from "@components/BannerRight";
 import axios from "axios";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@utils/firebase";
-import TabbarBottom from "@components/TabbarBottom";
+import dynamic from "next/dynamic";
+const TabbarBottom = dynamic( () => {
+  return import( '@components/TabbarBottom' );
+}, { ssr: false } );
 
 const PostWritePage = ({ searchParams }) => {
   const postId = searchParams?.id;

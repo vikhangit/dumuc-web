@@ -1,15 +1,10 @@
 "use client"
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import { Modal} from "antd";
-import { CaretDownOutlined} from '@ant-design/icons';
-import { uploadImage } from "apis/other";
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth, db } from '@utils/firebase';
-import dynamic from 'next/dynamic';
-import { useWindowSize } from "@hooks/useWindowSize";
-import { createUserStories, getProfile, updateProfile } from "@apis/users";
-import { createStoryByUser } from "@apis/feeds";
-import { FaCamera, FaCheck } from "react-icons/fa6";
+import { getProfile } from "@apis/users";
+import {  FaCheck } from "react-icons/fa6";
 import { Spinner } from 'flowbite-react';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -18,17 +13,9 @@ import { IoMdCloseCircle } from "react-icons/io";
 
 export default function ModalAddMember({ visible, onCancel, onCallback, authors,  activeGroup}) {
   const [user] = useAuthState(auth)
-  const sizes = useWindowSize()
   const [loading, setLoading] = useState(false);
-  const [link, setLink] = useState("")
   const [usingUser, setUsingUser] = useState()
-  const [active, setActive] = useState(0)
-  const [avatar, setAvatar] = useState("")
-  const refAvatar = useRef(null)
-  const [loadingAvatar, setLoadingAvatar] = useState(false)
   const [name, setName] = useState("")
-  const [error, setError] = useState("")
-  const myAuthor = authors?.find(x => x?.userId === user?.uid)
   const [valueSearch, setValueSearch] = useState("");
   const [friendList, setFriendList] = useState([])
   const [memberList, setMemberList] = useState([])
@@ -64,6 +51,7 @@ export default function ModalAddMember({ visible, onCancel, onCallback, authors,
           }
     }
 }
+console.log("Mêbneqweq", memberList)
   return (
     <Modal
       visible={visible}
@@ -136,33 +124,48 @@ export default function ModalAddMember({ visible, onCancel, onCallback, authors,
           {
             friendList?.length > 0 ? friendList?.map((item, index) => 
             {
-             const author = authors?.find(x => x?.authorId === item?.author?.authorId)
-             return <div
+             const author = authors?.find(x => x?.authorId === item?.authorId)
+             return activeGroup && activeGroup?.member?.find(x => x?.user === author?.userId) 
+             ? <div
              key={index}
-             onClick={() => {
-              const find = memberList?.findIndex(x => x?.authorId === author?.authorId)
-              if(!activeGroup?.member?.find(x => x?.user === author?.userId)){
-                if(find < 0){
-                  memberList.unshift(author)
-                }else{
-                  memberList.splice(find, 1)
-                }
-                setMemberList([...memberList])
-              }
-             }}
+
               className={` rounded-md flex items-center gap-x-2 pl-[15px] pr-2 py-[10px] mt-[10px] cursor-pointer`}>
                 <div className="w-5 h-4 flex items-center justify-center border border-gray-400 rounded-[2px] text-sky-500 mr-3">
-                {memberList?.find(x => x?.authorId === author?.authorId) || activeGroup?.member?.find(x => x?.user === author?.userId) && <FaCheck size={12} />}
+                { <FaCheck size={12} />}
                 </div>
              <Image src={author?.user?.photo && author?.user?.photo?.length > 0 ? author?.user?.photo : "/dumuc/avatar.png"} width={0} height={0} sizes='100vw' className='w-[45px] h-[45px] rounded-full' />
              <div className='flex justify-between w-full'>
                  <div>
-                     <Link href="" className='text-base'>{author?.name}</Link>
+                     <div  className='text-base'>{author?.name}</div>
                      {/* <p className='text-[13px] text-[#00000080] mt-2'>Tin nhắn mới nhất của bạn ....</p> */}
                  </div>
                  {/* <span className='text-[13px] text-[#00000080]'>13 phút</span> */}
              </div>
+         </div> : 
+         <div
+         key={index}
+         onClick={() => {
+          const find = memberList?.findIndex(x => x?.authorId === author?.authorId)
+            if(find < 0){
+              memberList.push(author)
+            }else{
+              memberList.splice(find, 1)
+            }
+            setMemberList([...memberList])
+         }}
+          className={` rounded-md flex items-center gap-x-2 pl-[15px] pr-2 py-[10px] mt-[10px] cursor-pointer`}>
+            <div className="w-5 h-4 flex items-center justify-center border border-gray-400 rounded-[2px] text-sky-500 mr-3">
+            {memberList?.find(x => x?.authorId === author?.authorId) && <FaCheck size={12} />}
+            </div>
+         <Image src={author?.user?.photo && author?.user?.photo?.length > 0 ? author?.user?.photo : "/dumuc/avatar.png"} width={0} height={0} sizes='100vw' className='w-[45px] h-[45px] rounded-full' />
+         <div className='flex justify-between w-full'>
+             <div>
+                 <div  className='text-base'>{author?.name}</div>
+                 {/* <p className='text-[13px] text-[#00000080] mt-2'>Tin nhắn mới nhất của bạn ....</p> */}
+             </div>
+             {/* <span className='text-[13px] text-[#00000080]'>13 phút</span> */}
          </div>
+     </div> 
          }): <div className='h-full w-full flex justify-center items-center text-base'>Danh bạn đang trống</div>
           }
         </div>

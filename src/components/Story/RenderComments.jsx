@@ -1,8 +1,6 @@
-import { Modal } from 'flowbite-react'
 import React, { useEffect, useState } from 'react'
 import { Comments } from './StoryComment/Comments'
 import { nestedComment } from '@utils/covertCommets'
-import { IoMdClose } from 'react-icons/io'
 
 export default function RenderComments({ story, items, onCallback, setShowComment}) {
     const [comments, setComments] = useState(nestedComment(items))

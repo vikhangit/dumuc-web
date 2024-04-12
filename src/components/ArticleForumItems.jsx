@@ -1,7 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
 import { getPostsLoadMore } from "@apis/posts";
-import { useWindowSize } from "@hooks/useWindowSize";
 import InfiniteScroll from "react-infinite-scroller";
 import { Spinner } from "flowbite-react";
 import ArticeForumChild from "./ArticeForumChild";
@@ -17,7 +16,6 @@ const ArticleForumItems = ({
 }) => {
   const [user] = useAuthState(auth)
   const [posts, setPosts] = useState(data?.items);
-  const sizes = useWindowSize()
   const [hasLoadMore, setHasLoadMore] = useState(true);
   useEffect(() =>{
     setPosts(data)

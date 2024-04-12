@@ -1,17 +1,14 @@
 "use client"
 import { getFeedsLoadMore } from '@apis/feeds';
 import { getAuthor, getPostsLoadMore } from '@apis/posts';
-import { useWindowSize } from '@hooks/useWindowSize';
 import React, { useEffect, useState } from 'react';
 import FeedItems from './FeedItems';
 import ArticleItems from './ArticleItems';
 import Image from 'next/image';
-import { IoIosArrowRoundBack } from 'react-icons/io';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '@utils/firebase';
 import { HiPencil } from 'react-icons/hi';
 import { getUser } from '@apis/users';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
 export default function AuthorLibrary({active, setActive, id, slug, setOpenLibrary, usingUser, onCallback}) {
@@ -23,7 +20,6 @@ export default function AuthorLibrary({active, setActive, id, slug, setOpenLibra
     const [userAuthor, setUserAuthor] = useState();
     const [tab, setTab] = useState(0)
     const router = useRouter()
-    const sizes = useWindowSize();
 
     useEffect(() => {
         let payload = {
@@ -120,7 +116,7 @@ export default function AuthorLibrary({active, setActive, id, slug, setOpenLibra
                                                 item?.author?.photo
                                                     ? item?.author?.photo
                                                     : item?.author?.user?.photo ? item?.author?.user?.photo : "/dumuc/avatar.png"
-                                            } alt={author?.name} 
+                                            } alt={item?.author?.name} 
                                             onClick={() => router.push(`/author/${item?.author?.slug}/${item?.author?.authorId}`)}
                                             />
                                 <p  onClick={() => router.push(`/author/${item?.author?.slug}/${item?.author?.authorId}`)} className='text-base font-semibold'>{item?.author?.name}</p>
@@ -135,7 +131,7 @@ export default function AuthorLibrary({active, setActive, id, slug, setOpenLibra
                                                 item?.author?.photo
                                                     ? item?.author?.photo
                                                     : item?.author?.user?.photo ? item?.author?.user?.photo : "/dumuc/avatar.png"
-                                            } alt={author?.name} 
+                                            } alt={item?.author?.name} 
                                             onClick={() => router.push(`/author/${item?.author?.slug}/${item?.author?.authorId}`)}
                                             />
                                 <p  onClick={() => router.push(`/author/${item?.author?.slug}/${item?.author?.authorId}`)} className='text-base font-semibold'>{item?.author?.name}</p>
@@ -150,7 +146,7 @@ export default function AuthorLibrary({active, setActive, id, slug, setOpenLibra
                                                 item?.author?.photo
                                                     ? item?.author?.photo
                                                     : item?.author?.user?.photo ? item?.author?.user?.photo : "/dumuc/avatar.png"
-                                            } alt={author?.name} 
+                                            } alt={item?.author?.name} 
                                             onClick={() => router.push(`/author/${item?.author?.slug}/${item?.author?.authorId}`)}
                                             />
                                 <p  onClick={() => router.push(`/author/${item?.author?.slug}/${item?.author?.authorId}`)} className='text-base font-semibold'>{item?.author?.name}</p>

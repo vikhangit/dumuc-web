@@ -3,10 +3,8 @@ import Link from "next/link";
 import moment from "moment";
 
 import Image from "next/image";
-import { PiShareFatLight } from "react-icons/pi";
 import { CiShare2 } from "react-icons/ci";
-import { useEffect, useState } from "react";
-import { getLabels } from "@apis/posts";
+import {  useState } from "react";
 
 export default function ArticeForumChild({item}) {
     const [label, setLabel] = useState([])

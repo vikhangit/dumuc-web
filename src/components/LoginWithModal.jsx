@@ -11,7 +11,7 @@ import isEmail from 'validator/lib/isEmail';
 
 import { auth, providerGoogle } from 'utils/firebase';
 import { signInWithPopup, isSignInWithEmailLink, signInWithEmailLink, sendSignInLinkToEmail, onAuthStateChanged } from "firebase/auth";
-import { useWindowSize } from "@hooks/useWindowSize";
+import  {useWindowSize}  from "@hooks/useWindowSize";
 
 const LoginWithModal = ({searchParams, close, item}) => {
     const query = searchParams;
@@ -76,7 +76,7 @@ const LoginWithModal = ({searchParams, close, item}) => {
             // URL you want to redirect back to. The domain (www.example.com) for this
             // URL must be in the authorized domains list in the Firebase Console.
             //url: `https://appfunnel.page.link/fxwk?email=${values.email}`,
-            url: `${process.env.NEXT_PUBLIC_HOMEPAGE_URL}/auth?email=${email}&url_return=${query?.url_return}`,
+            url: `${process.env.NEXT_PUBLIC_HOMEPAGE_URL}?email=${email}&url_return=${query?.url_return}`,
             // This must be true.
             handleCodeInApp: true,
         };
@@ -89,7 +89,7 @@ const LoginWithModal = ({searchParams, close, item}) => {
                 // The link was successfully sent. Inform the user.
                 // Save the email locally so you don't need to ask the user for it again
                 // if they open the link on the same device.
-                window.localStorage.setItem('emailForSignIn', email);
+                localStorage.setItem('emailForSignIn', email);
                 setIsModalOpen(true);
                 setLoadingAction(false);
                 // ...
@@ -105,14 +105,15 @@ const LoginWithModal = ({searchParams, close, item}) => {
 
     useEffect(() => {
         setLoadingAction(true)
-        const saved_email = window.localStorage.getItem("emailForSignIn");
-        if (isSignInWithEmailLink(auth, window.location.href) && !!saved_email) {
+        const saved_email = localStorage.getItem("emailForSignIn");
+        const link = `${process.env.NEXT_PUBLIC_HOMEPAGE_URL}/auth?email=${searchParams?.email}&url_return=${searchParams?.url_return}&apiKey=${searchParams?.apiKey}&oobCode=${searchParams?.oobCode}&mode=${searchParams?.mode}&lang=${searchParams?.lang}`
+        if (isSignInWithEmailLink(auth, link) && !!saved_email) {
             //sign in with email link (Passwordless)
-            signInWithEmailLink(auth, saved_email, window.location.href)
+            signInWithEmailLink(auth, saved_email, link)
                 .then(async (result) => {
                     let userCreate = result.user;
                     // Clear email from storage.
-                    window.localStorage.removeItem('emailForSignIn');
+                    localStorage.removeItem('emailForSignIn');
                     createUser({
                         uid: userCreate.uid,
                         email: userCreate.email,
@@ -171,7 +172,7 @@ const LoginWithModal = ({searchParams, close, item}) => {
     //redirect already login
     useEffect(() => {
         
-        const saved_email = window.localStorage.getItem("emailForSignIn");
+        const saved_email = localStorage.getItem("emailForSignIn");
         if (user && loading === false && (saved_email === null)) {
             //redirect
             close()

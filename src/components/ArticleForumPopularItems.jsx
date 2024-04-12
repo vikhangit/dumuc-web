@@ -2,7 +2,6 @@
 import Link from 'next/link';
 import moment from "moment";
 import Image from 'next/image';
-import { PiShareFatLight } from 'react-icons/pi';
 import { CiShare2 } from 'react-icons/ci';
 
 const ArticleForumPopularItems = ({ items, title, category }) => {

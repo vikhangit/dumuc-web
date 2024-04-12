@@ -3,7 +3,9 @@ import { getFeeds } from '@apis/feeds';
 import { getPosts } from '@apis/posts';;
 import React, { useEffect, useState } from 'react'
 import Header from './Header';
-import TabbarBottom from './TabbarBottom';
+const TabbarBottom = dynamic( () => {
+  return import( './TabbarBottom' );
+}, { ssr: false } );
 import BannerRight from './BannerRight';
 import FeedSearchItems from './FeedSearchItems';
 import ArticleItems from './ArticleItems';

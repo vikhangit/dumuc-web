@@ -1,5 +1,4 @@
-import { getAuthor } from '@apis/posts'
-import { createUserFollow, createUserToFollowerList, deleteAddFriend, deleteRecieveFriend, receiveRequestAddFriend, sendRequestAddFriend } from '@apis/users'
+import { deleteAddFriend, deleteRecieveFriend, receiveRequestAddFriend, sendRequestAddFriend } from '@apis/users'
 import { auth } from '@utils/firebase'
 import Image from 'next/image'
 import React, { useState } from 'react'

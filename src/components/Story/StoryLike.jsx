@@ -2,9 +2,8 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from 'next/navigation';
 import {createUserLike, deleteUserLike, getProfile, updateProfile} from '@apis/users';
-import { useAuthState, useUpdateProfile } from "react-firebase-hooks/auth";
+import { useAuthState} from "react-firebase-hooks/auth";
 import { auth } from "@utils/firebase";
-import { message } from "antd";
 import { Spinner } from "flowbite-react";
 
 const StoryLike = ({id, currentUrl, onCallback, renderCountComment, item}) => {

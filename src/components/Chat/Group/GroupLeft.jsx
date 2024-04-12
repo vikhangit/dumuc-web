@@ -9,11 +9,10 @@ import { IoCloseCircle} from 'react-icons/io5';
 import { MdOutlineGroupAdd, MdOutlinePersonAddAlt } from 'react-icons/md';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '@utils/firebase';;
-  import { getProfile } from '@apis/users';
+import { getProfile } from '@apis/users';
 import { useRouter } from 'next/navigation';
 import ModalCreateGroup from './ModalCreateGroup';
 import { FaCamera } from 'react-icons/fa6';
-import moment from 'moment';
 
 export default function ChatGroupLeft({activeGroup, setActiveGroup, mobile, setMobile, messages, authors}) {
     const [user] = useAuthState(auth)

@@ -2,10 +2,13 @@
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation';
 import QuickPostModalEmoji from '@components/QuickPostModlEmoji';
-import QuickPostModal from '@components/QuickPostModal';
+const QuickPostModal = dynamic( () => {
+  return import( '@components/QuickPostModal' );
+}, { ssr: false } );
 import Image from 'next/image';
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { auth } from '@utils/firebase';
+import dynamic from 'next/dynamic';
 
 const NewQuickPost = ({onCallback}) => {
   const router = useRouter();

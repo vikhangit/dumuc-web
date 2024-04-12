@@ -4,15 +4,18 @@ import Header from "@components/Header";
 import TableOfContent from "@components/TableOfContent";
 import ArticleItems from "@components/ArticleItems";
 import ArticleComments from "@components/ArticleComments";
-import ArticleMeta from "@components/ArticleMeta";
-import EditorjsRender from "@components/editorjs/EditorjsRender";
+const ArticleMeta = dynamic( () => {
+  return import( '@components/ArticleMeta' );
+}, { ssr: false } );
+const EditorjsRender = dynamic( () => {
+  return import( '@components/editorjs/EditorjsRender' );
+}, { ssr: false } );
 import Scroll from "react-scroll";
-import moment from "moment";
-import TabbarBottom from "@components/TabbarBottom";
-
-import {getPost, getLabels } from "@apis/posts";
+const TabbarBottom = dynamic( () => {
+  return import( '@components/TabbarBottom' );
+}, { ssr: false } );
+import {getPost} from "@apis/posts";
 import Image from "next/image";
-import ArticleBookmark from "@components/ArticleBookmark";
 import Link from "next/link";
 import BannerRight from "@components/BannerRight";
 import { useEffect, useState } from "react";
@@ -21,6 +24,7 @@ import { useWindowSize } from "@hooks/useWindowSize";
 import { IoMdAddCircleOutline } from "react-icons/io";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@utils/firebase";
+import dynamic from "next/dynamic";
 
 const PostDetailContent = ({ slug, id }) => {
   const [post, setPost] = useState({});
@@ -28,7 +32,6 @@ const PostDetailContent = ({ slug, id }) => {
   const [showScroll, setShowScroll] = useState(false);
   const [user] = useAuthState(auth);
   const [label, setLabel] = useState([])
-  const sizes = useWindowSize()
   useEffect(() => {
     getPost({postId: id}).then((data) => setPost(data))
     setLoading(false)

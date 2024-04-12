@@ -6,20 +6,21 @@ import { HiChevronDoubleLeft, HiChevronDoubleRight, HiLink, HiOutlineVideoCamera
 import { MdOutlineAdd } from 'react-icons/md';
 import { auth } from '@utils/firebase';
 import { useAuthState } from 'react-firebase-hooks/auth';
-import ModalImageZoom from '@components/ModalImageZoom';
-import { createStoryByUser, getStoriesLoadMore } from '@apis/feeds';
+import { getStoriesLoadMore } from '@apis/feeds';
 import { useRouter } from 'next/navigation';
 import { uploadImage } from '@apis/other';
-import QuickAddStory from '@components/QuickAddStory';
-import { useWindowSize } from '@hooks/useWindowSize';
-import ModalPlayVideos from '@components/ModalPlayVideos';
+const QuickAddStory = dynamic( () => {
+  return import( '@components/QuickAddStory' );
+}, { ssr: false } );
+const ModalPlayVideos = dynamic( () => {
+  return import( '@components/ModalPlayVideos' );
+}, { ssr: false } );
 import { message } from 'antd';
 import ModalWating from './ModalWating';
-import { IoVideocam, IoVideocamOutline } from 'react-icons/io5';
-import { IoIosLink, IoMdCloseCircle } from 'react-icons/io';
+import { IoMdCloseCircle } from 'react-icons/io';
+import dynamic from 'next/dynamic';
 
 const Story = ({data, onCallback}) => {
-  const sizes = useWindowSize()
   const [stories, setStories] = useState(data)
   const [loading, setLoading] = useState(false)
   const [swiper, setSwiper] = useState(null)
@@ -155,7 +156,7 @@ const Story = ({data, onCallback}) => {
         </SwiperSlide>}
         {
          stories?.length > 0 && stories?.sort((a, b) => b?.no - a?.no).map((item, index) => 
-         user?.email === item?.author?.user?.email ?
+         user?.uid === item?.userId ?
           <SwiperSlide 
               style={{
                 height: 250,

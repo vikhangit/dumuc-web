@@ -9,29 +9,28 @@ import { Navigation } from "swiper/modules";
 import { message } from "antd";
 
 import Header from "@components/Header";
-import SOSHeaderBar from "@components/SOSHeaderBar";
-
 import BannerRight from "@components/BannerRight";
-import TabbarBottom from "@components/TabbarBottom";
-
-import SOSRangeSelect from "@components/SOSRangeSelect";
-import { EnvironmentFilled } from '@ant-design/icons';
-import GoogleMapReact from "google-map-react";
-
+const TabbarBottom = dynamic( () => {
+  return import( '@components/TabbarBottom' );
+}, { ssr: false } );
 import { auth, firestore } from '@utils/firebase';
 import moment from "moment";
 
 import { getCategories } from "@apis/posts";
 import { getSoss, createSosHelper, getHelperSossByUser, expireSos } from '@apis/soss';
-import Timer from "@components/Timer";
+const Timer = dynamic( () => {
+  return import( '@components/Timer' );
+}, { ssr: false } );
 import { DateTimeLog } from "@utils/dateFormat";
 import _, { size } from 'lodash';
 import SOSTab from "./SOSTabs";
 import { useWindowSize } from "@hooks/useWindowSize";
-import PasswordlessPage from "app/auth/page";
-import LoginWithModal from "./LoginWithModal";
+const LoginWithModal = dynamic( () => {
+  return import( './LoginWithModal' );
+}, { ssr: false } );
 import { generateCustomToken } from "@apis/users";
 import { useAuthState } from "react-firebase-hooks/auth";
+import dynamic from "next/dynamic";
 
 const SOSPageContent = () => {
   const router = useRouter();
@@ -173,10 +172,10 @@ const SOSPageContent = () => {
   //const [bounds, setBounds] = useState(null)
 
   const onDirectionClick = (userLocation, sosLocation) => {
-    window.open('https://www.google.com/maps/dir/?api=1&origin=' +
-      userLocation.lat + ',' + userLocation.lng + '&destination='
-      + sosLocation.lat
-      + ',' + sosLocation.lng + '&travelmode=driving')
+    // window.open('https://www.google.com/maps/dir/?api=1&origin=' +
+    //   userLocation.lat + ',' + userLocation.lng + '&destination='
+    //   + sosLocation.lat
+    //   + ',' + sosLocation.lng + '&travelmode=driving')
   }
 
 
@@ -824,7 +823,7 @@ const SOSPageContent = () => {
                                         ]);
                                         generateCustomToken(token)
                                         .then(result => {
-                                          window.open(`${sos?.livestream_link}`, "_blank");
+                                          // window.open(`${sos?.livestream_link}`, "_blank");
                                         })
                                         }
                                       });

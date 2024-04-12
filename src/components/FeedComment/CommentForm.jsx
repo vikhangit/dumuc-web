@@ -2,12 +2,10 @@ import { createComment, createCommentReply, getFeed, updateComment } from '@apis
 import { uploadImage } from '@apis/other';
 import { getProfile } from '@apis/users';
 import { useWindowSize } from '@hooks/useWindowSize';
-import { nestedComment } from '@utils/covertCommets';
 import { auth } from '@utils/firebase';
 import { message } from 'antd';
 import { Spinner } from 'flowbite-react';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
 import React, { useEffect, useRef, useState } from 'react'
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { IoMdCloseCircle } from 'react-icons/io';
@@ -30,7 +28,6 @@ export default function CommentForm({
   setOpenLogin
 }) {
   const [user] = useAuthState(auth)
-  const router = useRouter();
   const [photos, setPhotos] = useState([])
   const [loading, setLoading] = useState(false);
   const [usingUser, setUsingUser] = useState()

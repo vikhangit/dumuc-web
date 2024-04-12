@@ -1,16 +1,13 @@
 "use client"
 import {useState,  useEffect} from 'react'
 import { Spinner } from "flowbite-react";
-
 import {getPostsLoadMore} from "@apis/posts";
-
-import ArticleLike from "@components/ArticleLike";
-import ArticleComment from "@components/ArticleComment";
-import ArticleMeta from "@components/ArticleMeta";
-import ArticleAuthor from "@components/ArticleAuthor";
-
+const ArticleMeta = dynamic( () => {
+  return import( '@components/ArticleMeta' );
+}, { ssr: false } );
 import InfiniteScroll from 'react-infinite-scroller';
 import Image from 'next/image';
+import dynamic from 'next/dynamic';
 
 const ArticleItems = ({ data, title, authorId, category, tagId, layout='scroll', onCallback }) => {
   const [loading, setLoading] = useState(false)

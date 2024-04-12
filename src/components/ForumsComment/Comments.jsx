@@ -1,11 +1,12 @@
-import { useMemo, useState } from "react"
+import {  useState } from "react"
 import Comment from "./Comment"
-import CommentForm from "./CommentForm"
-import { nestedComment } from "@utils/covertCommets"
+import dynamic from "next/dynamic";
+const CommentForm = dynamic( () => {
+    return import( './CommentForm' );
+  }, { ssr: false } );
 
 export const Comments = ({ comments, setComments, post, onCallback}) => {
     const [qoute, setQoute] = useState([])
-    console.log(comments)
 
     return (
         <div>
