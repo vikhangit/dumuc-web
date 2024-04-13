@@ -13,7 +13,9 @@ import Loading from "app/loading";
 import Story from "./Dumuc/Story";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@utils/firebase";
-import RequestFriend from "./RequestFriend";
+const RequestFriend = dynamic( () => {
+  return import( './RequestFriend' );
+}, { ssr: false } );
 import { getProfile } from "@apis/users";
 import dynamic from "next/dynamic";
 const HomePageContent = () => {
@@ -64,6 +66,15 @@ const HomePageContent = () => {
                       <TrendingTopFive items={tags} limit={5} />
                     </div>
                     </div>
+                  </div>
+                  <div>
+                  {usingUser?.friendList?.filter(x => x.status === 1 && x.type === "recieve")?.length > 0 && <div className="mt-4 block xl:hidden">
+                    <div className="">
+                      <RequestFriend items={usingUser?.friendList?.filter(x => x.status === 1 && x.type === "recieve")}
+                      onCallback={async () => await  getProfile(user?.accessToken).then(data => setUsingUser(data))}  
+                      />
+                    </div>
+                  </div>}
                   </div>
                   <div>
                     {

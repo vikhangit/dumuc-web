@@ -7,12 +7,14 @@ import { Spinner } from "flowbite-react";
 import { message } from "antd";
 import { useEffect } from 'react'
 import { getAuthors } from '@apis/posts'
+import { useWindowSize } from '@hooks/useWindowSize'
 
 export default function RequestFriend({items, onCallback}) {
     const [user] = useAuthState(auth)
     const [loading, setLoading] = useState();
     const [loadingRemove, setLoadingRemove] = useState();
     const [authors, setAuthors] = useState([])
+    const sizes = useWindowSize()
     useEffect(() => {
       getAuthors().then((data) => {
         setAuthors(data)
@@ -20,12 +22,12 @@ export default function RequestFriend({items, onCallback}) {
     }, [])
   return (
     <div>
-        <div>Lời mời kết bạn</div>
+        <div className='font-semibold xl:font-normal'>Lời mời kết bạn</div>
         <div>        
-      <ul class="pb-1 mt-3">
+      <ul class={`pb-1 mt-3 grid xl:block ${sizes.width > 450 ? "grid-cols-2" : "gap-y-4"} gap-x-4`}>
         {items && items?.map(async (item, index) => {
           const author = authors?.find(x => x?.authorId === item?.authorId)
-           return <div>
+           return <div className='bg-white rounded-lg shadow shadow-gray-400 py-2 px-2  xl:shadow-none'>
             <div className='flex gap-x-3 items-center w-full mt-2'>
            <Image width={0} height={0} sizes="100vw" class="w-10 h-10 rounded-full" src={
                            author?.photo
