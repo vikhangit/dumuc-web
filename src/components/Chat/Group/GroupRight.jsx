@@ -355,19 +355,23 @@ export default function ChatGroupRight({
                       />
                       <div className="w-2/3 sm-w-1/2">
                         {item?.photos?.length > 0 && (
-                          <div>
+                          <div
+                            className={`w-full sm:w-3/4 ${
+                              author?.userId === user?.uid ? "ml-auto" : ""
+                            }`}
+                          >
                             <div
-                              className={`w-full flex ${
+                              className={`w-full flex flex-wrap ${
                                 author?.userId === user?.uid
                                   ? "justify-end"
-                                  : "justify-start"
-                              } gap-2 mt-2`}
+                                  : ""
+                              } ${author?.userId === user?.uid ? "" : ""} mt-3`}
                             >
                               {item?.photos?.map((photo, indexC) => {
                                 return (
                                   <div
                                     key={indexC}
-                                    className={`rounded-md h-full w-full relative w-1/2 sm:w-1/3 md:w-1/4`}
+                                    className={`rounded-md h-full relative w-1/2 sm:w-1/3 2xl:w-1/4`}
                                   >
                                     <button
                                       onClick={() => {
@@ -385,9 +389,9 @@ export default function ChatGroupRight({
                                           objectFit: "cover",
                                         }}
                                         sizes="100vw"
-                                        className={`rounded-md w-full ${
+                                        className={`px-[3px] py-[2px] rounded-lg w-full ${
                                           sizes.width > 450
-                                            ? "h-[110px] sm:h-[125px] md:h-[115px] xl:h-[110px] 2xl:h-[125px]"
+                                            ? "h-[110px] sm:h-[105px] md:h-[105px] lg:h-[90px] 2xl:h-[110px]"
                                             : "h-[70px]"
                                         }`}
                                         src={photo}
@@ -399,14 +403,16 @@ export default function ChatGroupRight({
                               })}
                             </div>
                             <div
-                              className={`w-fit ${"ml-auto"} text-[10px] text-white px-[8px] pt-[3px] pb-[2px]  rounded-full font-normal mt-[4px] bg-black bg-opacity-40`}
+                              className={`w-fit ${
+                                author?.userId === user?.uid && "ml-auto"
+                              } text-[10px] text-white px-[8px] pt-[3px] pb-[2px]  rounded-full font-normal mt-[4px] bg-black bg-opacity-40`}
                             >
                               {getTimeChat(item?.createdAt)}
                             </div>
                           </div>
                         )}
                         {item?.files?.length > 0 && (
-                          <div className={`w-full mt-2`}>
+                          <div className={`w-full mt-3`}>
                             {item?.files?.map((photo, indexC) => {
                               return (
                                 <Link
@@ -415,82 +421,93 @@ export default function ChatGroupRight({
                                   target="_blank"
                                 >
                                   <div
-                                    className={`cursor-pointer w-full sm:w-3/4 lg:w-2/3 xl:w-7/12 2xl:w-1/2  text-base font-medium cursor-pointer ${
+                                    className={`w-full ${
                                       item?.formAuthor?.userId === user?.uid
-                                        ? "bg-[#e5efff] ml-auto"
-                                        : "bg-gray-100"
-                                    }  rounded-[10px] px-[10px] py-[20px] mb-2`}
+                                        ? " ml-auto"
+                                        : ""
+                                    } sm:w-3/4 lg:w-2/3 xl:w-7/12 2xl:w-1/2`}
                                   >
-                                    <div className="flex items-center gap-x-2">
-                                      {photo?.type?.includes("image") ? (
-                                        <FaFileImage
-                                          className="text-amber-500"
-                                          size={48}
-                                        />
-                                      ) : photo?.name?.includes("pptx") ? (
-                                        <SiMicrosoftpowerpoint
-                                          className="text-rose-700"
-                                          size={48}
-                                        />
-                                      ) : photo?.name?.includes("xlsx") ? (
-                                        <FaFileLines
-                                          className="text-green-600"
-                                          size={48}
-                                        />
-                                      ) : photo?.type?.includes("video") ? (
-                                        <RiFileVideoFill
-                                          size={48}
-                                          className="text-yellow-300"
-                                        />
-                                      ) : photo?.type?.includes("pdf") ? (
-                                        <BiSolidFilePdf
-                                          size={48}
-                                          className="text-rose-500"
-                                        />
-                                      ) : photo?.type?.includes("doc") ? (
-                                        <BsFileEarmarkWordFill
-                                          size={48}
-                                          className="text-[#4367A5]"
-                                        />
-                                      ) : photo?.type?.includes(
-                                          "audio/mpeg"
-                                        ) ? (
-                                        <FaFileAudio
-                                          size={48}
-                                          className="text-purple-600"
-                                        />
-                                      ) : photo?.type?.includes(
-                                          "text/plain"
-                                        ) ? (
-                                        <BiSolidFileTxt
-                                          size={48}
-                                          className="text-sky-400"
-                                        />
-                                      ) : (
-                                        <FaFile
-                                          size={48}
-                                          className="text-sky-400"
-                                        />
-                                      )}
-                                      <div className="">
-                                        {" "}
-                                        {photo?.name?.slice(0, 20)}
-                                        {photo?.name?.length > 20 && (
-                                          <>
-                                            ...
-                                            {photo?.name?.slice(
-                                              photo?.name?.length - 8,
-                                              photo?.name?.length
-                                            )}
-                                          </>
+                                    <div
+                                      className={`cursor-pointer   text-base font-medium cursor-pointer ${
+                                        item?.formAuthor?.userId === user?.uid
+                                          ? "bg-[#e5efff] ml-auto"
+                                          : "bg-gray-100"
+                                      }  rounded-[10px] px-[10px] py-[20px] mb-2`}
+                                    >
+                                      <div className="flex items-center gap-x-2">
+                                        {photo?.type?.includes("image") ? (
+                                          <FaFileImage
+                                            className="text-amber-500"
+                                            size={48}
+                                          />
+                                        ) : photo?.name?.includes("pptx") ? (
+                                          <SiMicrosoftpowerpoint
+                                            className="text-rose-700"
+                                            size={48}
+                                          />
+                                        ) : photo?.name?.includes("xlsx") ? (
+                                          <FaFileLines
+                                            className="text-green-600"
+                                            size={48}
+                                          />
+                                        ) : photo?.type?.includes("video") ? (
+                                          <RiFileVideoFill
+                                            size={48}
+                                            className="text-yellow-300"
+                                          />
+                                        ) : photo?.type?.includes("pdf") ? (
+                                          <BiSolidFilePdf
+                                            size={48}
+                                            className="text-rose-500"
+                                          />
+                                        ) : photo?.type?.includes("doc") ? (
+                                          <BsFileEarmarkWordFill
+                                            size={48}
+                                            className="text-[#4367A5]"
+                                          />
+                                        ) : photo?.type?.includes(
+                                            "audio/mpeg"
+                                          ) ? (
+                                          <FaFileAudio
+                                            size={48}
+                                            className="text-purple-600"
+                                          />
+                                        ) : photo?.type?.includes(
+                                            "text/plain"
+                                          ) ? (
+                                          <BiSolidFileTxt
+                                            size={48}
+                                            className="text-sky-400"
+                                          />
+                                        ) : (
+                                          <FaFile
+                                            size={48}
+                                            className="text-sky-400"
+                                          />
                                         )}
+                                        <div className="">
+                                          {" "}
+                                          {photo?.name?.slice(0, 20)}
+                                          {photo?.name?.length > 20 && (
+                                            <>
+                                              ...
+                                              {photo?.name?.slice(
+                                                photo?.name?.length - 8,
+                                                photo?.name?.length
+                                              )}
+                                            </>
+                                          )}
+                                        </div>
                                       </div>
                                     </div>
-                                  </div>
-                                  <div
-                                    className={`w-fit ${"ml-auto"} text-[10px] text-white px-[8px] pt-[3px] pb-[2px]  rounded-full font-normal mt-[4px] bg-black bg-opacity-40`}
-                                  >
-                                    {getTimeChat(item?.createdAt)}
+                                    <div
+                                      className={`w-fit ${
+                                        author?.userId === user?.uid &&
+                                        "ml-auto"
+                                      } text-[10px] text-white px-[8px] pt-[3px] pb-[2px]  rounded-full font-normal mt-[4px] bg-black bg-opacity-40`}
+                                    >
+                                      {getTimeChat(item?.createdAt)}
+                                    </div>
                                   </div>
                                 </Link>
                               );
@@ -505,7 +522,7 @@ export default function ChatGroupRight({
                               item?.formAuthor?.userId === user?.uid
                                 ? "ml-auto"
                                 : ""
-                            }  mb-2`}
+                            }  mt-3`}
                           >
                             <div
                               className={`w-full  text-sm ${
@@ -517,7 +534,9 @@ export default function ChatGroupRight({
                               {item?.text}
                             </div>
                             <div
-                              className={`w-fit ${"ml-auto"} text-[10px] text-white px-[8px] py-[0px]  rounded-full font-normal mt-[4px] bg-black bg-opacity-40`}
+                              className={`w-fit ${
+                                author?.userId === user?.uid && "ml-auto"
+                              } text-[10px] text-white px-[8px] py-[0px]  rounded-full font-normal mt-[4px] bg-black bg-opacity-40`}
                             >
                               {getTimeChat(item?.createdAt)}
                             </div>
