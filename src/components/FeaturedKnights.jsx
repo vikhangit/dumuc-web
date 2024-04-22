@@ -16,7 +16,7 @@ const FeaturedKnights = ({ usersRanking, limit }) => {
 
   useEffect(() => {
     getCategories().then((result) => {
-      setCategories(result.filter(x => x.type === 'soss'))
+      setCategories(result.filter((x) => x.type === "soss"));
     });
   }, []);
 
@@ -63,45 +63,53 @@ const FeaturedKnights = ({ usersRanking, limit }) => {
             </div>
           </div>
           {categories
-                  .filter((x) => x.categoryParentId === "")
-                  .map((item) => {
-                    return (
-                      categories
-                        .filter((y) => y.categoryParentId === item.categoryId)
-                        .map((sub) => {
-                          return (
-                                      <div className="flex py-4 mt-2 gap-x-3 items-center border-b border-gray-500">
-                                      <div
-                                        className={`${
-                                          sizes.width > 369 ? "basis-1/2" : "basis-1/3"
-                                        } text-sm sm:text-lg font-semibold`}
-                                      >
-                                         {sub.name}
-                                      </div>
-                                      <div
-                                        className={`${
-                                          sizes.width > 369 ? "basis-1/4" : "basis-1/3"
-                                        } sm:px-4 flex justify-center`}
-                                      >
-                                        <span className="text-center py-1 sm:py-2 w-full bg-white shadow shadow-gray-500 rounded-full text-xs sm:text-sm font-semibold">
-                                          {authorStatistics?.createdSoss?.filter((x) => x?.category === sub?.categoryId).length}
-                                        </span>
-                                      </div>
-                                      <div
-                                        className={`${
-                                          sizes.width > 369 ? "basis-1/4" : "basis-1/3"
-                                        } sm:px-4 flex justify-center`}
-                                      >
-                                        <span className="text-center py-1 sm:py-2 w-full bg-white shadow shadow-gray-500 rounded-full text-xs sm:text-sm font-semibold">
-                                        {authorStatistics?.helpedSoss?.filter((x) => x?.category === sub?.categoryId).length}
-                                        </span>
-                                      </div>
-                                    </div>
-                          );
-                        })
-                    );
-                  })}
-          
+            .filter((x) => x.categoryParentId === "")
+            .map((item) => {
+              return categories
+                .filter((y) => y.categoryParentId === item.categoryId)
+                .map((sub, indexSub) => {
+                  return (
+                    <div
+                      key={indexSub}
+                      className="flex py-4 mt-2 gap-x-3 items-center border-b border-gray-500"
+                    >
+                      <div
+                        className={`${
+                          sizes.width > 369 ? "basis-1/2" : "basis-1/3"
+                        } text-sm sm:text-lg font-semibold`}
+                      >
+                        {sub.name}
+                      </div>
+                      <div
+                        className={`${
+                          sizes.width > 369 ? "basis-1/4" : "basis-1/3"
+                        } sm:px-4 flex justify-center`}
+                      >
+                        <span className="text-center py-1 sm:py-2 w-full bg-white shadow shadow-gray-500 rounded-full text-xs sm:text-sm font-semibold">
+                          {
+                            authorStatistics?.createdSoss?.filter(
+                              (x) => x?.category === sub?.categoryId
+                            ).length
+                          }
+                        </span>
+                      </div>
+                      <div
+                        className={`${
+                          sizes.width > 369 ? "basis-1/4" : "basis-1/3"
+                        } sm:px-4 flex justify-center`}
+                      >
+                        <span className="text-center py-1 sm:py-2 w-full bg-white shadow shadow-gray-500 rounded-full text-xs sm:text-sm font-semibold">
+                          {
+                            authorStatistics?.helpedSoss?.filter(
+                              (x) => x?.category === sub?.categoryId
+                            ).length
+                          }
+                        </span>
+                      </div>
+                    </div>
+                  );
+                });
+            })}
         </Modal.Body>
       </Modal>
     );
@@ -163,13 +171,13 @@ const FeaturedKnights = ({ usersRanking, limit }) => {
                           await getAuthorStatistics({
                             authorId: item?.author?.authorId,
                           })
-                          .then(result => {
-             
-                            setAuthorStatistics(result)
-                            setLoading(false);
-                          }).then(() => {
-                            setShowModal(true);
-                          })
+                            .then((result) => {
+                              setAuthorStatistics(result);
+                              setLoading(false);
+                            })
+                            .then(() => {
+                              setShowModal(true);
+                            });
                         }}
                       >
                         Xem thống kê

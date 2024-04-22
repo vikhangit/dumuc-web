@@ -20,18 +20,18 @@ import { getAuthors } from "@apis/posts";
 import dynamic from "next/dynamic";
 const ChatLeft = dynamic(
   () => {
-    return import("@components/Chat/Left");
+    return import("@components/Chat/Friend/Left");
   },
   { ssr: false }
 );
 const ChatRight = dynamic(
   () => {
-    return import("@components/Chat/Right");
+    return import("@components/Chat/Friend/Right");
   },
   { ssr: false }
 );
 
-export default function ChatGroup() {
+export default function ChatFriend() {
   const [user] = useAuthState(auth);
   const sizes = useWindowSize();
   const [show, setShow] = useState(0);
@@ -123,9 +123,9 @@ export default function ChatGroup() {
       </div>
       {/* <div className={sizes.width > 411 ? "mb-24" :  "mb-16"} /> */}
       {sizes.width > 992 ? (
-        <TabbarBottomChat active="chat" />
+        <TabbarBottomChat active="friend" />
       ) : (
-        show < 0 && !mobile && <TabbarBottomChat active="chat" />
+        show < 0 && !mobile && <TabbarBottomChat active="friend" />
       )}
     </main>
   );

@@ -20,13 +20,13 @@ function CustomGalleryRenderer({ data }) {
         },
       },
       Images: {
-       
         initialSize: "cover",
         content: (_ref, slide) => {
           let rez = "<picture>";
           const media = slide.media.split(";");
           slide.sources.split(";").map((source, index) => {
             rez += `<source
+            key="${index}"
                         media="${media[index] || ""}"
                         srcset="${source}"
                         />`;

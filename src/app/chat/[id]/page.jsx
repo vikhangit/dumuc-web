@@ -18,6 +18,7 @@ import {
 } from "firebase/firestore";
 import { getAuthors } from "@apis/posts";
 import dynamic from "next/dynamic";
+import { useParams } from "next/navigation";
 const ChatLeft = dynamic(
   () => {
     return import("@components/Chat/Left");
@@ -39,7 +40,7 @@ export default function ChatGroup() {
   const [messages, setMessages] = useState([]);
   const [userRecieved, setUserRecieved] = useState();
   const [rooms, setRooms] = useState([]);
-  const [allChat, setAllChat] = useState([]);
+  const params = useParams();
   useEffect(() => {
     if (sizes.width < 992) {
       setShow(-1);
@@ -61,34 +62,21 @@ export default function ChatGroup() {
     return () => unsubscribe;
   }, []);
   useEffect(() => {
-    const q = query(collection(db, "chat-rooms"), orderBy("createdAt", "desc"));
-    const unsubscribe = onSnapshot(q, (QuerySnapshot) => {
-      let fetchedMessages = [];
-      QuerySnapshot.forEach((doc) => {
-        let messages = [];
-        const q2 = query(
-          collection(db, "chat-rooms", doc.id, "messages"),
-          orderBy("createdAt", "asc")
-        );
-        const unsubscribe1 = onSnapshot(q2, (querySnapshot) =>
-          querySnapshot.forEach((doc1) =>
-            messages.push({
-              ...doc1.data(),
-              id: doc1.id,
-              createdAt: doc1.data()?.createdAt?.toDate(),
-            })
-          )
-        );
-        fetchedMessages.push({
+    let messages = [];
+    const q2 = query(
+      collection(db, "chat-rooms", params.id, "messages"),
+      orderBy("createdAt", "asc")
+    );
+    const unsubscribe = onSnapshot(q2, (querySnapshot) =>
+      querySnapshot.forEach((doc) =>
+        messages.push({
           ...doc.data(),
           id: doc.id,
-          messages,
           createdAt: doc.data()?.createdAt?.toDate(),
-        });
-        return () => unsubscribe1;
-      });
-      setMessages(fetchedMessages?.sort((a, b) => a?.createdAt - b?.createdAt));
-    });
+        })
+      )
+    );
+    setMessages(messages);
     return () => unsubscribe;
   }, []);
   const [authors, setAuthors] = useState();
@@ -109,7 +97,6 @@ export default function ChatGroup() {
           setMobile={setMobile}
           messages={messages}
           authors={authors}
-          rooms={rooms}
         />
         <ChatRight
           userRecieved={userRecieved}
@@ -118,7 +105,6 @@ export default function ChatGroup() {
           setMobile={setMobile}
           messages={messages}
           authors={authors}
-          rooms={rooms}
         />
       </div>
       {/* <div className={sizes.width > 411 ? "mb-24" :  "mb-16"} /> */}

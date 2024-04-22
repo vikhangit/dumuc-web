@@ -10,7 +10,12 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { auth, db } from "@utils/firebase";
 import { getProfile } from "@apis/users";
 import moment from "moment";
-import { useParams, useRouter, useSearchParams } from "next/navigation";
+import {
+  useParams,
+  usePathname,
+  useRouter,
+  useSearchParams,
+} from "next/navigation";
 import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
 import ModalAddFriend from "./ModalAddFriend";
 export default function ChatLeft({
@@ -25,9 +30,10 @@ export default function ChatLeft({
   const sizes = useWindowSize();
   const router = useRouter();
   const search = useSearchParams();
+  const path = usePathname();
   const [friendList, setFriendList] = useState([]);
   const [valueSearch, setValueSearch] = useState("");
-  const [searchFunction, setSearchFunction] = useState(false);
+  const [searchFunction, setSearchFunction] = useState(true);
   const [usingUser, setUsingUser] = useState();
   const [userTo, setUserTo] = useState();
   const [activeMessage, setActiveMessage] = useState([]);
@@ -58,27 +64,6 @@ export default function ChatLeft({
       return () => unsubscribe;
     } else {
       setActiveMessage([]);
-    }
-  }, [search]);
-  useEffect(() => {
-    if (search.get("friendId")) {
-      setSearchFunction(true);
-      const author = authors?.find(
-        (x) => x?.authorId === search.get("friendId")
-      );
-      const findChat2 = messages?.filter((item) =>
-        item?.member?.find((x) => x?.userId === user?.uid)
-      );
-      const findChat = findChat2?.find((item) =>
-        item?.member?.find((x) => x?.userId === author?.userId)
-      );
-      console.log(author);
-      if (!findChat) {
-        setUserRecieved(author);
-      } else {
-        setUserRecieved();
-        router.push(`/chat?chatId=${findChat?.id}`);
-      }
     }
   }, [search]);
   useEffect(() => {
@@ -164,7 +149,7 @@ export default function ChatLeft({
             }}
             value={valueSearch}
             // autoFocus={searchFunction}
-            className="ml-[6px] text-[#fff] text-base placeholder-[#fff] bg-[#C82027] w-full focus-visible:border-none focus-visible:shadow-none focus-visible:outline-none"
+            className="pl-[6px] text-[#fff] text-base placeholder-[#fff] bg-[#C82027] w-full focus-visible:border-none focus-visible:shadow-none focus-visible:outline-none"
             onChange={(e) => searchField(e.target.value)}
           />
           {valueSearch.trim() !== "" && searchFunction && (
@@ -175,37 +160,12 @@ export default function ChatLeft({
                   usingUser?.friendList?.filter((x) => x.status === 2)
                 );
               }}
-              className="absolute right-0"
+              className="absolute right-[10px]"
             >
-              <IoCloseCircle size={16} className="text-white" />
+              <IoCloseCircle size={20} className="text-white" />
             </button>
           )}
         </div>
-        {!searchFunction ? (
-          <Link
-            href={``}
-            onClick={(e) => {
-              e.preventDefault();
-              setShowAddFriend(true);
-            }}
-            className={`flex justify-center rounded-[20px] bg-[#EB7F7F] items-center  gap-x-2 text-white  py-[5px] ${
-              sizes.width > 380 ? "px-[15px] w-[150px]" : "w-[135px] gap-x-1"
-            }`}
-          >
-            <MdOutlinePersonAddAlt size={24} color="#fff" />
-            Thêm bạn
-          </Link>
-        ) : (
-          <button
-            onClick={() => {
-              setSearchFunction(false);
-              router.push("/chat");
-            }}
-            className={`rouded-[5px] text-white text-base font-semibold px-[20px] py-[5px] hover:bg-gray-200 hover:text-black cursor-pointer`}
-          >
-            Đóng
-          </button>
-        )}
       </div>
       <div className="h-[calc(100%-150px)] overflow-auto scroll-chat px-2">
         {searchFunction ? (
@@ -225,13 +185,7 @@ export default function ChatLeft({
                     const findChat = findChat2?.find((item) =>
                       item?.member?.find((x) => x?.userId === author?.userId)
                     );
-                    if (!findChat) {
-                      setUserRecieved(author);
-                      router.push("/chat");
-                    } else {
-                      setUserRecieved();
-                      router.push(`/chat?chatId=${findChat?.id}`);
-                    }
+                    router.push(`/chat?friendId=${author?.authorId}`);
                   }}
                   className={`${
                     userTo?.authorId === author?.authorId
@@ -378,12 +332,12 @@ export default function ChatLeft({
           </div>
         )}
       </div>
-      <ModalAddFriend
+      {/* <ModalAddFriend
         authors={authors}
         onCallback={() => {}}
         onCancel={() => setShowAddFriend(false)}
         visible={showAddFriend}
-      />
+      /> */}
     </div>
   );
 }

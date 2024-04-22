@@ -7,10 +7,13 @@ import { Navigation } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 import Image from "next/image";
 
-const AuthorPopularItemsMobile = ({ items = [], tiltle = 'THÀNH VIÊN NỔI BẬT' }) => {
-   useEffect(() => {
-        register();
-    }, []);
+const AuthorPopularItemsMobile = ({
+  items = [],
+  tiltle = "THÀNH VIÊN NỔI BẬT",
+}) => {
+  useEffect(() => {
+    register();
+  }, []);
   return (
     <>
       {tiltle && (
@@ -24,9 +27,9 @@ const AuthorPopularItemsMobile = ({ items = [], tiltle = 'THÀNH VIÊN NỔI B�
           >
             <path
               stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
               d="m11.479 1.712 2.367 4.8a.532.532 0 0 0 .4.292l5.294.769a.534.534 0 0 1 .3.91l-3.83 3.735a.534.534 0 0 0-.154.473l.9 5.272a.535.535 0 0 1-.775.563l-4.734-2.49a.536.536 0 0 0-.5 0l-4.73 2.487a.534.534 0 0 1-.775-.563l.9-5.272a.534.534 0 0 0-.154-.473L2.158 8.48a.534.534 0 0 1 .3-.911l5.294-.77a.532.532 0 0 0 .4-.292l2.367-4.8a.534.534 0 0 1 .96.004Z"
             />
           </svg>
@@ -61,7 +64,10 @@ const AuthorPopularItemsMobile = ({ items = [], tiltle = 'THÀNH VIÊN NỔI B�
               <Link href={`/author/${item?.slug}/${item?.authorId}`}>
                 <div class="flex flex-col items-center my-2 relative z-10">
                   <div className="w-14 h-14 p-1 rounded-full border border-black">
-                    <Image width={0} height={0} sizes="100vw"
+                    <Image
+                      width={0}
+                      height={0}
+                      sizes="100vw"
                       class="w-full h-full rounded-full"
                       src={item?.photo ? item?.photo : "/dumuc/avatar.png"}
                       alt={item?.name}

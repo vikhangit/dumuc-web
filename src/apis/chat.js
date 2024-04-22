@@ -1,19 +1,39 @@
-import { db } from '@utils/firebase';
-import { getFirestore, collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { db } from "@utils/firebase";
+import {
+  collection,
+  query,
+  orderBy,
+  onSnapshot,
+  limit,
+} from "firebase/firestore";
 
-// ...
-
-async function sendMessage(roomId, user, text) {
-    try {
-        await addDoc(collection(db, 'chat-rooms', roomId, 'messages'), {
-            uid: user?.uid,
-            displayName: user?.displayName,
-            text: text,
-            timestamp: serverTimestamp(),
-        });
-    } catch (error) {
-        console.error(error);
+function getChatRooms(callback){
+  return onSnapshot(
+    query(collection(db, "chat-rooms"), orderBy("createdAt", "asc")),
+    (querySnapshot) => {
+        const chatRooms = querySnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+            createdAt: doc.data()?.createdAt?.toDate()
+        }));
+        callback(chatRooms);
     }
+  );
 }
 
-export { sendMessage };
+function getMessages(roomId, callback) {
+  return onSnapshot(
+    query(
+        collection(db, 'chat-rooms', roomId, 'messages'),
+        orderBy("createdAt", "asc")
+    ),
+    (querySnapshot) => {
+        const messages = querySnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+        }));
+        callback(messages);
+    }
+  );
+}
+export { getChatRooms, getMessages }

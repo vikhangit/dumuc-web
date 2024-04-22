@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import CustomCodeRenderer from "@components/editorjs/CustomCodeRenderer";
 import CustomImageRenderer from "@components/editorjs/CustomImageRenderer";
 import CustomHeaderRenderer from "@components/editorjs/CustomHeaderRenderer";
@@ -15,13 +15,13 @@ const Output = dynamic(
 );
 
 const EditorjsRender = ({ item }) => {
-  const sizes = useWindowSize()
+  const sizes = useWindowSize();
   const renderers = {
     image: CustomImageRenderer,
     code: CustomCodeRenderer,
     header: CustomHeaderRenderer,
     gallery: CustomGalleryRenderer,
-    imageInline: CustomImageLinkRenderer
+    imageInline: CustomImageLinkRenderer,
   };
 
   const style = {
@@ -29,34 +29,60 @@ const EditorjsRender = ({ item }) => {
       fontSize: sizes.width > 576 ? 16 : 14,
       fontWeigjt: sizes.width > 576 ? "400" : "500",
       textAlign: "justify",
-      color: "#605F5F"
+      color: "#605F5F",
     },
   };
 
-  return (
-    item?.body?.blocks?.map((i, idx) => {
-      switch (i?.type) {
-        case "header": return <CustomHeaderRenderer data={i?.data} />
-        case "imageInline": return <CustomImageLinkRenderer data={i?.data}/>
-        case "code": return <CustomCodeRenderer data={i?.data} />
-        case "image": return <CustomImageRenderer data={i?.data} />
-        case "delimiter": return <div className="flex justify-center text-[50px]">*  *  *</div>
-        case "quote": return <div className="my-2">
-          <div>
-            <span><RiDoubleQuotesL size={32} color="blue" /></span>
-            <p style={{
-               marginLeft: 30,
-               marginRight: 30
-            }} className="text-lg font-normal text-justify">{i?.data?.text}</p>
-            <span className="flex justify-end"><RiDoubleQuotesR  size={32} color="blue" /></span>
+  return item?.body?.blocks?.map((i, idx) => {
+    switch (i?.type) {
+      case "header":
+        return <CustomHeaderRenderer key={idx} data={i?.data} />;
+      case "imageInline":
+        return <CustomImageLinkRenderer key={idx} data={i?.data} />;
+      case "code":
+        return <CustomCodeRenderer key={idx} data={i?.data} />;
+      case "image":
+        return <CustomImageRenderer key={idx} data={i?.data} />;
+      case "delimiter":
+        return (
+          <div key={idx} className="flex justify-center text-[50px]">
+            * * *
           </div>
-          <p className='text-sm italic text-center'>{i?.data.caption}</p>
-        </div>
-        case "paragraph": return <div className="my-2 text-lg font-normal text-justify" dangerouslySetInnerHTML={{__html: i?.data?.text}}></div>
-        default:
-      }
-    })
-  );
+        );
+      case "quote":
+        return (
+          <div key={idx} className="my-2">
+            <div>
+              <span>
+                <RiDoubleQuotesL size={32} color="blue" />
+              </span>
+              <p
+                style={{
+                  marginLeft: 30,
+                  marginRight: 30,
+                }}
+                className="text-lg font-normal text-justify"
+              >
+                {i?.data?.text}
+              </p>
+              <span className="flex justify-end">
+                <RiDoubleQuotesR size={32} color="blue" />
+              </span>
+            </div>
+            <p className="text-sm italic text-center">{i?.data.caption}</p>
+          </div>
+        );
+      case "paragraph":
+        return (
+          <div
+            key={idx}
+            className="my-2 text-lg font-normal text-justify"
+            dangerouslySetInnerHTML={{ __html: i?.data?.text }}
+          ></div>
+        );
+      default:
+    }
+  });
 };
 
 export default EditorjsRender;

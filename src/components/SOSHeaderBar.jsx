@@ -14,9 +14,12 @@ import {
   cancelSosHelper,
   completeConfirmSosHelper,
 } from "@apis/soss";
-const Timer = dynamic( () => {
-  return import( '@components/Timer' );
-}, { ssr: false } );
+const Timer = dynamic(
+  () => {
+    return import("@components/Timer");
+  },
+  { ssr: false }
+);
 import { DateTimeLog } from "@utils/dateFormat";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation } from "swiper/modules";
@@ -50,22 +53,30 @@ export default function SOSHeaderBar() {
   }, []);
   useEffect(() => {
     if (user) {
-      getSossByUser(user?.accessToken).then((soosData) => setSoss(
-        soosData.filter(x => x.status === 0).map((item) => {
-          return {
-            ...item,
-            type: "sos",
-          };
-        })
-      ))
-      getHelperSossByUser(user?.accessToken).then((helperSossData) => setHelperSoss(
-        helperSossData.filter(x => x.status === 0).map((item) => {
-          return {
-            ...item,
-            type: "helper",
-          };
-        })
-      ))
+      getSossByUser(user?.accessToken).then((soosData) =>
+        setSoss(
+          soosData
+            .filter((x) => x.status === 0)
+            .map((item) => {
+              return {
+                ...item,
+                type: "sos",
+              };
+            })
+        )
+      );
+      getHelperSossByUser(user?.accessToken).then((helperSossData) =>
+        setHelperSoss(
+          helperSossData
+            .filter((x) => x.status === 0)
+            .map((item) => {
+              return {
+                ...item,
+                type: "helper",
+              };
+            })
+        )
+      );
       setLoadingSkeleton(false);
     }
   }, [user]);
@@ -150,7 +161,7 @@ export default function SOSHeaderBar() {
         helperId: item?.sossHelpId,
         isCompletedConfirm: confirm === "YES" ? true : false,
       },
-     accessToken
+      accessToken
     )
       .then((result) => {
         message.success(result.message);
@@ -216,8 +227,7 @@ export default function SOSHeaderBar() {
                                 expireSos({
                                   sosId: item?.sosId,
                                 })
-                                  .then((result) => {
-                                  })
+                                  .then((result) => {})
                                   .catch((error) => {
                                     console.error(error);
                                     setLoadingSubmit(false);
@@ -230,7 +240,10 @@ export default function SOSHeaderBar() {
                                 <a
                                   href={`/author/${item?.author?.slug}/${item?.author?.authorId}`}
                                 >
-                                  <Image width={0} height={0} sizes="100vw"
+                                  <Image
+                                    width={0}
+                                    height={0}
+                                    sizes="100vw"
                                     class="w-10 h-10 rounded-full"
                                     src={
                                       item?.author?.photo
@@ -271,9 +284,9 @@ export default function SOSHeaderBar() {
                                   >
                                     <g
                                       stroke="currentColor"
-                                      stroke-linecap="round"
-                                      stroke-linejoin="round"
-                                      stroke-width="2"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth="2"
                                     >
                                       <path d="M8 12a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
                                       <path d="M13.8 12.938h-.01a7 7 0 1 0-11.465.144h-.016l.141.17c.1.128.2.252.3.372L8 20l5.13-6.248c.193-.209.373-.429.54-.66l.13-.154Z" />
@@ -325,9 +338,7 @@ export default function SOSHeaderBar() {
                                 expireSos({
                                   sosId: item?.sosId,
                                 })
-                                  .then((result) => {
-                                   
-                                  })
+                                  .then((result) => {})
                                   .catch((error) => {
                                     console.error(error);
                                     setLoadingSubmit(false);
@@ -340,7 +351,10 @@ export default function SOSHeaderBar() {
                                 <a
                                   href={`/author/${item?.author?.slug}/${item?.author?.authorId}`}
                                 >
-                                  <Image width={0} height={0} sizes="100vw"
+                                  <Image
+                                    width={0}
+                                    height={0}
+                                    sizes="100vw"
                                     class="w-10 h-10 rounded-full"
                                     src={
                                       item?.author?.photo
@@ -374,9 +388,9 @@ export default function SOSHeaderBar() {
                                   >
                                     <g
                                       stroke="currentColor"
-                                      stroke-linecap="round"
-                                      stroke-linejoin="round"
-                                      stroke-width="2"
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth="2"
                                     >
                                       <path d="M8 12a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
                                       <path d="M13.8 12.938h-.01a7 7 0 1 0-11.465.144h-.016l.141.17c.1.128.2.252.3.372L8 20l5.13-6.248c.193-.209.373-.429.54-.66l.13-.154Z" />
@@ -429,7 +443,10 @@ export default function SOSHeaderBar() {
                             } `}
                             key={index}
                           >
-                            <Image width={0} height={0} sizes="100vw"
+                            <Image
+                              width={0}
+                              height={0}
+                              sizes="100vw"
                               alt={`Photo}`}
                               src={photo}
                               className="rounded-md h-full w-full object-cover"
@@ -455,7 +472,10 @@ export default function SOSHeaderBar() {
                           className="p-1 flex flex-col sm:flex-row justify-between"
                         >
                           <div className="flex items-center">
-                            <Image width={0} height={0} sizes="100vw"
+                            <Image
+                              width={0}
+                              height={0}
+                              sizes="100vw"
                               class="w-12 h-12 rounded-full"
                               src={
                                 helper?.user?.photo
@@ -485,9 +505,9 @@ export default function SOSHeaderBar() {
                                     >
                                       <path
                                         stroke="currentColor"
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth="2"
                                         d="M1 5.917 5.724 10.5 15 1.5"
                                       />
                                     </svg>{" "}
@@ -505,9 +525,8 @@ export default function SOSHeaderBar() {
                                       >
                                         <path
                                           stroke="currentColor"
-                                          stroke-linecap="round"
-                                          stroke-linejoin="round"
-                                          stroke-width="2"
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
                                           d="M1 5.917 5.724 10.5 15 1.5"
                                         />
                                       </svg>{" "}
@@ -526,9 +545,9 @@ export default function SOSHeaderBar() {
                                       >
                                         <path
                                           stroke="currentColor"
-                                          stroke-linecap="round"
-                                          stroke-linejoin="round"
-                                          stroke-width="2"
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          strokeWidth="2"
                                           d="M1 5.917 5.724 10.5 15 1.5"
                                         />
                                       </svg>{" "}
@@ -637,7 +656,10 @@ export default function SOSHeaderBar() {
                   <div className="space-y-1">
                     <div className="px-1 flex justify-between">
                       <div className="flex items-center">
-                        <Image width={0} height={0} sizes="100vw"
+                        <Image
+                          width={0}
+                          height={0}
+                          sizes="100vw"
                           class="w-12 h-12 rounded-full"
                           src={
                             sos?.user?.photo
@@ -711,7 +733,10 @@ export default function SOSHeaderBar() {
                             } `}
                             key={index}
                           >
-                            <Image width={0} height={0} sizes="100vw"
+                            <Image
+                              width={0}
+                              height={0}
+                              sizes="100vw"
                               alt={`Photo}`}
                               src={photo}
                               className="rounded-md h-full w-full object-cover"
@@ -738,9 +763,9 @@ export default function SOSHeaderBar() {
                               >
                                 <path
                                   stroke="currentColor"
-                                  stroke-linecap="round"
-                                  stroke-linejoin="round"
-                                  stroke-width="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth="2"
                                   d="M1 5.917 5.724 10.5 15 1.5"
                                 />
                               </svg>{" "}
@@ -776,7 +801,9 @@ export default function SOSHeaderBar() {
                               </div>
                               <div
                                 className="text-[#c80000] font-bold text-xs mt-2 ml-1 hover:scale-105 transition-all cursor-pointer"
-                                onClick={() => onCancelled(sos, user?.accessToken)}
+                                onClick={() =>
+                                  onCancelled(sos, user?.accessToken)
+                                }
                               >
                                 Huỷ giúp đỡ
                               </div>
@@ -800,7 +827,6 @@ export default function SOSHeaderBar() {
                 visible={showRating}
                 onCancel={() => setShowRating(false)}
                 onSubmit={(rating, isPrimaryHelper, ratingNote) => {
-                 
                   if (valueRating) {
                     onCompleteConfirmed(
                       {
