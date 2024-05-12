@@ -231,6 +231,12 @@
   .button-display {
     display: none;
   }
+}
+  
+@media only screen and (max-width: 800px) {
+  .bottomTabBarHiden1{
+    display: none;
+  }
   
 }
 .custome{
