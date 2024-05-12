@@ -37,17 +37,14 @@ import { FaFile, FaFileAudio, FaFileImage, FaFileLines } from "react-icons/fa6";
 import { BiSolidFilePdf, BiSolidFileTxt } from "react-icons/bi";
 import { BsEmojiSmile, BsFileEarmarkWordFill } from "react-icons/bs";
 import { SiMicrosoftpowerpoint } from "react-icons/si";
-import ModalAddMember from "./ModalAddMember";
 import ModalAbout from "./ModalAbout";
 import dynamic from "next/dynamic";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getTimeChat } from "@utils/dateFormat";
 import { HiOutlineDotsHorizontal, HiPencil } from "react-icons/hi";
-import ModalAddLeader from "./ModalAddLeader";
 import { Textarea } from "@nextui-org/input";
 import EmojiPicker from "emoji-picker-react";
 import moment from "moment";
-import ModalForwardMessage from "../ModalForwardMessage";
 
 export default function ChatGroupRight({
   userRecieved,
@@ -284,25 +281,9 @@ export default function ChatGroupRight({
               </div>
             </div>
             <div className="flex items-center gap-x-3 pr-0 sm:pr-5">
-              <IoMdPersonAdd
-                color="#0084ff"
-                size={24}
-                onClick={() => setShowModalAddMember(true)}
-              />
               <button className="group relative">
                 <IoInformationCircleSharp color="#0084ff" size={28} />
                 <div className="absolute z-[99999] hidden group-hover:flex flex-col justify-start items-start top-full right-0 bg-white shadow-sm shadow-gray-500 text-[10px] sm:text-xs font-medium w-[125px] rounded p-1">
-                  <Link
-                    href={``}
-                    onClick={async (e) => {
-                      e.preventDefault();
-                      setOpenAbout(true);
-                      setTypeAbout("member");
-                    }}
-                    className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left`}
-                  >
-                    Xem thành viên
-                  </Link>
                   <Link
                     href={``}
                     onClick={(e) => {
@@ -474,19 +455,19 @@ export default function ChatGroupRight({
                                             <MdReply size={20} /> Trả lời
                                           </Link>
                                           {/* <Link
-                                            href={``}
-                                            onClick={async (e) => {
-                                              e.preventDefault();
-                                              setPhotoForward(item?.photos);
-                                              setMessageForward("");
-                                              setFieldForward([]);
-                                              setShowForward(true);
-                                            }}
-                                            className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left  flex items-center gap-x-2 text-black`}
-                                          >
-                                            <IoMdShareAlt size={20} />
-                                            Chuyển tiếp
-                                          </Link> */}
+                                         href={``}
+                                         onClick={async (e) => {
+                                           e.preventDefault();
+                                           setPhotoForward(item?.photos);
+                                           setMessageForward("");
+                                           setFieldForward([]);
+                                           setShowForward(true);
+                                         }}
+                                         className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left  flex items-center gap-x-2 text-black`}
+                                       >
+                                         <IoMdShareAlt size={20} />
+                                         Chuyển tiếp
+                                       </Link> */}
                                         </div>
                                       </button>
                                     )}
@@ -574,19 +555,19 @@ export default function ChatGroupRight({
                                             <MdReply size={20} /> Trả lời
                                           </Link>
                                           {/* <Link
-                                            href={``}
-                                            onClick={async (e) => {
-                                              e.preventDefault();
-                                              setPhotoForward(item?.photos);
-                                              setMessageForward("");
-                                              setFieldForward([]);
-                                              setShowForward(true);
-                                            }}
-                                            className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left  flex items-center gap-x-2 text-black`}
-                                          >
-                                            <IoMdShareAlt size={20} />
-                                            Chuyển tiếp
-                                          </Link> */}
+                                         href={``}
+                                         onClick={async (e) => {
+                                           e.preventDefault();
+                                           setPhotoForward(item?.photos);
+                                           setMessageForward("");
+                                           setFieldForward([]);
+                                           setShowForward(true);
+                                         }}
+                                         className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left  flex items-center gap-x-2 text-black`}
+                                       >
+                                         <IoMdShareAlt size={20} />
+                                         Chuyển tiếp
+                                       </Link> */}
                                         </div>
                                       </button>
                                     )}
@@ -883,19 +864,19 @@ export default function ChatGroupRight({
                                         <MdReply size={20} /> Trả lời
                                       </Link>
                                       {/* <Link
-                                        href={``}
-                                        onClick={async (e) => {
-                                          e.preventDefault();
-                                          setFieldForward(item?.files);
-                                          setMessageForward("");
-                                          setPhotoForward([]);
-                                          setShowForward(true);
-                                        }}
-                                        className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left  flex items-center gap-x-2 text-black`}
-                                      >
-                                        <IoMdShareAlt size={20} />
-                                        Chuyển tiếp
-                                      </Link> */}
+                                     href={``}
+                                     onClick={async (e) => {
+                                       e.preventDefault();
+                                       setFieldForward(item?.files);
+                                       setMessageForward("");
+                                       setPhotoForward([]);
+                                       setShowForward(true);
+                                     }}
+                                     className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left  flex items-center gap-x-2 text-black`}
+                                   >
+                                     <IoMdShareAlt size={20} />
+                                     Chuyển tiếp
+                                   </Link> */}
                                     </div>
                                   </button>
                                 )}
@@ -971,19 +952,19 @@ export default function ChatGroupRight({
                                         <MdReply size={20} /> Trả lời
                                       </Link>
                                       {/* <Link
-                                        href={``}
-                                        onClick={async (e) => {
-                                          e.preventDefault();
-                                          setMessageForward(item?.text);
-                                          setPhotoForward([]);
-                                          setFieldForward([]);
-                                          setShowForward(true);
-                                        }}
-                                        className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left  flex items-center gap-x-2 text-black`}
-                                      >
-                                        <IoMdShareAlt size={20} />
-                                        Chuyển tiếp
-                                      </Link> */}
+                                     href={``}
+                                     onClick={async (e) => {
+                                       e.preventDefault();
+                                       setMessageForward(item?.text);
+                                       setPhotoForward([]);
+                                       setFieldForward([]);
+                                       setShowForward(true);
+                                     }}
+                                     className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left  flex items-center gap-x-2 text-black`}
+                                   >
+                                     <IoMdShareAlt size={20} />
+                                     Chuyển tiếp
+                                   </Link> */}
                                     </div>
                                   </button>
                                 )}
@@ -1275,11 +1256,11 @@ export default function ChatGroupRight({
                                 {item.type === "deputy-leader-remove"
                                   ? "bị xóa quyền nhóm phó"
                                   : `trở thành
-                                ${
-                                  item?.type === "leader"
-                                    ? " nhóm trưởng"
-                                    : " nhóm phó"
-                                }`}
+                             ${
+                               item?.type === "leader"
+                                 ? " nhóm trưởng"
+                                 : " nhóm phó"
+                             }`}
                               </p>
                             </div>
                           ) : (
@@ -1563,14 +1544,6 @@ export default function ChatGroupRight({
         setOpenImage={setOpenImage}
         type={type}
       />
-      <ModalAddMember
-        authors={authors}
-        onCallback={() => {}}
-        visible={showModalAddMember}
-        onCancel={() => setShowModalAddMember(false)}
-        activeGroup={activeGroup}
-        member={groupTo?.member}
-      />
       <ModalAbout
         visible={openAbout}
         onCancel={() => setOpenAbout(false)}
@@ -1578,25 +1551,7 @@ export default function ChatGroupRight({
         authors={authors}
         member={groupTo?.member}
         type={typeAbout}
-        setShowModalLeader={setShowModalLeader}
       />
-      <ModalAddLeader
-        authors={authors}
-        member={groupTo?.member}
-        onCancel={() => setShowModalLeader(false)}
-        onCloseParent={() => setOpenAbout(false)}
-        visible={showModalLeader}
-      />
-      {/* <ModalForwardMessage
-        authors={authors}
-        onCallback={() => {}}
-        visible={showForward}
-        onCancel={() => setShowForward(false)}
-        messageForward={messageForward}
-        photForward={photoForward}
-        fileForward={fileForward}
-        listmessage={messages}
-      /> */}
     </div>
   );
 }

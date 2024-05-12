@@ -8,7 +8,8 @@ const nextConfig = {
           'googleapis.com',
           'localhost',
           'lh3.googleusercontent.com',
-          'wall.vn'
+          'wall.vn',
+          "flagcdn.com"
         ]
     },
 }

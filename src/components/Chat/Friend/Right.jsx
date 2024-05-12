@@ -594,7 +594,7 @@ export default function ChatRight({
                             formAuthor: myAuthor,
                           }
                         );
-                        router.push(`/chat?chat=${data?.id}`);
+                        router.push(`/chat?chatId=${data?.id}`);
                       });
                     }
                     setNewMessage("");

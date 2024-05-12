@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { getFeedsLoadMore } from "@apis/feeds";
+import { createFeedView, getFeedsLoadMore } from "@apis/feeds";
 import FeedItem from "@components/FeedItem";
 import InfiniteScroll from "react-infinite-scroller";
 import { Spinner } from "flowbite-react";
@@ -49,6 +49,7 @@ const FeedItems = ({
       }
     });
   };
+
   return (
     <div>
       {" "}

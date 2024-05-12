@@ -603,7 +603,7 @@ ul.tree:before {
 }
 
 .scroll-quick-post::-webkit-scrollbar, .scroll-chat::-webkit-scrollbar {
-  width: 10px;
+  width: 5px;
   
 }
 
@@ -648,4 +648,57 @@ ul.tree:before {
 }
 .html iframe{
   border-radius: 0.5rem !important;
+}
+
+
+div[data-slot="input-wrapper"]{
+  box-shadow: none !important;
+  border: none !important;
+  background-color: white !important;
+  padding: 0px !important;
+}
+div[data-slot="base"]{
+  background-color: white !important;
+}
+div[data-slot="input-wrapper"] textarea{
+  border: none !important;
+  padding: 5px 0px !important;
+}
+div[data-slot="input-wrapper"] textarea::-webkit-input-placeholder {
+  color:rgb(156 163 175);
+}
+div[data-slot="input-wrapper"] textarea::-moz-placeholder{
+  color:rgb(156 163 175);
+} /* Firefox 19+ */
+div[data-slot="input-wrapper"] textarea:-moz-placeholder{
+  color:rgb(156 163 175);
+} /* Firefox 18- */
+div[data-slot="input-wrapper"] textarea:-ms-input-placeholder{
+  color:rgb(156 163 175);
+}
+
+div[data-slot="input-wrapper"] textarea::-webkit-scrollbar {
+  width: 10px;
+  
+}
+div[data-slot="input-wrapper"] textarea::-webkit-scrollbar {
+  width: 5px;
+}
+
+/* Track */
+div[data-slot="input-wrapper"] textarea::-webkit-scrollbar-track {
+  background: #DADBDE;
+  border-radius: 100px;
+  
+}
+
+/* Handle */
+div[data-slot="input-wrapper"] textarea::-webkit-scrollbar-thumbmb{
+  background: #B0B0B2;
+  border-radius: 100px;
+}
+
+/* Handle on hover */
+div[data-slot="input-wrapper"] textarea::-webkit-scrollbar-thumb:hover{
+  background: #DADBDE;
 }

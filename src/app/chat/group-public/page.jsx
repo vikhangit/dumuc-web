@@ -9,92 +9,77 @@ import { useWindowSize } from "@hooks/useWindowSize";
 import React, { useEffect, useRef, useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth, db } from "@utils/firebase";
-import {
-  collection,
-  query,
-  orderBy,
-  onSnapshot,
-  limit,
-} from "firebase/firestore";
+import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
 import { getAuthors } from "@apis/posts";
 import dynamic from "next/dynamic";
-const ChatLeft = dynamic(
+import { useSearchParams } from "next/navigation";
+const ChatGroupLeft = dynamic(
   () => {
-    return import("@components/Chat/Left");
+    return import("@components/Chat/GroupPublic/GroupLeft");
   },
   { ssr: false }
 );
-const ChatRight = dynamic(
+const ChatGroupRight = dynamic(
   () => {
-    return import("@components/Chat/Right");
+    return import("@components/Chat/GroupPublic/GroupRight");
   },
   { ssr: false }
 );
 
-export default function ChatGroup() {
+export default function Chat() {
   const [user] = useAuthState(auth);
   const sizes = useWindowSize();
+  const search = useSearchParams();
   const [show, setShow] = useState(0);
   const [mobile, setMobile] = useState(false);
   const [messages, setMessages] = useState([]);
   const [userRecieved, setUserRecieved] = useState();
-  const [rooms, setRooms] = useState([]);
-  const [allChat, setAllChat] = useState([]);
+  const [activeGroup, setActiveGroup] = useState();
   useEffect(() => {
     if (sizes.width < 992) {
       setShow(-1);
     }
   }, [sizes]);
   useEffect(() => {
-    const q = query(collection(db, "chat-rooms"), orderBy("createdAt", "asc"));
+    const q = query(
+      collection(db, "chat-groups"),
+      orderBy("createdAt", "desc")
+    );
     const unsubscribe = onSnapshot(q, (QuerySnapshot) => {
-      let fetchedRooms = [];
-      QuerySnapshot.forEach((doc) => {
-        fetchedRooms.push({
-          ...doc.data(),
-          id: doc.id,
-          createdAt: doc.data()?.createdAt?.toDate(),
-        });
-      });
-      setRooms(fetchedRooms);
-    });
-    return () => unsubscribe;
-  }, []);
-  useEffect(() => {
-    const q = query(collection(db, "chat-rooms"), orderBy("createdAt", "asc"));
-    const unsubscribe = onSnapshot(q, (QuerySnapshot) => {
-      let fetchedMessages = [];
+      let fetchedGroup = [];
       QuerySnapshot.forEach((doc) => {
         let messages = [];
-        const q2 = query(
-          collection(db, "chat-rooms", doc.id, "messages"),
+        const q3 = query(
+          collection(db, "chat-groups", doc.id, "messages"),
           orderBy("createdAt", "asc")
         );
-        const unsubscribe1 = onSnapshot(q2, (querySnapshot) =>
+        onSnapshot(q3, (querySnapshot) => {
           querySnapshot.forEach((doc1) =>
             messages.push({
-              ...doc1.data(),
               id: doc1.id,
+              ...doc1.data(),
               createdAt: doc1.data()?.createdAt?.toDate(),
             })
-          )
-        );
-        fetchedMessages.push({
+          );
+        });
+        fetchedGroup.push({
           ...doc.data(),
           id: doc.id,
+          // member,
           messages,
           createdAt: doc.data()?.createdAt?.toDate(),
         });
-        return () => unsubscribe1;
       });
-      setMessages(fetchedMessages?.sort((a, b) => a?.createdAt - b?.createdAt));
+      setMessages(fetchedGroup);
     });
     return () => unsubscribe;
   }, []);
+  console.log("123", messages);
   const [authors, setAuthors] = useState();
   useEffect(() => {
     getAuthors().then((data) => setAuthors(data));
   }, []);
+  console.log(messages);
   return (
     <main className="w-full h-full fixed left-0 top-0">
       <div
@@ -102,30 +87,32 @@ export default function ChatGroup() {
           sizes.width > 992 ? "flex-row" : "flex-col"
         }`}
       >
-        <ChatLeft
+        <ChatGroupLeft
           setUserRecieved={setUserRecieved}
           userRecieved={userRecieved}
+          activeGroup={activeGroup}
+          setActiveGroup={setActiveGroup}
           mobile={mobile}
           setMobile={setMobile}
           messages={messages}
           authors={authors}
-          rooms={rooms}
         />
-        <ChatRight
+        <ChatGroupRight
           userRecieved={userRecieved}
+          activeGroup={activeGroup}
+          setActiveGroup={setActiveGroup}
           setUserRecieved={setUserRecieved}
           mobile={mobile}
           setMobile={setMobile}
           messages={messages}
           authors={authors}
-          rooms={rooms}
         />
       </div>
       {/* <div className={sizes.width > 411 ? "mb-24" :  "mb-16"} /> */}
       {sizes.width > 992 ? (
-        <TabbarBottomChat active="chat" />
+        <TabbarBottomChat active="group-public" />
       ) : (
-        show < 0 && !mobile && <TabbarBottomChat active="chat" />
+        show < 0 && !mobile && <TabbarBottomChat active="group-public" />
       )}
     </main>
   );

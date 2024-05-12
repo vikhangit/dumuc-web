@@ -48,21 +48,6 @@ export default function Chat() {
     const unsubscribe = onSnapshot(q, (QuerySnapshot) => {
       let fetchedGroup = [];
       QuerySnapshot.forEach((doc) => {
-        let member = [];
-        const q2 = query(
-          collection(db, "chat-groups", doc.id, "member"),
-          orderBy("createdAt", "asc")
-        );
-        onSnapshot(q2, (querySnapshot) => {
-          querySnapshot.forEach((doc1) =>
-            member.push({
-              id: doc1.id,
-              ...doc1.data(),
-              createdAt: doc1.data()?.createdAt?.toDate(),
-            })
-          );
-        });
-
         let messages = [];
         const q3 = query(
           collection(db, "chat-groups", doc.id, "messages"),
@@ -77,25 +62,10 @@ export default function Chat() {
             })
           );
         });
-        let avatar = [];
-        const q4 = query(
-          collection(db, "chat-groups", doc.id, "avatar"),
-          orderBy("createdAt", "desc")
-        );
-        onSnapshot(q4, (querySnapshot) => {
-          querySnapshot.forEach((doc1) =>
-            avatar.push({
-              id: doc1.id,
-              ...doc1.data(),
-              createdAt: doc1.data()?.createdAt?.toDate(),
-            })
-          );
-        });
         fetchedGroup.push({
           ...doc.data(),
           id: doc.id,
-          member,
-          avatar,
+          // member,
           messages,
           createdAt: doc.data()?.createdAt?.toDate(),
         });
@@ -142,7 +112,7 @@ export default function Chat() {
       {sizes.width > 992 ? (
         <TabbarBottomChat active="group" />
       ) : (
-        show < 0 && !mobile && <TabbarBottomChat active="chat" />
+        show < 0 && !mobile && <TabbarBottomChat active="group" />
       )}
     </main>
   );

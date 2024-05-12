@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 import { auth } from "utils/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { FaUserFriends } from "react-icons/fa";
+import { FaUsers } from "react-icons/fa6";
 
 export default function TabbarBottomChat({ active = "home" }) {
   const [user] = useAuthState(auth);
@@ -88,14 +89,35 @@ export default function TabbarBottomChat({ active = "home" }) {
             </span>
           </Link>
         )}
+        {active === "group-public" ? (
+          <Link
+            href={"/chat/group-public"}
+            className="cursor-pointer inline-flex flex-col items-center justify-center px-0 sm:px-2 hover:bg-gray-50 dark:hover:bg-gray-800 group"
+          >
+            <MdOutlineSupervisedUserCircle size={32} color="#c80000" />
+            <span class="text-base md:text-lg font-semibold text-[#c80000] bottomTabBarHiden">
+              Nhóm cộng đồng
+            </span>
+          </Link>
+        ) : (
+          <Link
+            href={"/chat/group-public"}
+            className="cursor-pointer inline-flex flex-col items-center justify-center px-0 sm:px-2 hover:bg-gray-50 dark:hover:bg-gray-800 group"
+          >
+            <MdOutlineSupervisedUserCircle size={32} color="#9C9C9C" />
+            <span class="text-base md:text-lg font-semibold text-gray-500 bottomTabBarHiden">
+              Nhóm cộng đồng
+            </span>
+          </Link>
+        )}
         {active === "group" ? (
           <Link
             href={"/chat/group"}
             className="cursor-pointer inline-flex flex-col items-center justify-center px-0 sm:px-2 hover:bg-gray-50 dark:hover:bg-gray-800 group"
           >
-            <MdOutlineSupervisedUserCircle size={32} color="#c80000" />
+            <FaUsers size={32} color="#c80000" />
             <span class="text-base md:text-lg font-semibold text-[#c80000] bottomTabBarHiden">
-              Nhóm
+              Nhóm riêng tư
             </span>
           </Link>
         ) : (
@@ -103,30 +125,9 @@ export default function TabbarBottomChat({ active = "home" }) {
             href={"/chat/group"}
             className="cursor-pointer inline-flex flex-col items-center justify-center px-0 sm:px-2 hover:bg-gray-50 dark:hover:bg-gray-800 group"
           >
-            <MdOutlineSupervisedUserCircle size={32} color="#9C9C9C" />
+            <FaUsers size={32} color="#9C9C9C" />
             <span class="text-base md:text-lg font-semibold text-gray-500 bottomTabBarHiden">
-              Nhóm
-            </span>
-          </Link>
-        )}
-        {active === "list" ? (
-          <Link
-            href={"/account"}
-            className="cursor-pointer inline-flex flex-col items-center justify-center px-0 sm:px-2 hover:bg-gray-50 dark:hover:bg-gray-800 group"
-          >
-            <MdAccountCircle size={32} color="#c80000" />
-            <span class="text-base md:text-lg font-semibold text-[#c80000] bottomTabBarHiden">
-              Tài khoản
-            </span>
-          </Link>
-        ) : (
-          <Link
-            href={"/account"}
-            className="cursor-pointer inline-flex flex-col items-center justify-center px-0 sm:px-2 hover:bg-gray-50 dark:hover:bg-gray-800 group"
-          >
-            <MdAccountCircle size={32} color="#9C9C9C" />
-            <span class="text-base md:text-lg font-semibold text-gray-500 bottomTabBarHiden">
-              Tài khoản
+              Nhóm riêng tư
             </span>
           </Link>
         )}

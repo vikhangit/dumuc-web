@@ -32,7 +32,6 @@ export default function ModalAbout({
   authors,
   member,
   avatarGroup,
-  setShowModalLeader,
 }) {
   const [user] = useAuthState(auth);
   const search = useSearchParams();
@@ -49,11 +48,10 @@ export default function ModalAbout({
   const [openAlertLeader, setOpenAlertLeader] = useState(false);
   const [openAlertRemove, setOpenAlertRemove] = useState(false);
   const [openAlertExit, setOpenAlertExit] = useState(false);
-
   useEffect(() => {
     setAvatar(about?.avatar);
     setName(about?.name);
-  }, []);
+  }, [about]);
   const handleChangeIamge = (e) => {
     setLoadigAvatar(true);
     if (e.target.files[0]) {
@@ -300,7 +298,7 @@ export default function ModalAbout({
                           </Link>
                           {user.uid !== item?.user && (
                             <Link
-                              href={`/chat?friendId=${author?.authorId}`}
+                              href={`/author/${author?.slug}/${author?.authorId}`}
                               className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left text-black`}
                             >
                               Chat riêng
@@ -428,34 +426,6 @@ export default function ModalAbout({
                                 )}
                                 <button
                                   className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left text-black`}
-                                  onClick={async () => {
-                                    const washingtonRef = doc(
-                                      db,
-                                      "chat-groups",
-                                      about?.id
-                                    );
-                                    await updateDoc(washingtonRef, {
-                                      leader: item?.user,
-                                    }).then(async (result) => {
-                                      await addDoc(
-                                        collection(
-                                          db,
-                                          "chat-groups",
-                                          search.get("groupId"),
-                                          "messages"
-                                        ),
-                                        {
-                                          type: "leader",
-                                          notify: true,
-                                          user: item?.user,
-                                          createdAt: serverTimestamp(),
-                                        }
-                                      );
-                                      message.success(
-                                        `Bạn đã đề cử ${author?.name} thành nhóm trưởng thành công`
-                                      );
-                                    });
-                                  }}
                                 >
                                   Đề cử trưởng nhóm
                                 </button>
@@ -521,7 +491,7 @@ export default function ModalAbout({
                                       );
                                     });
                                 } else {
-                                  setShowModalLeader(true);
+                                  alert("Vui lòng đề cử nhóm trưởng mới");
                                   // await updateDoc(washingtonRef, {
                                   //   member: arrayRemove(item),
                                   // })

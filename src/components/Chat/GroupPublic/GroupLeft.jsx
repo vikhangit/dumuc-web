@@ -182,15 +182,15 @@ export default function ChatGroupLeft({
       </div>
       <div className="h-[calc(100%-150px)] overflow-auto scroll-chat px-2">
         {groupList?.length > 0 &&
-        groupList?.filter((x) => x.isPrivate)?.length > 0 ? (
+        groupList?.filter((x) => !x.isPrivate)?.length > 0 ? (
           groupList
-            ?.filter((x) => x.isPrivate)
+            ?.filter((x) => !x.isPrivate)
             .map((item, i) => {
-              const findMess = item?.messages?.filter((x) => !x?.notify);
               const author = authors?.find(
                 (x) =>
                   x?.authorId ===
-                  findMess[findMess?.length - 1]?.formAuthor?.authorId
+                  item?.messages[item?.messages.length - 1]?.formAuthor
+                    ?.authorId
               );
               if (item.id === search.get("groupId")) {
                 if (item?.member?.find((x) => x?.user === user?.uid)) {
@@ -200,7 +200,7 @@ export default function ChatGroupLeft({
                       onClick={() => {
                         // setActiveGroup(item);
                         setMobile(true);
-                        router.push(`/chat/group?groupId=${item?.id}`);
+                        router.push(`/chat/group-public?groupId=${item?.id}`);
                       }}
                       className={`${
                         groupTo?.id === item?.id
@@ -230,15 +230,16 @@ export default function ChatGroupLeft({
                           {author ? (
                             <p className="text-[13px] text-gray-600 mt-2">
                               {`${author?.name}: ${
-                                findMess[findMess?.length - 1]?.files?.length >
-                                0
+                                item?.messages[item?.messages.length - 1]?.files
+                                  ?.length > 0
                                   ? "[File]"
-                                  : findMess[findMess?.length - 1]?.photos
-                                      ?.length > 0
+                                  : item?.messages[item?.messages.length - 1]
+                                      ?.photos?.length > 0
                                   ? "[Hình ảnh]"
-                                  : findMess[findMess?.length - 1]?.text
-                                      ?.length > 0
-                                  ? findMess[findMess?.length - 1]?.text
+                                  : item?.messages[item?.messages.length - 1]
+                                      ?.text?.length > 0
+                                  ? item?.messages[item?.messages.length - 1]
+                                      ?.text
                                   : "Chưa có tin nhắn mới"
                               }`}
                             </p>
@@ -249,9 +250,10 @@ export default function ChatGroupLeft({
                           )}
                         </div>
                         <span className="text-[13px] text-gray-600">
-                          {findMess?.length > 0 &&
+                          {item?.messages.length > 0 &&
                             getTimeChat(
-                              findMess[findMess?.length - 1]?.createdAt
+                              item?.messages[item?.messages?.length - 1]
+                                ?.createdAt
                             )}
                         </span>
                       </div>
@@ -266,7 +268,7 @@ export default function ChatGroupLeft({
                       onClick={() => {
                         // setActiveGroup(item);
                         setMobile(true);
-                        router.push(`/chat/group?groupId=${item?.id}`);
+                        router.push(`/chat/group-public?groupId=${item?.id}`);
                       }}
                       className={`${
                         groupTo?.id === item?.id
@@ -296,15 +298,16 @@ export default function ChatGroupLeft({
                           {author ? (
                             <p className="text-[13px] text-gray-600 mt-2">
                               {`${author?.name}: ${
-                                findMess[findMess?.length - 1]?.files?.length >
-                                0
+                                item?.messages[item?.messages.length - 1]?.files
+                                  ?.length > 0
                                   ? "[File]"
-                                  : findMess[findMess?.length - 1]?.photos
-                                      ?.length > 0
+                                  : item?.messages[item?.messages.length - 1]
+                                      ?.photos?.length > 0
                                   ? "[Hình ảnh]"
-                                  : findMess[findMess?.length - 1]?.text
-                                      ?.length > 0
-                                  ? findMess[findMess?.length - 1]?.text
+                                  : item?.messages[item?.messages.length - 1]
+                                      ?.text?.length > 0
+                                  ? item?.messages[item?.messages.length - 1]
+                                      ?.text
                                   : "Chưa có tin nhắn mới"
                               }`}
                             </p>
@@ -315,9 +318,10 @@ export default function ChatGroupLeft({
                           )}
                         </div>
                         <span className="text-[13px] text-gray-600">
-                          {findMess?.length > 0 &&
+                          {item?.messages.length > 0 &&
                             getTimeChat(
-                              findMess[findMess?.length - 1]?.createdAt
+                              item?.messages[item?.messages?.length - 1]
+                                ?.createdAt
                             )}
                         </span>
                       </div>
@@ -325,68 +329,67 @@ export default function ChatGroupLeft({
                   );
                 }
               }
-              if (item?.member?.find((x) => x?.user === user?.uid)) {
-                return (
-                  <div
-                    key={i}
-                    onClick={() => {
-                      // setActiveGroup(item);
-                      setMobile(true);
-                      router.push(`/chat/group?groupId=${item?.id}`);
-                    }}
-                    className={`${
-                      groupTo?.id === item?.id
-                        ? "bg-[#0084ff] bg-opacity-30"
-                        : "bg-white"
-                    } rounded-md shadow-md shadow-gray-400 flex items-center gap-x-2 pl-[15px] pr-2 py-[20px] mt-[10px] cursor-pointer`}
-                  >
-                    <div className="w-[45px] h-[45px] rounded-full flex justify-center items-center border border-gray-400">
-                      {item?.avatar?.length > 0 && item?.avatar?.length > 0 && (
-                        <Image
-                          src={
-                            item?.avatar?.length > 0
-                              ? item?.avatar
-                              : "/dumuc/avatar.png"
-                          }
-                          width={0}
-                          height={0}
-                          sizes="100vw"
-                          className="w-full h-full rounded-full"
-                        />
+              return (
+                <div
+                  key={i}
+                  onClick={() => {
+                    // setActiveGroup(item);
+                    setMobile(true);
+                    router.push(`/chat//group-public?groupId=${item?.id}`);
+                  }}
+                  className={`${
+                    groupTo?.id === item?.id
+                      ? "bg-[#0084ff] bg-opacity-30"
+                      : "bg-white"
+                  } rounded-md shadow-md shadow-gray-400 flex items-center gap-x-2 pl-[15px] pr-2 py-[20px] mt-[10px] cursor-pointer`}
+                >
+                  <div className="w-[45px] h-[45px] rounded-full flex justify-center items-center border border-gray-400">
+                    {item?.avatar?.length > 0 && item?.avatar?.length > 0 && (
+                      <Image
+                        src={
+                          item?.avatar?.length > 0
+                            ? item?.avatar
+                            : "/dumuc/avatar.png"
+                        }
+                        width={0}
+                        height={0}
+                        sizes="100vw"
+                        className="w-full h-full rounded-full"
+                      />
+                    )}
+                  </div>
+
+                  <div className="flex justify-between w-full">
+                    <div>
+                      <Link href="" className="text-base">
+                        {item?.name}
+                      </Link>
+                      {author && (
+                        <p className="text-[13px] text-gray-600 mt-2">
+                          {`${author?.name}: ${
+                            item?.messages[item?.messages.length - 1]?.files
+                              ?.length > 0
+                              ? "[File]"
+                              : item?.messages[item?.messages.length - 1]
+                                  ?.photos?.length > 0
+                              ? "[Hình ảnh]"
+                              : item?.messages[item?.messages.length - 1]?.text
+                                  ?.length > 0
+                              ? item?.messages[item?.messages.length - 1]?.text
+                              : "Chưa có tin nhắn mới"
+                          }`}
+                        </p>
                       )}
                     </div>
-
-                    <div className="flex justify-between w-full">
-                      <div>
-                        <Link href="" className="text-base">
-                          {item?.name}
-                        </Link>
-                        {author && (
-                          <p className="text-[13px] text-gray-600 mt-2">
-                            {`${author?.name}: ${
-                              findMess[findMess?.length - 1]?.files?.length > 0
-                                ? "[File]"
-                                : findMess[findMess?.length - 1]?.photos
-                                    ?.length > 0
-                                ? "[Hình ảnh]"
-                                : findMess[findMess?.length - 1]?.text?.length >
-                                  0
-                                ? findMess[findMess?.length - 1]?.text
-                                : "Chưa có tin nhắn mới"
-                            }`}
-                          </p>
+                    <span className="text-[13px] text-gray-600">
+                      {item?.messages.length > 0 &&
+                        getTimeChat(
+                          item?.messages[item?.messages?.length - 1]?.createdAt
                         )}
-                      </div>
-                      <span className="text-[13px] text-gray-600">
-                        {findMess?.length > 0 &&
-                          getTimeChat(
-                            findMess[item?.messages?.length - 1]?.createdAt
-                          )}
-                      </span>
-                    </div>
+                    </span>
                   </div>
-                );
-              }
+                </div>
+              );
             })
         ) : (
           <div className="h-full w-full flex justify-center items-center text-base">

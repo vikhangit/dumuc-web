@@ -1,48 +1,49 @@
 "use client";
-import { useParams, usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { useAuthState, useSignOut } from "react-firebase-hooks/auth";
 
-import { createUser } from "@apis/auth";
-import Header from "@components/Header";
-import { Select, message } from "antd";
-import BannerRight from "@components/BannerRight";
-import {
-  RecaptchaVerifier,
-  onAuthStateChanged,
-  signInWithPhoneNumber,
-  signInWithPopup,
-} from "firebase/auth";
-import dynamic from "next/dynamic";
-import { auth, providerGoogle } from "utils/firebase";
+import { getProfile, updateProfile } from "@apis/users";
 import { dataCoutryCode } from "@utils/countryCode";
 import { replaceStringByIndex } from "@utils/functions";
-import { getUnicode } from "emoji-dictionary";
+import { message } from "antd";
+import {
+  PhoneAuthProvider,
+  RecaptchaVerifier,
+  updatePhoneNumber,
+} from "firebase/auth";
 import Image from "next/image";
-const TabbarBottom = dynamic(
-  () => {
-    return import("@components/TabbarBottom");
-  },
-  { ssr: false }
-);
+import { auth } from "utils/firebase";
 
-export default function PasswordlessPage({ searchParams }) {
-  const query = searchParams;
+export default function ModalChangePhone({ visible, onCancel }) {
+  const [user] = useAuthState(auth);
+  const [loading, setLoading] = useState(false);
+  const [usingUser, setUsingUser] = useState();
   const router = useRouter();
-  const params = useParams();
-  const pathname = usePathname();
+  const [signOut, loadingSignout, error] = useSignOut(auth);
   const [loadingAction, setLoadingAction] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [p2, setP2] = useState("");
   const [otp, setOtp] = useState("");
   const [confirmResult, setConfirmResult] = useState(null);
   const [sendOtp, setSendOtp] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const [activePhoneCode, setActivePhoneCode] = useState("+84");
+  useEffect(() => {
+    getProfile(user?.accessToken).then((dataCall) => setUsingUser(dataCall));
+  }, [user]);
+  useEffect(() => {
+    setPhoneNumber(
+      usingUser?.phone && usingUser?.phone?.length > 0 ? usingUser?.phone : ""
+    );
+    setActivePhoneCode(usingUser?.countryCode ? usingUser?.countryCode : "+84");
+  }, [usingUser]);
   const [selectedItem, setSelectedItem] = useState(
     <div className="flex items-center gap-x-2">
       <Image
         src={`https://flagcdn.com/16x12/vn.png`}
         srcset={`https://flagcdn.com/32x24/vn.png 2x,
-https://flagcdn.com/48x36/vn.png 3x`}
+  https://flagcdn.com/48x36/vn.png 3x`}
         width={16}
         height={12}
         alt={"Vietnam"}
@@ -50,53 +51,6 @@ https://flagcdn.com/48x36/vn.png 3x`}
       +84
     </div>
   );
-
-  const loginGoogle = () => {
-    setLoadingAction(true);
-    signInWithPopup(auth, providerGoogle)
-      .then((result) => {
-        let userCreate = result.user;
-        createUser({
-          uid: userCreate.uid,
-          email: userCreate.email,
-          name: userCreate.displayName,
-          phone: userCreate.phoneNumber,
-          photo: userCreate.photoURL,
-        })
-          .then((result) => {
-            setLoadingAction(false);
-            message.success("Đăng nhập thành công");
-            onAuthStateChanged(auth, (user) => {
-              if (user) {
-                //redirect
-                if (
-                  query?.url_return !== undefined &&
-                  query?.url_return !== "undefined"
-                ) {
-                  const url_return = query?.url_return;
-                  router.push(url_return);
-                } else {
-                  router.push("/");
-                }
-              }
-            });
-          })
-          .catch((err) => {
-            setLoadingAction(false);
-            message.error(err.message);
-          });
-      })
-      .catch(function (error) {
-        setLoadingAction(false);
-        message.error(error.message);
-      });
-  };
-  const handlePhoneNumberChange = (e) => {
-    setPhoneNumber(e.target.value);
-  };
-  const handleOtpChange = (e) => {
-    setOtp(e.target.value);
-  };
   useEffect(() => {
     window.recaptchaVerifier = new RecaptchaVerifier(
       auth,
@@ -108,6 +62,12 @@ https://flagcdn.com/48x36/vn.png 3x`}
       }
     );
   }, [auth]);
+  const handlePhoneNumberChange = (e) => {
+    setPhoneNumber(e.target.value);
+  };
+  const handleOtpChange = (e) => {
+    setOtp(e.target.value);
+  };
   const handleSendOtp = async () => {
     setLoadingAction(true);
     try {
@@ -119,12 +79,12 @@ https://flagcdn.com/48x36/vn.png 3x`}
               activePhoneCode
             )
           : `${activePhoneCode}${phoneNumber.replace(/\D/g, "")}`;
-      const confirmation = await signInWithPhoneNumber(
-        auth,
+      const provider = new PhoneAuthProvider(auth);
+      const verificationId = await provider.verifyPhoneNumber(
         phoneNumberFormater,
         window.recaptchaVerifier
       );
-      setConfirmResult(confirmation);
+      setConfirmResult(verificationId);
       setSendOtp(true);
       setLoadingAction(false);
       message.success("Mã xác thực OTP đã được gửi");
@@ -135,33 +95,23 @@ https://flagcdn.com/48x36/vn.png 3x`}
   const handleOtpSubmit = async () => {
     setLoadingAction(true);
     try {
-      await confirmResult.confirm(otp);
-      setOtp("");
-      await onAuthStateChanged(auth, (user) => {
-        if (user) {
-          createUser({
-            uid: user.uid,
-            email: user.email,
-            name: user.phoneNumber,
-            phone:
-              phoneNumber.indexOf("0") === 0
-                ? replaceStringByIndex(phoneNumber.replace(/\D/g, ""), 0, 0)
-                : `0${phoneNumber.replace(/\D/g, "")}`,
-            countryCode: activePhoneCode,
-            photo: user.photoURL,
-          }).then((res) => {
-            message.success("Đăng nhập thành công");
-            if (
-              query?.url_return !== undefined &&
-              query?.url_return !== "undefined"
-            ) {
-              const url_return = query?.url_return;
-              router.push(url_return);
-            } else {
-              router.push("/");
-            }
-          });
-        }
+      const phoneCredential = PhoneAuthProvider.credential(confirmResult, otp);
+      await updatePhoneNumber(user, phoneCredential);
+      await updateProfile(
+        {
+          phone:
+            phoneNumber.indexOf("0") === 0
+              ? replaceStringByIndex(phoneNumber.replace(/\D/g, ""), 0, 0)
+              : `0${phoneNumber.replace(/\D/g, "")}`,
+          countryCode: activePhoneCode,
+        },
+        user?.accessToken
+      ).then(async () => {
+        await signOut().then(async (res) => {
+          router.push("/auth");
+          message.success("Đã thay đổi sđt thành công vui lòng đăng nhập lại");
+          onCancel();
+        });
       });
     } catch (error) {
       if (error.code === "auth/invalid-verification-code") {
@@ -187,11 +137,10 @@ https://flagcdn.com/48x36/vn.png 3x`}
   }, [ref]);
 
   return (
-    <main className="w-full">
-      <Header />
-      <div className="flex flex-col gap-4 mt-14" ref={ref}>
+    <div className="mt-8 w-full">
+      <div className="w-full">
         {!sendOtp && (
-          <div className="mx-8 flex gap-x-1 lg:mx-20">
+          <div className="w-full flex gap-x-1">
             <button
               onClick={() => setShowDropdown(!showDropdown)}
               className="relative w-[90px] flex justify-center items-center bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500"
@@ -208,7 +157,7 @@ https://flagcdn.com/48x36/vn.png 3x`}
                             <Image
                               src={`https://flagcdn.com/16x12/${item.code.toLocaleLowerCase()}.png`}
                               srcset={`https://flagcdn.com/32x24/${item.code.toLocaleLowerCase()}.png 2x,
-                      https://flagcdn.com/48x36/${item.code.toLocaleLowerCase()}.png 3x`}
+                  https://flagcdn.com/48x36/${item.code.toLocaleLowerCase()}.png 3x`}
                               width={16}
                               height={12}
                               alt={item.name}
@@ -228,7 +177,7 @@ https://flagcdn.com/48x36/vn.png 3x`}
                         <Image
                           src={`https://flagcdn.com/16x12/${item.code.toLocaleLowerCase()}.png`}
                           srcset={`https://flagcdn.com/32x24/${item.code.toLocaleLowerCase()}.png 2x,
-          https://flagcdn.com/48x36/${item.code.toLocaleLowerCase()}.png 3x`}
+      https://flagcdn.com/48x36/${item.code.toLocaleLowerCase()}.png 3x`}
                           width={16}
                           height={12}
                           alt={item.name}
@@ -258,11 +207,12 @@ https://flagcdn.com/48x36/vn.png 3x`}
             </div>
           </div>
         )}
+
         {!sendOtp ? (
-          <div className="mx-8 lg:mx-20" id="recaptcha-container"></div>
+          <div className="mt-3" id="recaptcha-container"></div>
         ) : null}
         {sendOtp && (
-          <div className="mx-8 lg:mx-20">
+          <div className="w-full">
             <input
               className={
                 otp === ""
@@ -275,11 +225,13 @@ https://flagcdn.com/48x36/vn.png 3x`}
             />
           </div>
         )}
+      </div>
+      <div className="w-full flex justify-end mt-3 gap-x-2">
         {loadingAction ? (
           <button
             disabled
             type="button"
-            className="text-white mx-8 lg:mx-20 bg-[#c80000] hover:brightness-110 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2"
+            class={`text-white border border-[#c80000] bg-[#c80000] hover:brightness-110 focus:ring-4 focus:ring-blue-300 rounded-lg font-medium text-xs px-4 py-1.5 hover:text-[#c80000] hover:bg-white`}
           >
             <svg
               aria-hidden="true"
@@ -298,44 +250,27 @@ https://flagcdn.com/48x36/vn.png 3x`}
                 fill="currentColor"
               />
             </svg>
-            Loading...
+            {!sendOtp ? "Lấy mã xác thực" : "Xác thực OTP"}...
           </button>
         ) : (
           <button
             onClick={sendOtp ? handleOtpSubmit : handleSendOtp}
             type="button"
-            class="text-white mx-8 lg:mx-20 bg-[#c80000] hover:brightness-110 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2"
+            class={`text-white border border-[#c80000] bg-[#c80000] hover:brightness-110 focus:ring-4 focus:ring-blue-300 rounded-lg font-medium text-xs px-4 py-1.5 hover:text-[#c80000] hover:bg-white`}
           >
             {!sendOtp ? "Lấy mã xác thực" : "Xác thực OTP"}
           </button>
         )}
-      </div>
-      <div className="text-center text-xs my-4 text-gray-500 my-8">Hoặc</div>
-      <div className="flex flex-col ">
         <button
-          onClick={() => loginGoogle()}
+          onClick={() => {
+            onCancel();
+          }}
           type="button"
-          className="flex items-center justify-center text-[#c80000] gap-x-2 mx-8 lg:mx-20 bg-white border border-[#c80000] hover:brightness-110 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5"
+          class={`text-black border border-gray-300 bg-white hover:brightness-110 focus:ring-4 focus:ring-gray-300 rounded-lg font-medium text-xs px-4 py-1.5 hover:bg-gray-300`}
         >
-          <svg
-            class="w-5 h-5"
-            aria-hidden="true"
-            xmlns="http://www.w3.org/2000/svg"
-            fill="currentColor"
-            viewBox="0 0 18 19"
-          >
-            <path
-              fill-rule="evenodd"
-              d="M8.842 18.083a8.8 8.8 0 0 1-8.65-8.948 8.841 8.841 0 0 1 8.8-8.652h.153a8.464 8.464 0 0 1 5.7 2.257l-2.193 2.038A5.27 5.27 0 0 0 9.09 3.4a5.882 5.882 0 0 0-.2 11.76h.124a5.091 5.091 0 0 0 5.248-4.057L14.3 11H9V8h8.34c.066.543.095 1.09.088 1.636-.086 5.053-3.463 8.449-8.4 8.449l-.186-.002Z"
-              clip-rule="evenodd"
-            />
-          </svg>
-          Đăng nhập bằng Google
+          Hủy
         </button>
       </div>
-      <div className="mb-24"></div>
-      <TabbarBottom active="" />
-      <BannerRight isAppInstall={true} />
-    </main>
+    </div>
   );
 }

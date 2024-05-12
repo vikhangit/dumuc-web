@@ -2,7 +2,7 @@
 import { useState, useRef, useCallback } from "react";
 import Image from "next/image";
 import "@fancyapps/ui/dist/fancybox/fancybox.css";
-import { updateFeedByUser } from "apis/feeds";
+import { createFeedView, updateFeedByUser } from "apis/feeds";
 import FeedBookmark from "@components/FeedBookmark";
 import dynamic from "next/dynamic";
 const FeedLikeShareComment = dynamic(
@@ -34,6 +34,7 @@ const ModalImageZoomFeed = dynamic(
 );
 import { Modal } from "flowbite-react";
 import LoginWithModal from "./LoginWithModal";
+import { IoEyeOutline } from "react-icons/io5";
 
 const FeedItem = ({ item, index, onCallback }) => {
   const [user, loading, error] = useAuthState(auth);
@@ -53,6 +54,9 @@ const FeedItem = ({ item, index, onCallback }) => {
     const timeToStart = 7 * 60 + 12.6;
     videoEl.current.seekTo(timeToStart, "seconds");
   }, [videoEl.current]);
+  createFeedView({
+    feedId: item?.feedId,
+  }).then((result) => onCallback());
   return (
     <div
       key={item?.feedId}
@@ -107,6 +111,9 @@ const FeedItem = ({ item, index, onCallback }) => {
           </p>
         </div>
         <div className="flex justify-end items-center">
+          <button className="flex gap-x-1 items-center mr-2">
+            <IoEyeOutline size={20} /> {item?.viewsCount}
+          </button>
           {
             <div className="relative cursor-pointer group">
               <IoMdMore size={24} />

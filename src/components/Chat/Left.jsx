@@ -35,6 +35,7 @@ export default function ChatLeft({
   useEffect(() => {
     getProfile(user?.accessToken).then((dataCall) => {
       setUsingUser(dataCall);
+      console.log(dataCall?.friendList);
       setFriendList(dataCall?.friendList?.filter((x) => x.status === 2));
     });
   }, [user]);
@@ -72,7 +73,6 @@ export default function ChatLeft({
       const findChat = findChat2?.find((item) =>
         item?.member?.find((x) => x?.userId === author?.userId)
       );
-      console.log(author);
       if (!findChat) {
         setUserRecieved(author);
       } else {
@@ -80,7 +80,8 @@ export default function ChatLeft({
         router.push(`/chat?chatId=${findChat?.id}`);
       }
     }
-  }, [search]);
+  }, [search, messages, authors]);
+  console.log(search.get("chatId"));
   useEffect(() => {
     if (search.get("chatId")) {
       const chatDetail = messages?.find((x) => x?.id === search.get("chatId"));
@@ -90,6 +91,7 @@ export default function ChatLeft({
       const author = authors?.find(
         (item) => item?.authorId === userRecieveds?.authorId
       );
+      console.log(author);
       setUserTo(author);
     } else if (userRecieved) {
       setUserTo(userRecieved);
@@ -137,6 +139,21 @@ export default function ChatLeft({
       .replace("in", "")
       .replace("ago", "")
       .replace("few", "");
+  };
+  const selectFriend = (author) => {
+    const findChat2 = messages?.filter((item) =>
+      item?.member?.find((x) => x?.userId === user?.uid)
+    );
+    const findChat = findChat2?.find((item) =>
+      item?.member?.find((x) => x?.userId === author?.userId)
+    );
+    if (!findChat) {
+      setUserRecieved(author);
+      router.push("/chat");
+    } else {
+      setUserRecieved();
+      router.push(`/chat?chatId=${findChat?.id}`);
+    }
   };
   return (
     <div
@@ -207,7 +224,7 @@ export default function ChatLeft({
           </button>
         )}
       </div>
-      <div className="h-[calc(100%-150px)] overflow-auto scroll-chat px-2">
+      <div className="h-[calc(100%-150px)] overflow-auto scroll-chat px-2 pb-3">
         {searchFunction ? (
           friendList?.length > 0 ? (
             friendList?.map((item, index) => {
@@ -219,19 +236,7 @@ export default function ChatLeft({
                   key={index}
                   onClick={() => {
                     setMobile(true);
-                    const findChat2 = messages?.filter((item) =>
-                      item?.member?.find((x) => x?.userId === user?.uid)
-                    );
-                    const findChat = findChat2?.find((item) =>
-                      item?.member?.find((x) => x?.userId === author?.userId)
-                    );
-                    if (!findChat) {
-                      setUserRecieved(author);
-                      router.push("/chat");
-                    } else {
-                      setUserRecieved();
-                      router.push(`/chat?chatId=${findChat?.id}`);
-                    }
+                    selectFriend(author);
                   }}
                   className={`${
                     userTo?.authorId === author?.authorId
@@ -302,68 +307,101 @@ export default function ChatLeft({
                           width={0}
                           height={0}
                           sizes="100vw"
-                          className="w-[45px] h-[45px] rounded-full"
+                          className={`${
+                            sizes.width > 400
+                              ? "w-[45px] h-[45px]"
+                              : "w-[40px] h-[40px]"
+                          }  rounded-full cursor-pointer`}
                         />
-                        <div className="flex justify-between w-full">
-                          <div>
+                        <div className="w-full">
+                          <div className="flex justify-between">
                             <Link href="" className="text-base">
                               {author?.name}
                             </Link>
                             {search.get("chatId") === item?.id &&
                             activeMessage?.length > 0 ? (
-                              <p className="text-[13px] text-gray-600 mt-2">
-                                {activeMessage[activeMessage?.length - 1]?.files
-                                  ?.length > 0
-                                  ? "[File]"
-                                  : activeMessage[activeMessage?.length - 1]
-                                      ?.photos?.length > 0
-                                  ? "[Hình ảnh]"
-                                  : activeMessage[activeMessage?.length - 1]
-                                      ?.text?.length > 0
-                                  ? [
-                                      `${
-                                        activeMessage[activeMessage?.length - 1]
-                                          ?.text
-                                      }`,
-                                    ]
-                                  : "[Chưa có tin nhắn mới]"}
-                              </p>
+                              <span className="text-[13px] w- text-gray-600">
+                                {getTimeChat(
+                                  activeMessage[activeMessage?.length - 1]
+                                    ?.createdAt
+                                )}
+                              </span>
                             ) : (
-                              <p className="text-[13px] text-gray-600 mt-2">
-                                {item?.messages[item?.messages.length - 1]
-                                  ?.files?.length > 0
-                                  ? ["File"]
-                                  : item?.messages[item?.messages.length - 1]
-                                      ?.photos?.length > 0
-                                  ? ["Hình ảnh"]
-                                  : item?.messages[item?.messages.length - 1]
-                                      ?.text?.length > 0
-                                  ? [
-                                      `${
-                                        item?.messages[
-                                          item?.messages.length - 1
-                                        ]?.text
-                                      }`,
-                                    ]
-                                  : ["Chưa có tin nhắn mới"]}
-                              </p>
+                              <span className="text-[13px] text-gray-600">
+                                {getTimeChat(
+                                  item?.messages[item?.messages.length - 1]
+                                    ?.createdAt
+                                )}
+                              </span>
                             )}
                           </div>
                           {search.get("chatId") === item?.id &&
                           activeMessage?.length > 0 ? (
-                            <span className="text-[13px] text-gray-600">
-                              {getTimeChat(
-                                activeMessage[activeMessage?.length - 1]
-                                  ?.createdAt
+                            <p className="text-[13px] text-gray-600 mt-2 line-clamp-1">
+                              {activeMessage[activeMessage?.length - 1]
+                                ?.recall ? (
+                                <span className="italic">
+                                  Tin nhắn đã thu hồi
+                                </span>
+                              ) : activeMessage[activeMessage?.length - 1]
+                                  ?.files?.length > 0 ? (
+                                `[File] ${
+                                  activeMessage[activeMessage?.length - 1]
+                                    ?.files[
+                                    activeMessage[activeMessage?.length - 1]
+                                      ?.files?.length - 1
+                                  ]?.name
+                                }`
+                              ) : activeMessage[activeMessage?.length - 1]
+                                  ?.photos?.length > 0 ? (
+                                "[Hình ảnh]"
+                              ) : activeMessage[activeMessage?.length - 1]?.text
+                                  ?.length > 0 ? (
+                                [
+                                  `${
+                                    activeMessage[activeMessage?.length - 1]
+                                      ?.text
+                                  }`,
+                                ]
+                              ) : (
+                                <span className="italic">
+                                  Chưa có tin nhắn mới
+                                </span>
                               )}
-                            </span>
+                            </p>
                           ) : (
-                            <span className="text-[13px] text-gray-600">
-                              {getTimeChat(
-                                item?.messages[item?.messages.length - 1]
-                                  ?.createdAt
+                            <p className="text-[13px] text-gray-600 mt-2 line-clamp-1">
+                              {item?.messages[item?.messages.length - 1]
+                                ?.recall ? (
+                                <span className="italic">
+                                  Tin nhắn đã thu hồi
+                                </span>
+                              ) : item?.messages[item?.messages.length - 1]
+                                  ?.files?.length > 0 ? (
+                                `[File] ${
+                                  item?.messages[item?.messages.length - 1]
+                                    ?.files[
+                                    item?.messages[item?.messages.length - 1]
+                                      ?.files?.length - 1
+                                  ]?.name
+                                }`
+                              ) : item?.messages[item?.messages.length - 1]
+                                  ?.photos?.length > 0 ? (
+                                "[Hình ảnh]"
+                              ) : item?.messages[item?.messages.length - 1]
+                                  ?.text?.length > 0 ? (
+                                [
+                                  `${
+                                    item?.messages[item?.messages.length - 1]
+                                      ?.text
+                                  }`,
+                                ]
+                              ) : (
+                                <span className="italic">
+                                  Chưa có tin nhắn mới
+                                </span>
                               )}
-                            </span>
+                            </p>
                           )}
                         </div>
                       </div>
@@ -383,6 +421,7 @@ export default function ChatLeft({
         onCallback={() => {}}
         onCancel={() => setShowAddFriend(false)}
         visible={showAddFriend}
+        onChooseUser={(author) => selectFriend(author)}
       />
     </div>
   );

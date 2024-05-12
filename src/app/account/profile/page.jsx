@@ -1,31 +1,63 @@
-"use client"
-import React, { useState, useEffect, useRef } from "react";
-import { useRouter } from 'next/navigation';
+"use client";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { Button, message } from "antd";
-import { updateProfile, getProfile, updateCCCDFrontPhoto, updateCCCDBackSidePhoto } from "@apis/users";
+import {
+  updateProfile,
+  getProfile,
+  updateCCCDFrontPhoto,
+  updateCCCDBackSidePhoto,
+} from "@apis/users";
 import Header from "@components/Header";
 import { MdOutlineControlPoint } from "react-icons/md";
 import BannerRight from "@components/BannerRight";
 import { uploadImage } from "apis/other";
 import Image from "next/image";
-import { UploadOutlined } from '@ant-design/icons';
+import { UploadOutlined } from "@ant-design/icons";
 import { Spinner } from "flowbite-react";
-const TabbarBottom = dynamic( () => {
-  return import( '@components/TabbarBottom' );
-}, { ssr: false } );import { useAuthState, useUpdateProfile } from "react-firebase-hooks/auth";
-import { auth } from "@utils/firebase";
-import "./profile.css"
+const TabbarBottom = dynamic(
+  () => {
+    return import("@components/TabbarBottom");
+  },
+  { ssr: false }
+);
+import {
+  useAuthState,
+  useUpdateEmail,
+  useUpdateProfile,
+  useVerifyBeforeUpdateEmail,
+} from "react-firebase-hooks/auth";
+import { auth, providerGoogle } from "@utils/firebase";
+import "./profile.css";
 import dynamic from "next/dynamic";
+import {
+  GoogleAuthProvider,
+  reauthenticateWithCredential,
+  reauthenticateWithPopup,
+  reauthenticateWithRedirect,
+  updateCurrentUser,
+} from "firebase/auth";
+import ModalChangePhone from "./ModalChangePhone";
+const ModalChangeEmail = dynamic(
+  () => {
+    return import("./ModalChangeEmail");
+  },
+  { ssr: false }
+);
 const ProfilePage = () => {
   const router = useRouter();
 
   const [loadingSubmit, setLoadingSubmit] = useState(false);
   const [user, loading, errorAuth] = useAuthState(auth);
   const [setUser, updating, error] = useUpdateProfile(auth);
+  const [updateEmail, updatingEmail, errorEmail] = useUpdateEmail(auth);
 
   const [name, setName] = useState("");
   const [nameError, setNameError] = useState("");
-
+  const [isEditEmail, setIsEditEmail] = useState(false);
+  const [isEditPhone, setIsEditPhone] = useState(false);
+  const [email, setEmail] = useState("");
+  const [emailError, setEmailError] = useState("");
   const [phone, setPhone] = useState();
   const [phoneError, setPhoneError] = useState("");
 
@@ -34,91 +66,106 @@ const ProfilePage = () => {
 
   const [sex, setSex] = useState();
   const [sexError, setSexError] = useState("");
-  const [plateArray, setPlateArray] = useState([])
+  const [plateArray, setPlateArray] = useState([]);
   const [numberPlate, setNumberPlate] = useState(plateArray[0]);
   const [numberPlate2, setNumberPlate2] = useState(plateArray[1]);
   const [numberPlateError, setNumberPlateError] = useState("");
   const refImage = useRef(null);
   const refFontSide = useRef(null);
-  const refBackSide = useRef(null)
+  const refBackSide = useRef(null);
   const [loadingAvatar, setLoadigAvatar] = useState(false);
   const [loadingFontSide, setLoadingFontSide] = useState(false);
   const [loadingBackSide, setLoadingBackSide] = useState(false);
-  const [usingUser, setUsingUser] = useState()
-  useEffect(() =>{
+  const [usingUser, setUsingUser] = useState();
+  console.log(user);
+  useEffect(() => {
     (async () => {
       try {
-        const dataCall = await getProfile(user?.accessToken) 
-        setUsingUser(dataCall)
-      } catch (e) {
-      }
+        const dataCall = await getProfile(user?.accessToken);
+        setUsingUser(dataCall);
+      } catch (e) {}
     })();
-  },[user])
+  }, [user]);
   useEffect(() => {
-    setName(usingUser?.name?.length > 0 ? usingUser?.name : user?.displayName)
-    setAddress(usingUser?.address)
-    setPhone(usingUser?.phone)
-    setSex(usingUser?.sex)
-    setPlateArray(usingUser?.numberPlate ? `${usingUser?.numberPlate}`?.replace(/\s/g, "")?.split(",") : [])
-    
-  },[usingUser])
+    setName(usingUser?.name?.length > 0 ? usingUser?.name : "");
+    setAddress(usingUser?.address);
+    setPhone(usingUser?.phone?.length > 0 ? usingUser?.phone : "");
+    setSex(usingUser?.sex);
+    setEmail(usingUser?.email?.length > 0 ? usingUser?.email : "");
+    setPlateArray(
+      usingUser?.numberPlate
+        ? `${usingUser?.numberPlate}`?.replace(/\s/g, "")?.split(",")
+        : []
+    );
+  }, [usingUser]);
   useEffect(() => {
-    setNumberPlate(plateArray[0])
-    setNumberPlate2(plateArray[1])
-  },[plateArray])
-  const handleChange = name => e => {
-    setLoadigAvatar(true)
-    if (name === 'photo' && e.target.files[0]) {
+    setNumberPlate(plateArray[0]);
+    setNumberPlate2(plateArray[1]);
+  }, [plateArray]);
+  const handleChange = (name) => (e) => {
+    setLoadigAvatar(true);
+    if (name === "photo" && e.target.files[0]) {
       uploadImage(e.target.files[0], user?.accessToken).then((data) => {
-        updateProfile({
-          photo: data?.url,
-          userId: user?.userId
-        }, user?.accessToken)
-          .then(() => {
-            setUser({
-              photoURL: data?.url,
-              displayName: name,
-            })
-            message.success("Cập nhật thành công");
-            setLoadigAvatar(false)
+        updateProfile(
+          {
+            photo: data?.url,
+            userId: user?.userId,
+          },
+          user?.accessToken
+        ).then(() => {
+          setUser({
+            photoURL: data?.url,
+            displayName: name,
           });
+          message.success("Cập nhật thành công");
+          setLoadigAvatar(false);
+        });
       });
     }
   };
-  const handleChangeFontSide = name => e => {
-    setLoadingFontSide(true)
-    if (name === 'photo' && e.target.files[0]) {
-      updateCCCDFrontPhoto(e.target.files[0], user?.accessToken).then((data) => {
-        updateProfile({
-          ...usingUser,
-          cccdFrontPhoto: data?.url
-        }, user?.accessToken)
-        setLoadingFontSide(false)
-        message.success("Cập nhật thành công");
-      });
+  const handleChangeFontSide = (name) => (e) => {
+    setLoadingFontSide(true);
+    if (name === "photo" && e.target.files[0]) {
+      updateCCCDFrontPhoto(e.target.files[0], user?.accessToken).then(
+        (data) => {
+          updateProfile(
+            {
+              ...usingUser,
+              cccdFrontPhoto: data?.url,
+            },
+            user?.accessToken
+          );
+          setLoadingFontSide(false);
+          message.success("Cập nhật thành công");
+        }
+      );
     }
   };
-  const handleChangeBackSide = name => e => {
-    setLoadingBackSide(true)
-    if (name === 'photo' && e.target.files[0]) {
-      updateCCCDBackSidePhoto(e.target.files[0], user?.accessToken).then((data) => {
-        updateProfile({
-          ...usingUser,
-          cccdBackPhoto: data.url
-        }, user?.accessToken)
-        setLoadingBackSide(false)
-        message.success("Cập nhật thành công");
-      });
+  const handleChangeBackSide = (name) => (e) => {
+    setLoadingBackSide(true);
+    if (name === "photo" && e.target.files[0]) {
+      updateCCCDBackSidePhoto(e.target.files[0], user?.accessToken).then(
+        (data) => {
+          updateProfile(
+            {
+              ...usingUser,
+              cccdBackPhoto: data.url,
+            },
+            user?.accessToken
+          );
+          setLoadingBackSide(false);
+          message.success("Cập nhật thành công");
+        }
+      );
     }
   };
 
   useEffect(() => {
     if (user === undefined && loading === false) {
-      const url_return = `${process.env.NEXT_PUBLIC_HOMEPAGE_URL}/account/profile`
+      const url_return = `${process.env.NEXT_PUBLIC_HOMEPAGE_URL}/account/profile`;
       router.push(`/auth?url_return=${url_return}`);
     }
-  }, [user, loading])
-
+  }, [user, loading]);
 
   const save = () => {
     setLoadingSubmit(true);
@@ -127,27 +174,25 @@ const ProfilePage = () => {
       setLoadingSubmit(false);
       return;
     }
-
-    if (phone === undefined || phone === '') {
-      setPhoneError('Vui lòng nhập Số điện thoại!');
-      setLoadingSubmit(false);
-      return;
-    }
-
-    if (address === undefined || address === '') {
-      setAddressError('Vui lòng nhập Địa chỉ!');
-      setLoadingSubmit(false);
-      return;
-    }
-
-    // if (sex === undefined || sex === '') {
-    //   setSexError('Vui lòng chọn Giới tính!');
+    // if (email === undefined || email === "") {
+    //   setEmailError("Vui lòng nhập địa chỉ Email!");
+    //   setLoadingSubmit(false);
+    //   return;
+    // }
+    // if (phone === undefined || phone === "") {
+    //   setPhoneError("Vui lòng nhập Số điện thoại!");
     //   setLoadingSubmit(false);
     //   return;
     // }
 
-    if (numberPlate === undefined || numberPlate === '') {
-      setNumberPlateError('Vui lòng nhập Biển số xe!');
+    if (address === undefined || address === "") {
+      setAddressError("Vui lòng nhập Địa chỉ!");
+      setLoadingSubmit(false);
+      return;
+    }
+
+    if (numberPlate === undefined || numberPlate === "") {
+      setNumberPlateError("Vui lòng nhập Biển số xe!");
       setLoadingSubmit(false);
       return;
     }
@@ -155,48 +200,89 @@ const ProfilePage = () => {
     //post data
     let item = {
       name: name,
-      phone,
       address,
       sex,
-      numberPlate: numberPlate2 != undefined && numberPlate2 != "" ? `${numberPlate?.replace(/\s/g, "")},${numberPlate2?.replace(/\s/g, "")}` : `${numberPlate?.replace(/\s/g, "")}`,
+      numberPlate:
+        numberPlate2 != undefined && numberPlate2 != ""
+          ? `${numberPlate?.replace(/\s/g, "")},${numberPlate2?.replace(
+              /\s/g,
+              ""
+            )}`
+          : `${numberPlate?.replace(/\s/g, "")}`,
       userId: user?.userId,
     };
-    updateProfile(item, user?.accessToken)
-      .then(() => {
+    updateProfile(item, user?.accessToken).then(async () => {
+      const success = await updateEmail(email);
+      if (success) {
+        getProfile(user?.accessToken).then(async (profile) => {
+          await setUser({
+            displayName: name,
+            photoURL: profile.photo,
+          });
+        });
         setLoadingSubmit(false);
         message.success("Cập nhật thành công");
-
-        getProfile(user?.accessToken)
-          .then(profile => {
-            setUser({
-              displayName: name,
-              photoURL: profile.photo
-            })
-          })
-      });
+      } else {
+        message.error("Đã xãy ra lỗi");
+      }
+    });
   };
-  // const string = `${numberPlate}, ${numberPlate}`
 
   return (
     <main className="w-full">
       <Header isBack={true} />
       <div class="px-0 sm:px-4 dark:bg-gray-900">
-        <div >
-          <div className="my-4 px-4 text-sm sm:text-md text-[#424141B2] font-semibold">Thông tin cơ bản</div>
-          <div >
-            <div class="bg-white rounded-lg p-4 sm:p-6 xl:p-8 dark:bg-gray-800 border-b" style={{
-              boxShadow: "0px 4px 4px 0px #00000040 inset"
-            }}>
+        <div>
+          <div className="my-4 px-4 text-sm sm:text-md text-[#424141B2] font-semibold">
+            Thông tin cơ bản
+          </div>
+          <div>
+            <div
+              class="bg-white rounded-lg p-4 sm:p-6 xl:p-8 dark:bg-gray-800 border-b"
+              style={{
+                boxShadow: "0px 4px 4px 0px #00000040 inset",
+              }}
+            >
               {/* <h3 class="text-xl font-bold dark:text-white">Tài khoản</h3>
               <div className="mb-3 text-xs">Username: <span classname="text-[#c80000]">dumuc{user?.username}</span> (Dùng để tìm khi Chat, Call)</div> */}
               <div class="items-center flex justify-center flex-col mb-3">
-                <label onClick={() => refImage.current.click()} class="flex justify-center items-center w-[150px] h-[120px] sm:w-[200px] sm:h-[160px] border border-[#00000033] rounded-lg cursor-pointer">
-                  {
-                    loadingAvatar ? <Spinner /> :  user?.photoURL?.length > 0 ? <Image width={0} height={0} sizes="100vw" className="w-full h-full rounded-lg" src={user?.photoURL} alt={user?.displayName} /> : <MdOutlineControlPoint color="#00000033" size="24" />
-                  }
+                <label
+                  onClick={() => refImage.current.click()}
+                  class="flex justify-center items-center w-[150px] h-[120px] sm:w-[200px] sm:h-[160px] border border-[#00000033] rounded-lg cursor-pointer"
+                >
+                  {loadingAvatar ? (
+                    <Spinner />
+                  ) : user?.photoURL?.length > 0 ? (
+                    <Image
+                      width={0}
+                      height={0}
+                      sizes="100vw"
+                      className="w-full h-full rounded-lg"
+                      src={user?.photoURL}
+                      alt={user?.displayName}
+                    />
+                  ) : (
+                    <MdOutlineControlPoint color="#00000033" size="24" />
+                  )}
                 </label>
-               {user?.photoURL?.length > 0 && <Button  onClick={() => refImage.current.click()}  className="mt-3 mb-3" icon={<UploadOutlined />}>Thay đổi</Button>}
-                <input id="photo" name="photo" ref={refImage} accept="image/png, image/jpeg" onChange={handleChange('photo')} className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 hidden" type="file"></input>
+                {user?.photoURL?.length > 0 && (
+                  <Button
+                    onClick={() => refImage.current.click()}
+                    className="mt-3 mb-3"
+                    icon={<UploadOutlined />}
+                  >
+                    Thay đổi
+                  </Button>
+                )}
+                <input
+                  id="photo"
+                  name="photo"
+                  ref={refImage}
+                  accept="image/png, image/jpeg"
+                  onChange={handleChange("photo")}
+                  className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 hidden"
+                  type="file"
+                ></input>
               </div>
 
               <div class="mb-3 flex items-center">
@@ -239,13 +325,23 @@ const ProfilePage = () => {
                 >
                   Email
                 </label>
-                <input
-                  disabled
-                  type="text"
-                  id="default-input"
-                  class={"bg-gray-200 border border-gray-300 text-gray-900 text-xs sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full px-2.5 py-1.5"}
-                  value={user?.email}
-                />
+                <div className="w-full flex gap-x-2">
+                  <input
+                    type="text"
+                    id="default-input"
+                    disabled
+                    class="bg-gray-200 border border-gray-300 text-gray-900 text-xs sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full px-2.5 py-1.5"
+                    value={email}
+                  />
+                  <button
+                    onClick={() => {
+                      setIsEditEmail(true);
+                    }}
+                    className="w-[120px] bg-[#c80000] text-white border border-[#c80000] rounded-lg hover:bg-white hover:text-[#c80000]"
+                  >
+                    Thay đổi
+                  </button>
+                </div>
               </div>
               <div class="mb-3 flex items-center">
                 <label
@@ -254,7 +350,7 @@ const ProfilePage = () => {
                 >
                   Điện thoại
                 </label>
-                <div className="w-full">
+                {/* <div className="w-full">
                   <input
                     type="text"
                     id="default-input"
@@ -278,7 +374,34 @@ const ProfilePage = () => {
                       {phoneError}
                     </p>
                   )}
-                </div>
+                </div> */}
+
+                {isEditPhone ? (
+                  <ModalChangePhone
+                    visible={isEditPhone}
+                    onCancel={() => {
+                      setIsEditPhone(false);
+                    }}
+                  />
+                ) : (
+                  <div className="w-full flex gap-x-2">
+                    <input
+                      type="text"
+                      id="default-input"
+                      disabled
+                      class="bg-gray-200 border border-gray-300 text-gray-900 text-xs sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full px-2.5 py-1.5"
+                      value={phone}
+                    />
+                    <button
+                      onClick={() => {
+                        setIsEditPhone(true);
+                      }}
+                      className="w-[120px] bg-[#c80000] text-white border border-[#c80000] rounded-lg hover:bg-white hover:text-[#c80000]"
+                    >
+                      Thay đổi
+                    </button>
+                  </div>
+                )}
               </div>
               <div class="mb-3 w-full flex items-center">
                 <label
@@ -288,12 +411,11 @@ const ProfilePage = () => {
                   Giới tính
                 </label>
                 <div className="w-full">
-
                   <select
                     id="sex"
                     name="sex"
                     className={
-                     "mt-1 block w-full pl-3 pr-10 py-1.5 text-xs sm:text-sm border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+                      "mt-1 block w-full pl-3 pr-10 py-1.5 text-xs sm:text-sm border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
                     }
                     defaultValue={sex}
                     value={sex}
@@ -403,10 +525,10 @@ const ProfilePage = () => {
                     class={
                       "bg-gray-50 border border-gray-300 text-gray-900 text-xs sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full px-2.5 py-1.5"
                     }
-                  onChange={(e) => {
-                    setNumberPlate2(e.target.value?.replace(/\s/g, ""))
-                  }}
-                  value={numberPlate2?.replace(/\s/g, "")}
+                    onChange={(e) => {
+                      setNumberPlate2(e.target.value?.replace(/\s/g, ""));
+                    }}
+                    value={numberPlate2?.replace(/\s/g, "")}
                   />
                   {/* {numberPlateError !== "" && (
                     <p class="mt-1 text-xs sm:text-sm text-[#c80000] font-semibold">
@@ -418,35 +540,108 @@ const ProfilePage = () => {
             </div>
 
             <div>
-              <div className="my-4 px-4 text-sm sm:text-md text-[#424141B2] font-semibold">Cập nhật thông tin nâng cấp VIP</div>
-              <div class="bg-white rounded-lg p-4 sm:p-6 xl:p-8 dark:bg-gray-800 mb-3 border-b" style={{
-                boxShadow: "0px 4px 4px 0px #00000040 inset"
-              }}>
-                <div class={`items-center flex justify-center mb-3  gap-x-4 profile1`}>
-                  <div className={` flex flex-col items-center profile2 basis-auto`}>
+              <div className="my-4 px-4 text-sm sm:text-md text-[#424141B2] font-semibold">
+                Cập nhật thông tin nâng cấp VIP
+              </div>
+              <div
+                class="bg-white rounded-lg p-4 sm:p-6 xl:p-8 dark:bg-gray-800 mb-3 border-b"
+                style={{
+                  boxShadow: "0px 4px 4px 0px #00000040 inset",
+                }}
+              >
+                <div
+                  class={`items-center flex justify-center mb-3  gap-x-4 profile1`}
+                >
+                  <div
+                    className={` flex flex-col items-center profile2 basis-auto`}
+                  >
                     <div class={`items-center flex justify-center w-full`}>
-                      <label  onClick={() => refFontSide.current.click()}  class={`flex justify-center items-center w-[150px] h-[120px] sm:w-[200px] sm:h-[160px] fontSide border border-[#00000033] rounded-lg cursor-pointer`}>
-                        {
-                         loadingFontSide ? <Spinner /> : usingUser?.cccdFrontPhoto ? <Image width={0} height={0} sizes="100vw" className="w-full h-full rounded-lg" src={usingUser?.cccdFrontPhoto} alt={usingUser?.name} /> :  <MdOutlineControlPoint color="#00000033" size="24" />
-                        }
-                      </label>                  
-                      <input id="cccd-1" ref={refFontSide} name="photo1" onChange={handleChangeFontSide('photo')} accept="image/png, image/jpeg" className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 hidden" type="file"></input>
+                      <label
+                        onClick={() => refFontSide.current.click()}
+                        class={`flex justify-center items-center w-[150px] h-[120px] sm:w-[200px] sm:h-[160px] fontSide border border-[#00000033] rounded-lg cursor-pointer`}
+                      >
+                        {loadingFontSide ? (
+                          <Spinner />
+                        ) : usingUser?.cccdFrontPhoto ? (
+                          <Image
+                            width={0}
+                            height={0}
+                            sizes="100vw"
+                            className="w-full h-full rounded-lg"
+                            src={usingUser?.cccdFrontPhoto}
+                            alt={usingUser?.name}
+                          />
+                        ) : (
+                          <MdOutlineControlPoint color="#00000033" size="24" />
+                        )}
+                      </label>
+                      <input
+                        id="cccd-1"
+                        ref={refFontSide}
+                        name="photo1"
+                        onChange={handleChangeFontSide("photo")}
+                        accept="image/png, image/jpeg"
+                        className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 hidden"
+                        type="file"
+                      ></input>
                     </div>
-                    <div className="mt-2 text-sm sm:text-md text-[#424141B2] font-semibold text-center">CCCD mặt trước</div>
-                    {user?.cccdFrontPhoto && <Button  onClick={() => refFontSide.current.click()}  className="mt-2 mb-3" icon={<UploadOutlined />}>Thay đổi</Button>}
+                    <div className="mt-2 text-sm sm:text-md text-[#424141B2] font-semibold text-center">
+                      CCCD mặt trước
+                    </div>
+                    {user?.cccdFrontPhoto && (
+                      <Button
+                        onClick={() => refFontSide.current.click()}
+                        className="mt-2 mb-3"
+                        icon={<UploadOutlined />}
+                      >
+                        Thay đổi
+                      </Button>
+                    )}
                   </div>
                   <div className={`flex flex-col items-center profile2`}>
                     <div class={`items-center flex justify-center w-full`}>
-                      <label  onClick={() => refBackSide.current.click()} class={`flex justify-center items-center w-[150px] h-[120px] sm:w-[200px] sm:h-[160px] fontSide border border-[#00000033] rounded-lg cursor-pointer`}>
-                        {
-                        loadingBackSide ?  <Spinner /> : usingUser?.cccdBackPhoto ? <Image width={0} height={0} sizes="100vw" className="w-full h-full rounded-lg" src={usingUser?.cccdBackPhoto} alt={usingUser?.name} /> : <MdOutlineControlPoint color="#00000033" size="24" />
-                        }
+                      <label
+                        onClick={() => refBackSide.current.click()}
+                        class={`flex justify-center items-center w-[150px] h-[120px] sm:w-[200px] sm:h-[160px] fontSide border border-[#00000033] rounded-lg cursor-pointer`}
+                      >
+                        {loadingBackSide ? (
+                          <Spinner />
+                        ) : usingUser?.cccdBackPhoto ? (
+                          <Image
+                            width={0}
+                            height={0}
+                            sizes="100vw"
+                            className="w-full h-full rounded-lg"
+                            src={usingUser?.cccdBackPhoto}
+                            alt={usingUser?.name}
+                          />
+                        ) : (
+                          <MdOutlineControlPoint color="#00000033" size="24" />
+                        )}
                       </label>
-                      
-                      <input id="cccd-2" ref={refBackSide} name="photo" onChange={handleChangeBackSide('photo')} accept="image/png, image/jpeg" className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 hidden" type="file"></input>
+
+                      <input
+                        id="cccd-2"
+                        ref={refBackSide}
+                        name="photo"
+                        onChange={handleChangeBackSide("photo")}
+                        accept="image/png, image/jpeg"
+                        className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 hidden"
+                        type="file"
+                      ></input>
                     </div>
-                    <div className="mt-2 text-sm sm:text-md text-[#424141B2] font-semibold text-center">CCCD mặt sau</div>
-                    {user?.cccdBackPhoto && <Button  onClick={() => refBackSide.current.click()}  className="mt-2 mb-3" icon={<UploadOutlined />}>Thay đổi</Button>}
+                    <div className="mt-2 text-sm sm:text-md text-[#424141B2] font-semibold text-center">
+                      CCCD mặt sau
+                    </div>
+                    {user?.cccdBackPhoto && (
+                      <Button
+                        onClick={() => refBackSide.current.click()}
+                        className="mt-2 mb-3"
+                        icon={<UploadOutlined />}
+                      >
+                        Thay đổi
+                      </Button>
+                    )}
                   </div>
                 </div>
                 <div className="w-full mt-6 flex justify-center">
@@ -485,13 +680,22 @@ const ProfilePage = () => {
                     </button>
                   )}
                 </div>
-                <div className="text-sm sm:text-md text-[#424141B2] font-medium mt-3">Mã ID hệ thống là: dumuc{user?.username}</div>
+                <div className="text-sm sm:text-md text-[#424141B2] font-medium mt-3">
+                  Mã ID hệ thống là: dumuc{user?.username}
+                </div>
               </div>
-              <div>
-              </div>
+              <div></div>
             </div>
           </div>
         </div>
+        <ModalChangeEmail
+          visible={isEditEmail}
+          onCancel={() => {
+            setIsEditEmail(false);
+          }}
+        />
+
+        {/* <div className="" id="recaptcha-container"></div> */}
         <div className="mb-28"></div>
       </div>
       <BannerRight isAppInstall={true} />

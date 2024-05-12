@@ -30,6 +30,7 @@ export default function ModalAddFriend({
   onCancel,
   onCallback,
   authors,
+  onChooseUser,
 }) {
   const [user] = useAuthState(auth);
   const [loading, setLoading] = useState(false);
@@ -69,7 +70,6 @@ export default function ModalAddFriend({
       }
     }
   };
-  console.log(authors);
   return (
     <Modal
       visible={visible}
@@ -113,7 +113,10 @@ export default function ModalAddFriend({
                 x?.userId !== user.uid && (
                   <div
                     key={indexParent}
-                    onClick={() => {}}
+                    onClick={() => {
+                      onChooseUser(x);
+                      onCancel();
+                    }}
                     className={` rounded-md flex items-center gap-x-2 pl-[15px] pr-2 py-[10px] mt-[10px] cursor-pointer`}
                   >
                     <div className="flex justify-between w-full">
@@ -164,7 +167,6 @@ export default function ModalAddFriend({
                                         },
                                         user?.accessToken
                                       ).then(async (result) => {
-                                        console.log(result);
                                         //update recoil
                                         await deleteRecieveFriend(
                                           {
@@ -185,10 +187,7 @@ export default function ModalAddFriend({
                                     type="button"
                                     class="flex items-center gap-x-1 px-2 py-1 text-xs font-medium text-center text-white bg-[#c80000] rounded-[4px] hover:brightness-110 focus:ring-4 focus:outline-none focus:ring-blue-300"
                                   >
-                                    <>
-                                      <FaUserTimes size={20} />
-                                      Hủy lời mời
-                                    </>
+                                    <>Hủy lời mời</>
                                   </button>
                                 );
                               } else if (
@@ -205,10 +204,7 @@ export default function ModalAddFriend({
                                     {loadingAdd === indexParent ? (
                                       <Spinner className="w-4 h-4" />
                                     ) : (
-                                      <>
-                                        <FaUserCheck size={20} />
-                                        Phản hồi
-                                      </>
+                                      <>Phản hồi</>
                                     )}
                                     <div className="absolute hidden group-hover:flex flex-col justify-start items-start top-full left-0 bg-white shadow-sm shadow-gray-500 text-[10px] sm:text-xs font-medium w-[120px] rounded p-1">
                                       {loadingFeedback === indexParent ? (
@@ -237,7 +233,6 @@ export default function ModalAddFriend({
                                               },
                                               user?.accessToken
                                             ).then(async (result) => {
-                                              console.log(result);
                                               //update recoil
                                               await deleteRecieveFriend(
                                                 {
@@ -255,7 +250,6 @@ export default function ModalAddFriend({
                                               },
                                               user?.accessToken
                                             ).then(async (result) => {
-                                              console.log(result);
                                               await receiveRequestAddFriend(
                                                 {
                                                   authorUserId: x?.userId,
@@ -307,7 +301,6 @@ export default function ModalAddFriend({
                                               },
                                               user?.accessToken
                                             ).then(async (result) => {
-                                              console.log(result);
                                               //update recoil
                                               await deleteRecieveFriend(
                                                 {
@@ -349,13 +342,7 @@ export default function ModalAddFriend({
                                     {loadingAdd === indexParent ? (
                                       <Spinner className="w-4 h-4" />
                                     ) : (
-                                      <>
-                                        <FaUserCheck
-                                          size={20}
-                                          className="w-4 h-4"
-                                        />
-                                        Bạn bè
-                                      </>
+                                      <>Bạn bè</>
                                     )}
                                     <div className="absolute hidden group-hover:flex flex-col justify-start items-start top-full left-0 bg-white shadow-sm shadow-gray-500 text-[10px] sm:text-xs font-medium w-[120px] rounded p-1">
                                       {usingUser?.follows?.find(
@@ -387,7 +374,6 @@ export default function ModalAddFriend({
                                                 },
                                                 user?.accessToken
                                               ).then(async (result) => {
-                                                console.log(result);
                                                 //update recoil
                                                 await deleteUserInFollowerList(
                                                   {
@@ -441,7 +427,6 @@ export default function ModalAddFriend({
                                               },
                                               user?.accessToken
                                             ).then(async (result) => {
-                                              console.log(result);
                                               await createUserToFollowerList(
                                                 {
                                                   authorUserId: x?.userId,
@@ -494,7 +479,6 @@ export default function ModalAddFriend({
                                               },
                                               user?.accessToken
                                             ).then(async (result) => {
-                                              console.log(result);
                                               //update recoil
                                               await deleteRecieveFriend(
                                                 {
@@ -533,13 +517,7 @@ export default function ModalAddFriend({
                             (loadingAdd === indexParent ? (
                               <button
                                 onClick={async () => {
-                                  if (user) {
-                                    message.warning("Thao tác đang thực hiện");
-                                  } else {
-                                    router.push(
-                                      `/auth?url_return=${process.env.NEXT_PUBLIC_HOMEPAGE_URL}/author/${slug}/${id}`
-                                    );
-                                  }
+                                  message.warning("Thao tác đang thực hiện");
                                 }}
                                 type="button"
                                 class="flex items-center gap-x-1 px-2 py-1 text-xs font-medium text-center text-white bg-[#c80000] rounded-[4px] hover:brightness-110 focus:ring-4 focus:outline-none focus:ring-blue-300"
@@ -549,36 +527,29 @@ export default function ModalAddFriend({
                             ) : (
                               <button
                                 onClick={async () => {
-                                  if (user) {
-                                    setLoadingAdd(indexParent);
-                                    await sendRequestAddFriend(
+                                  setLoadingAdd(indexParent);
+                                  await sendRequestAddFriend(
+                                    {
+                                      authorId: x?.authorId,
+                                    },
+                                    user?.accessToken
+                                  ).then(async (result) => {
+                                    await receiveRequestAddFriend(
                                       {
-                                        authorId: x?.authorId,
+                                        authorUserId: x?.userId,
                                       },
                                       user?.accessToken
-                                    ).then(async (result) => {
-                                      console.log(result);
-                                      await receiveRequestAddFriend(
-                                        {
-                                          authorUserId: x?.userId,
-                                        },
-                                        user?.accessToken
-                                      )
-                                        .then((e) => console.log(e))
-                                        .catch((e) => console.log(e));
-                                    });
+                                    )
+                                      .then((e) => console.log(e))
+                                      .catch((e) => console.log(e));
+                                  });
 
-                                    await getProfile(user?.accessToken).then(
-                                      (dataCall) => setUsingUser(dataCall)
-                                    );
+                                  await getProfile(user?.accessToken).then(
+                                    (dataCall) => setUsingUser(dataCall)
+                                  );
 
-                                    setLoadingAdd(-1);
-                                    message.success("Đã gữi yêu cầu kết bạn.");
-                                  } else {
-                                    router.push(
-                                      `/auth?url_return=${process.env.NEXT_PUBLIC_HOMEPAGE_URL}/author/${slug}/${id}`
-                                    );
-                                  }
+                                  setLoadingAdd(-1);
+                                  message.success("Đã gữi yêu cầu kết bạn.");
                                 }}
                                 type="button"
                                 class="flex items-center gap-x-1 px-2 py-1 text-xs font-medium text-center text-white bg-[#c80000] rounded-[4px] hover:brightness-110 focus:ring-4 focus:outline-none focus:ring-blue-300"
@@ -586,10 +557,7 @@ export default function ModalAddFriend({
                                 {loadingAdd === indexParent ? (
                                   <Spinner className="w-4 h-4" />
                                 ) : (
-                                  <>
-                                    <FaUserPlus size={20} />
-                                    Thêm bạn bè
-                                  </>
+                                  <>Kết bạn</>
                                 )}
                               </button>
                             ))}
@@ -597,15 +565,9 @@ export default function ModalAddFriend({
                             (loadingAdd === indexParent ? (
                               <button
                                 onClick={async () => {
-                                  if (user) {
-                                    message.warning(
-                                      "Thao tác đang được thực hiện"
-                                    );
-                                  } else {
-                                    router.push(
-                                      `/auth?url_return=${process.env.NEXT_PUBLIC_HOMEPAGE_URL}/author/${slug}/${id}`
-                                    );
-                                  }
+                                  message.warning(
+                                    "Thao tác đang được thực hiện"
+                                  );
                                 }}
                                 type="button"
                                 class="flex items-center gap-x-1 px-2 py-1 text-xs font-medium text-center text-white bg-[#c80000] rounded-[4px] hover:brightness-110 focus:ring-4 focus:outline-none focus:ring-blue-300"
@@ -615,36 +577,29 @@ export default function ModalAddFriend({
                             ) : (
                               <button
                                 onClick={async () => {
-                                  if (user) {
-                                    setLoadingAdd(indexParent);
-                                    await sendRequestAddFriend(
+                                  setLoadingAdd(indexParent);
+                                  await sendRequestAddFriend(
+                                    {
+                                      authorId: x?.authorId,
+                                    },
+                                    user?.accessToken
+                                  ).then(async (result) => {
+                                    await receiveRequestAddFriend(
                                       {
-                                        authorId: x?.authorId,
+                                        authorUserId: x?.userId,
                                       },
                                       user?.accessToken
-                                    ).then(async (result) => {
-                                      console.log(result);
-                                      await receiveRequestAddFriend(
-                                        {
-                                          authorUserId: x?.userId,
-                                        },
-                                        user?.accessToken
-                                      )
-                                        .then((e) => console.log(e))
-                                        .catch((e) => console.log(e));
-                                    });
+                                    )
+                                      .then((e) => console.log(e))
+                                      .catch((e) => console.log(e));
+                                  });
 
-                                    await getProfile(user?.accessToken).then(
-                                      (dataCall) => setUsingUser(dataCall)
-                                    );
+                                  await getProfile(user?.accessToken).then(
+                                    (dataCall) => setUsingUser(dataCall)
+                                  );
 
-                                    setLoadingAdd(-1);
-                                    message.success("Đã gữi yêu cầu kết bạn.");
-                                  } else {
-                                    router.push(
-                                      `/auth?url_return=${process.env.NEXT_PUBLIC_HOMEPAGE_URL}/author/${slug}/${id}`
-                                    );
-                                  }
+                                  setLoadingAdd(-1);
+                                  message.success("Đã gữi yêu cầu kết bạn.");
                                 }}
                                 type="button"
                                 class="flex items-center gap-x-1 px-2 py-1 text-xs font-medium text-center text-white bg-[#c80000] rounded-[4px] hover:brightness-110 focus:ring-4 focus:outline-none focus:ring-blue-300"
@@ -652,10 +607,7 @@ export default function ModalAddFriend({
                                 {loadingAdd === indexParent ? (
                                   <Spinner className="w-4 h-4" />
                                 ) : (
-                                  <>
-                                    <FaUserPlus size={20} />
-                                    Thêm bạn bè
-                                  </>
+                                  <>Kết bạn</>
                                 )}
                               </button>
                             ))}
