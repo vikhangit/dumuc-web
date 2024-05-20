@@ -56,6 +56,7 @@ https://flagcdn.com/48x36/vn.png 3x`}
     signInWithPopup(auth, providerGoogle)
       .then((result) => {
         let userCreate = result.user;
+        console.log("123123123", result.user);
         createUser({
           uid: userCreate.uid,
           email: userCreate.email,

@@ -21,7 +21,7 @@ const FeedItems = ({
   const [user, loading, error] = useAuthState(auth);
   const [hasLoadMore, setHasLoadMore] = useState(true);
   useEffect(() => {
-    setItems(data?.items);
+    setItems(data?.items?.sort((a, b) => b?.no - a?.no));
   }, [data]);
   useEffect(() => {
     getAuthors().then((data) => {

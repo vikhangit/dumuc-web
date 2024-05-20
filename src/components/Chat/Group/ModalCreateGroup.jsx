@@ -77,6 +77,7 @@ export default function ModalCreateGroup({
         ? router.push(`/chat/group?groupId=${docRef?.id}`)
         : router.push(`/chat/group-public?groupId=${docRef?.id}`)
       : router.push(`/chat/group?groupId=${docRef?.id}`);
+    localStorage.removeItem("groupPrivate");
   };
   const handleChangeIamge = (e) => {
     setLoadingAvatar(true);

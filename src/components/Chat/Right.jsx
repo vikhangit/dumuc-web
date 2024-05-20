@@ -491,7 +491,7 @@ export default function ChatRight({
                 }
               })
             ) : (
-              <Spinner className="w-4 h-4" />
+              <div></div>
             )}
             {usingUser?.friendList?.length > 0 &&
               !usingUser?.friendList?.find(
