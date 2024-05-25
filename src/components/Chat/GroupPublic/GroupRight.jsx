@@ -140,8 +140,8 @@ export default function ChatGroupRight({
   useEffect(() => {
     if (search.get("groupId")) {
       const chatDetail = messages?.find((x) => x?.id === search.get("groupId"));
-      const myGroup = chatDetail?.member?.find((x) => x?.user === user.uid);
-      setGroupTo(myGroup && chatDetail);
+      // const myGroup = chatDetail?.member?.find((x) => x?.user === user?.uid);
+      setGroupTo(chatDetail);
     }
   }, [messages, search]);
   const handleSendImage = async (e) => {
