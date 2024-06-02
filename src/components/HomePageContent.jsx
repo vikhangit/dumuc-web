@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import {
   createFeedView,
   getFeedsLoadMore,
+  getFeedsLoadMore2,
   getStories,
   getStoriesLoadMore,
   getTags,
@@ -37,6 +38,7 @@ const HomePageContent = () => {
   const [tags, setTags] = useState([]);
   const [stories, setStories] = useState([]);
   const [usingUser, setUsingUser] = useState();
+  const [test, setTest] = useState([]);
   useEffect(() => {
     getFeedsLoadMore({ limit: 100 }).then((result) => setFeedData(result));
     getTags().then((result) => setTags(result));
@@ -44,8 +46,10 @@ const HomePageContent = () => {
       setStories(data);
     });
     getProfile(user?.accessToken).then((data) => setUsingUser(data));
+
     setLoading(false);
   }, [user]);
+  console.log("eqweqweqweqw", test);
   return loading ? (
     <Loading />
   ) : (

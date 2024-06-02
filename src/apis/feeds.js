@@ -1,5 +1,7 @@
 /* eslint-disable */
+import { db } from "@utils/firebase";
 import request from "@utils/request";
+import { collection, limit, onSnapshot, orderBy, query } from "firebase/firestore";
 
 export const getFeed = (payload) => {
   const {feedId} = payload;
@@ -54,6 +56,22 @@ export const getFeedsLoadMore = async (payload) => {
       return err;
     });
 };
+export const getFeedsLoadMore2 = (callback, num) => {
+  return onSnapshot(
+    query(
+        collection(db, "newsfeeds"), orderBy("no", "desc"), limit(num)
+    ),
+    (querySnapshot) => {
+        const messages = querySnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+        }));
+        callback(messages);
+    }
+);
+};
+
+
 
 export const getStoriesLoadMore = async (payload) => {
   // er
