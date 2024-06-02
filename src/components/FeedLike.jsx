@@ -66,8 +66,8 @@ const FeedLike = ({
     </svg>
   );
   //has login
-  if (user?.email) {
-    if (usingUser?.likes?.map((x) => x?.likeValue)?.includes(id)) {
+  if (user) {
+    if (item?.likesUser?.find((x) => x?.userId === user?.uid)) {
       return (
         <button
           key={id}
