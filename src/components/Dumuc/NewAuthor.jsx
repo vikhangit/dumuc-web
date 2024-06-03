@@ -662,21 +662,9 @@ const NewAuthorUI = ({ currentUrl = "/", params, searchParams }) => {
 
                         <button
                           onClick={() => {
-                            if (
-                              usingUser?.friendList?.find(
-                                (x) =>
-                                  x?.authorId === authorData?.authorId &&
-                                  x.status === 2
-                              )
-                            ) {
-                              router.push(
-                                `/chat?friendId=${authorData?.authorId}`
-                              );
-                            } else {
-                              message.error(
-                                "Bạn chưa là phải bạn bè của người dùng này"
-                              );
-                            }
+                            router.push(
+                              `/chat?friendId=${authorData?.authorId}`
+                            );
                           }}
                           className="flex items-center gap-x-2 px-5 py-2 text-xs font-medium text-center text-black bg-gray-300 rounded-[4px] hover:brightness-110 focus:ring-4 focus:outline-none focus:ring-blue-300"
                         >

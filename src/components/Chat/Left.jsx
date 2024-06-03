@@ -63,7 +63,7 @@ export default function ChatLeft({
   }, [search]);
   useEffect(() => {
     if (search.get("friendId")) {
-      setSearchFunction(true);
+      // setSearchFunction(true);
       const author = authors?.find(
         (x) => x?.authorId === search.get("friendId")
       );

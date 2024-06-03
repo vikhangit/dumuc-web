@@ -24,6 +24,7 @@ import { IoMdCloseCircle, IoMdSearch } from "react-icons/io";
 import { IoCloseCircle } from "react-icons/io5";
 import { FaUserTimes } from "react-icons/fa";
 import { MdOutlinePending, MdPending } from "react-icons/md";
+import { useRouter } from "next/navigation";
 
 export default function ModalAddFriend({
   visible,
@@ -33,6 +34,7 @@ export default function ModalAddFriend({
   onChooseUser,
 }) {
   const [user] = useAuthState(auth);
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [usingUser, setUsingUser] = useState();
   const [name, setName] = useState("");
@@ -125,7 +127,12 @@ export default function ModalAddFriend({
                     className={` rounded-md flex items-center gap-x-2 pl-[15px] pr-2 py-[10px] mt-[10px] cursor-pointer`}
                   >
                     <div className="flex items-center justify-between w-full">
-                      <div className="flex gap-x-2 items-center">
+                      <div
+                        className="flex gap-x-2 items-center"
+                        onClick={() =>
+                          router.push(`/author/${x?.slug}/${x?.authorId}`)
+                        }
+                      >
                         <Image
                           src={
                             x?.user?.photo && x?.user?.photo?.length > 0
@@ -137,7 +144,14 @@ export default function ModalAddFriend({
                           sizes="100vw"
                           className="w-[45px] h-[45px] rounded-full"
                         />
-                        <div className="text-base">{x?.name}</div>
+                        <div
+                          className="text-base"
+                          onClick={() =>
+                            router.push(`/author/${x?.slug}/${x?.authorId}`)
+                          }
+                        >
+                          {x?.name}
+                        </div>
                       </div>
                       <div className="flex items-center gap-x-4">
                         <MdOutlinePending
