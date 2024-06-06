@@ -250,7 +250,7 @@ export default function ChatGroupRight({
       }`}
     >
       <div className="h-[75px] flex justify-between items-center px-[15px] pl-[0px] sm:px-[20px] shadow-md shadow-gray-400">
-        {groupTo && (
+        {user && groupTo && (
           <>
             <div className="flex items-center gap-x-2 sm:gap-x-4">
               <button
@@ -301,7 +301,7 @@ export default function ChatGroupRight({
           </>
         )}
       </div>
-      {groupTo ? (
+      {user && groupTo ? (
         <>
           <div
             className={`overflow-auto scroll-chat px-3 py-5  bg-gray-200`}

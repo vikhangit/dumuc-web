@@ -158,7 +158,7 @@ export default function ChatRight({
     } else {
       setUserTo(userRecieved);
     }
-  }, [messages, search, userRecieved]);
+  }, [messages, search, userRecieved, user]);
   const handleSendImage = async (e) => {
     setShowWating(true);
     if (e?.target?.files) {
