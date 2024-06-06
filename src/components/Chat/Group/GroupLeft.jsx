@@ -181,7 +181,8 @@ export default function ChatGroupLeft({
         </button>
       </div>
       <div className="h-[calc(100%-150px)] overflow-auto scroll-chat px-2">
-        {groupList?.length > 0 &&
+        {user &&
+        groupList?.length > 0 &&
         groupList?.filter((x) => x.isPrivate)?.length > 0 ? (
           groupList
             ?.filter((x) => x.isPrivate)
