@@ -6,7 +6,13 @@ const TabbarBottomChat = dynamic(
   { ssr: false }
 );
 import { useWindowSize } from "@hooks/useWindowSize";
-import React, { useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth, db } from "@utils/firebase";
 import {
@@ -18,6 +24,8 @@ import {
 } from "firebase/firestore";
 import { getAuthors } from "@apis/posts";
 import dynamic from "next/dynamic";
+import { getProfile } from "@apis/users";
+import { useSearchParams } from "next/navigation";
 const ChatLeft = dynamic(
   () => {
     return import("@components/Chat/Left");
@@ -32,34 +40,27 @@ const ChatRight = dynamic(
 );
 
 export default function ChatGroup() {
+  const search = useSearchParams();
   const [user] = useAuthState(auth);
   const sizes = useWindowSize();
   const [show, setShow] = useState(0);
   const [mobile, setMobile] = useState(false);
   const [messages, setMessages] = useState([]);
   const [userRecieved, setUserRecieved] = useState();
-  const [rooms, setRooms] = useState([]);
-  const [allChat, setAllChat] = useState([]);
+  const [usingUser, setUsingUser] = useState();
+  const [friendList, setFriendList] = useState([]);
+
+  useEffect(() => {
+    getProfile(user?.accessToken).then((dataCall) => {
+      setUsingUser(dataCall);
+      setFriendList(dataCall?.friendList);
+    });
+  }, [user]);
   useEffect(() => {
     if (sizes.width < 992) {
       setShow(-1);
     }
   }, [sizes]);
-  useEffect(() => {
-    const q = query(collection(db, "chat-rooms"), orderBy("createdAt", "asc"));
-    const unsubscribe = onSnapshot(q, (QuerySnapshot) => {
-      let fetchedRooms = [];
-      QuerySnapshot.forEach((doc) => {
-        fetchedRooms.push({
-          ...doc.data(),
-          id: doc.id,
-          createdAt: doc.data()?.createdAt?.toDate(),
-        });
-      });
-      setRooms(fetchedRooms);
-    });
-    return () => unsubscribe;
-  }, []);
   useEffect(() => {
     const q = query(collection(db, "chat-rooms"), orderBy("createdAt", "asc"));
     const unsubscribe = onSnapshot(q, (QuerySnapshot) => {
@@ -91,10 +92,65 @@ export default function ChatGroup() {
     });
     return () => unsubscribe;
   }, []);
+  const [activeMessage, setActiveMessage] = useState([]);
+  useEffect(() => {
+    if (search.get("chatId")) {
+      const q = query(
+        collection(db, "chat-rooms", search.get("chatId"), "messages"),
+        orderBy("createdAt", "asc")
+      );
+      const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        let allMess = [];
+        querySnapshot.forEach((doc) =>
+          allMess.push({
+            id: doc.id,
+            ...doc.data(),
+            createdAt: doc.data()?.createdAt?.toDate(),
+          })
+        );
+        setActiveMessage(allMess);
+        setMobile(true);
+      });
+      return () => unsubscribe;
+    } else {
+      setActiveMessage([]);
+    }
+  }, [search]);
   const [authors, setAuthors] = useState();
   useEffect(() => {
     getAuthors().then((data) => setAuthors(data));
   }, []);
+
+  const checkFriendType = useCallback(
+    (friendAuthorId) => {
+      const findFriend = friendList?.find(
+        (x) => x?.authorId === friendAuthorId
+      );
+      if (findFriend) {
+        if (findFriend?.status === 2) {
+          return 2;
+        } else {
+          if (findFriend?.type === "send") {
+            return 3;
+          } else {
+            return 4;
+          }
+        }
+      }
+      return 1;
+    },
+    [friendList]
+  );
+
+  const [typeFriend, setTypeFriend] = useState(1);
+  useEffect(() => {
+    if (userRecieved) {
+      const type = checkFriendType(userRecieved?.authorId);
+      console.log("aaaaa", type);
+      setTypeFriend(type);
+    }
+  }, [userRecieved]);
+  console.log(console.log("bbbb", typeFriend));
   return (
     <main className="w-full h-full fixed left-0 top-0">
       <div
@@ -109,7 +165,15 @@ export default function ChatGroup() {
           setMobile={setMobile}
           messages={messages}
           authors={authors}
-          rooms={rooms}
+          friendListP={friendList}
+          user={user}
+          usingUser={usingUser}
+          activeMessage={activeMessage}
+          checkFriendType={checkFriendType}
+          myFriend={friendList}
+          setFriendListp={setFriendList}
+          typeFriend={typeFriend}
+          setTypeFriend={setTypeFriend}
         />
         <ChatRight
           userRecieved={userRecieved}
@@ -118,7 +182,14 @@ export default function ChatGroup() {
           setMobile={setMobile}
           messages={messages}
           authors={authors}
-          rooms={rooms}
+          myMessage={activeMessage}
+          friendList={friendList}
+          user={user}
+          usingUser={usingUser}
+          checkFriendType={checkFriendType}
+          setFriendList={setFriendList}
+          typeFriend={typeFriend}
+          setTypeFriend={setTypeFriend}
         />
       </div>
       {/* <div className={sizes.width > 411 ? "mb-24" :  "mb-16"} /> */}

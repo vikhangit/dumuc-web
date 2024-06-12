@@ -59,7 +59,6 @@ export default function SingleComment({
               onClick={() => {
                 setEditItem();
                 setQoute([]);
-                onCallback();
               }}
             >
               Hủy
@@ -77,10 +76,8 @@ export default function SingleComment({
             root={false}
             onCallback={onCallback}
             item={editItem}
-            completed={() => {
-              setEditItem();
-              onCallback();
-            }}
+            completed={() => {}}
+            setEditItem={setEditItem}
             setOpenLogin={setOpenLogin}
           />
         </div>

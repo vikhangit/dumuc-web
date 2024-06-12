@@ -1,46 +1,41 @@
 "use client";
-import { useState, useRef, useCallback } from "react";
-import Image from "next/image";
-import "@fancyapps/ui/dist/fancybox/fancybox.css";
-import { createFeedView, updateFeedByUser } from "apis/feeds";
 import FeedBookmark from "@components/FeedBookmark";
+import "@fancyapps/ui/dist/fancybox/fancybox.css";
+import { message } from "antd";
+import { createFeedView, getFeed, updateFeedByUser } from "apis/feeds";
+import { Modal } from "flowbite-react";
+import moment from "moment";
 import dynamic from "next/dynamic";
+import Image from "next/image";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { IoMdMore } from "react-icons/io";
+import { IoEyeOutline } from "react-icons/io5";
+import LoginWithModal from "./LoginWithModal";
+import QuickPostModalEmoji from "./QuickPostModlEmoji";
 const FeedLikeShareComment = dynamic(
   () => {
     return import("./FeedLikeShareComment");
   },
   { ssr: false }
 );
-import moment from "moment";
-import "@fancyapps/ui/dist/fancybox/fancybox.css";
-import { useRouter } from "next/navigation";
-import { message } from "antd";
-import { IoMdMore } from "react-icons/io";
-import Link from "next/link";
 const QuickPostModal = dynamic(
   () => {
     return import("./QuickPostModal");
   },
   { ssr: false }
 );
-import QuickPostModalEmoji from "./QuickPostModlEmoji";
-import { useAuthState } from "react-firebase-hooks/auth";
-import { auth } from "@utils/firebase";
 const ModalImageZoomFeed = dynamic(
   () => {
     return import("./ModalImageZoomFeed");
   },
   { ssr: false }
 );
-import { Modal } from "flowbite-react";
-import LoginWithModal from "./LoginWithModal";
-import { IoEyeOutline } from "react-icons/io5";
 
-const FeedItem = ({ item, index, onCallback }) => {
-  const [user, loading, error] = useAuthState(auth);
+const FeedItem = ({ data, index, onCallback, callData, user, usingUser }) => {
   const router = useRouter();
   const videoEl = useRef(null);
-  const [showMore, setShowMore] = useState(false);
   const [showSlide, setshowSlide] = useState(false);
   const [showPostText, setShowPostText] = useState(false);
   const [showPostEmotion, setShowPostEmotion] = useState(false);
@@ -49,14 +44,15 @@ const FeedItem = ({ item, index, onCallback }) => {
   const [imageList, setImageList] = useState([]);
   const [indexImage, setIndexImage] = useState(0);
   const [openLogin, setOpenLogin] = useState(false);
+  const [item, setItem] = useState(data);
+  useEffect(() => {
+    setItem(data);
+  }, [data]);
   const url = "/";
-  useCallback(() => {
-    const timeToStart = 7 * 60 + 12.6;
-    videoEl.current.seekTo(timeToStart, "seconds");
-  }, [videoEl.current]);
   createFeedView({
     feedId: item?.feedId,
-  }).then((result) => onCallback());
+  }).then((result) => {});
+
   return (
     <div
       key={item?.feedId}
@@ -65,7 +61,9 @@ const FeedItem = ({ item, index, onCallback }) => {
     >
       <div class="flex items-center space-x-4">
         <div class="flex-shrink-0">
-          <a href={`/author/${item?.author?.slug}/${item?.author?.authorId}`}>
+          <Link
+            href={`/author/${item?.author?.slug}/${item?.author?.authorId}`}
+          >
             <Image
               width={0}
               height={0}
@@ -80,15 +78,15 @@ const FeedItem = ({ item, index, onCallback }) => {
               }
               alt={item?.author?.name}
             />
-          </a>
+          </Link>
         </div>
         <div class="flex-1 min-w-0">
-          <a
+          <Link
             class="text-lg sm:text-xl font-bold leading-none text-gray-900 dark:text-white"
             href={`/author/${item?.author?.slug}/${item?.author?.authorId}`}
           >
             {item?.author?.name}
-          </a>
+          </Link>
           <p class="text-lg sm:text-xl font-normal mt-1 mb-1 leading-none text-gray-900 dark:text-white">
             {item?.emotion}
           </p>
@@ -210,9 +208,16 @@ const FeedItem = ({ item, index, onCallback }) => {
               setShowPostText(false);
             }}
             setShowPostEmotion={setShowPostEmotion}
-            showImage={showImage}
-            setShowImage={setShowImage}
+            // showImage={showImage}
+            // setShowImage={setShowImage}
             onCallback={onCallback}
+            user={user}
+            usingUser={usingUser}
+            callData={(feedId) =>
+              getFeed({ feedId }).then((newData) => {
+                setItem(newData);
+              })
+            }
           />
           <QuickPostModalEmoji
             setEmotion={setEmotion}
@@ -226,7 +231,12 @@ const FeedItem = ({ item, index, onCallback }) => {
             }}
           />
 
-          <FeedBookmark id={item?.feedId} currentUrl={url} />
+          <FeedBookmark
+            item={item}
+            currentUrl={url}
+            user={user}
+            usingUser={usingUser}
+          />
         </div>
       </div>
       <div>
@@ -245,21 +255,7 @@ const FeedItem = ({ item, index, onCallback }) => {
           <div
             dangerouslySetInnerHTML={{ __html: item.description }}
             className={`text-lg font-normal text-justify [&>figure]:mt-2 html`}
-          >
-            {/* {
-          item.description.length > 70 && <a
-            className="font-bold text-sm sm:text-base cursor-pointer hover:underline"
-            onClick={() => {
-              setShowMore(!showMore)
-              createFeedView({
-                feedId: item.feedId,
-              })
-            }}
-          >
-            {showMore ? "Ẩn" : "...Xem thêm"}
-          </a>
-        } */}
-          </div>
+          ></div>
         </div>
         {item?.photos?.length > 0 && (
           <div
@@ -321,13 +317,12 @@ const FeedItem = ({ item, index, onCallback }) => {
         )}
       </div>
       <FeedLikeShareComment
-        // setShowComment={setShowComment}
-        // setShowLike={setShowLike}
         item={item}
         index={index}
         url={url}
-        onCallback={onCallback}
         setOpenLogin={setOpenLogin}
+        user={user}
+        usingUser={usingUser}
       />
       <Modal show={openLogin} onClose={() => setOpenLogin(false)}>
         <Modal.Header className="bg-[#c80000] bg-opacity-60 rounded-b-xl justify-center text-center  text-white [&>h3]:text-white [&>h3]:w-full [&>h3]:text-base [&>h3]:sm:text-xl  [&>button]:ml-auto p-2.5 [&>button]:text-white">

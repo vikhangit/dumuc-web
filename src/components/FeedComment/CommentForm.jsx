@@ -29,7 +29,7 @@ export default function CommentForm({
   root,
   item,
   onCallback,
-  completed,
+  setEditItem,
   setOpenLogin,
 }) {
   const [user] = useAuthState(auth);
@@ -216,18 +216,14 @@ export default function CommentForm({
                         },
                         user?.accessToken
                       ).then((result) => {
-                        console.log("Result", result);
                         setLoading(false);
                         message.success("Cập nhật luận thành công");
                         setBody("");
                         setPhotos([]);
                         setQoute();
                         setFocusComment(false);
-                        getFeed({
-                          feedId: feed?.feedId,
-                        }).then((results) => {
-                          completed();
-                        });
+                        setEditItem();
+                        onCallback(feed?.feedId);
                       });
                     } else {
                       createComment(
@@ -242,17 +238,13 @@ export default function CommentForm({
                         user?.accessToken
                       ).then((result) => {
                         setLoading(false);
+                        setShowReplyBox && setShowReplyBox(false);
                         message.success("Đăng bình luận thành công");
                         setBody("");
                         setPhotos([]);
                         setQoute();
                         setFocusComment(false);
-                        getFeed({
-                          feedId: feed?.feedId,
-                        }).then((results) => {
-                          setShowReplyBox && setShowReplyBox(false);
-                          onCallback();
-                        });
+                        onCallback(feed?.feedId);
                       });
                     }
                   }

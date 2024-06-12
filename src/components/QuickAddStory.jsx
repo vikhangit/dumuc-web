@@ -28,30 +28,21 @@ export default function QuickAddStory({
   visible,
   onCancel,
   onCallback,
+  callEdit,
   url,
   type,
   data,
   activeItem,
+  user,
+  usingUser,
 }) {
-  const [user] = useAuthState(auth);
   const [loading, setLoading] = useState(false);
   const [link, setLink] = useState("");
   const [photo, setPhoto] = useState("");
   const [photoChange, setPhotoChange] = useState("");
-  const [usingUser, setUsingUser] = useState();
   const [active, setActive] = useState(0);
+  const [error, setError] = useState("");
   const refImage = useRef(null);
-  const [loadingChange, setLoadingChage] = useState(false);
-  const router = useRouter();
-  const [isMoout, setIsMount] = useState(false);
-  useEffect(() => {
-    getProfile(user?.accessToken).then((dataCall) => setUsingUser(dataCall));
-  }, [user]);
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setIsMount(true);
-    }
-  }, []);
   useEffect(() => {
     if (activeItem) {
       setLink(activeItem?.description);
@@ -70,58 +61,52 @@ export default function QuickAddStory({
   };
   const save = async () => {
     setLoading(true);
-    if (user) {
-      if (activeItem) {
-        await updateStoryByUser(
-          {
-            ...activeItem,
-            description: link,
-            photos: photoChange.length > 0 ? photoChange : photo,
-            isPrivate: JSON.parse(localStorage.getItem("storyPrivate"))
-              ? JSON.parse(localStorage.getItem("storyPrivate")) === "0"
-                ? true
-                : false
-              : true,
-          },
-          user?.accessToken
-        ).then((result) => {
-          let list = usingUser?.stories?.length > 0 ? usingUser?.stories : [];
-          deleteUserStories({
-            type: activeItem?.type,
-            storyId: activeItem?.storyId,
-          });
-          createUserStories({ ...result?.data }, user?.accessToken);
-          getProfile(user?.accessToken).then((dataCall) =>
-            setUsingUser(dataCall)
-          );
+    if (link === "" || link.length === 0) {
+      setLoading(false);
+      setError("Vui lòng nhập link video");
+      return;
+    }
+    if (activeItem) {
+      await updateStoryByUser(
+        {
+          ...activeItem,
+          description: link,
+          photos: photoChange.length > 0 ? photoChange : photo,
+          isPrivate: JSON.parse(localStorage.getItem("storyPrivate"))
+            ? JSON.parse(localStorage.getItem("storyPrivate")) === "0"
+              ? true
+              : false
+            : true,
+        },
+        user?.accessToken
+      ).then((result) => {
+        deleteUserStories({
+          type: activeItem?.type,
+          storyId: activeItem?.storyId,
         });
-      } else {
-        await createStoryByUser(
-          {
-            type: type,
-            description: link,
-            photos: url,
-            isPrivate: JSON.parse(localStorage.getItem("storyPrivate"))
-              ? JSON.parse(localStorage.getItem("storyPrivate")) === "0"
-                ? true
-                : false
-              : true,
-          },
-          user?.accessToken
-        ).then((result) => {
-          let list = usingUser?.stories?.length > 0 ? usingUser?.stories : [];
-          createUserStories({ ...result?.data }, user?.accessToken);
-          getProfile(user?.accessToken).then((dataCall) =>
-            setUsingUser(dataCall)
-          );
-        });
-      }
+        createUserStories({ ...result?.data }, user?.accessToken);
+      });
+    } else {
+      await createStoryByUser(
+        {
+          type: type,
+          description: link,
+          photos: url,
+          isPrivate: JSON.parse(localStorage.getItem("storyPrivate"))
+            ? JSON.parse(localStorage.getItem("storyPrivate")) === "0"
+              ? true
+              : false
+            : true,
+        },
+        user?.accessToken
+      ).then((result) => {
+        createUserStories({ ...result?.data }, user?.accessToken);
+      });
     }
     onCancel();
     localStorage.removeItem("storyPrivate");
     onCallback();
     setLoading(false);
-    window.location.reload();
   };
   return (
     <Modal
@@ -227,7 +212,7 @@ export default function QuickAddStory({
       className="modal-quick-post private"
     >
       <div className="mt-8">
-        {!activeItem &&
+        {/* {!activeItem &&
           (type === "file" ? (
             <video className={`rounded-md w-full h-full`} controls autoPlay>
               <source src={url} type="video/mp4" />
@@ -238,8 +223,8 @@ export default function QuickAddStory({
               setData={setLink}
               placeholder={`Nhập link video`}
             />
-          ))}
-        {activeItem &&
+          ))} */}
+        {/* {activeItem &&
           (activeItem?.type === "file" ? (
             <div>
               {photoChange.length > 0 ? (
@@ -281,21 +266,26 @@ export default function QuickAddStory({
               </div>
             </div>
           ) : (
-            <div>
-              <div className="flex justify-end text-[#c80000]">
-                {link !== "" && (
-                  <button className="ml-auto" onClick={() => setLink("")}>
-                    Xóa
-                  </button>
-                )}
-              </div>
-              <CustomEditor
-                initialData={link}
-                setData={setLink}
-                placeholder={`Nhập link video`}
-              />
-            </div>
-          ))}
+            
+          ))} */}
+
+        <div className="flex justify-end text-[#c80000] mr-[10px]">
+          {link !== "" && (
+            <button className="ml-auto" onClick={() => setLink("")}>
+              Xóa
+            </button>
+          )}
+        </div>
+        <CustomEditor
+          initialData={link}
+          setData={setLink}
+          placeholder={`Nhập link video`}
+        />
+        {error !== "" && (
+          <p className="mt-1 text-xs sm:text-sm text-[#c80000] font-semibold">
+            {error}
+          </p>
+        )}
       </div>
     </Modal>
   );

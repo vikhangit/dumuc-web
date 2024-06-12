@@ -1,43 +1,21 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import {
-  createUserLike,
-  deleteUserLike,
-  getProfile,
-  updateProfile,
-} from "@apis/users";
-import { useAuthState, useUpdateProfile } from "react-firebase-hooks/auth";
+import { createUserLike, deleteUserLike, getProfile } from "@apis/users";
 import { auth } from "@utils/firebase";
-import { message } from "antd";
 import { Spinner } from "flowbite-react";
+import { useEffect, useState } from "react";
+import { useAuthState } from "react-firebase-hooks/auth";
 
-const FeedLike = ({
-  id,
-  currentUrl,
-  onCallback,
-  renderCountComment,
-  item,
-  setOpenLogin,
-}) => {
-  const router = useRouter();
-  const [user] = useAuthState(auth);
-  const [usingUser, setUsingUser] = useState();
-  const [loading, setLoading] = useState(false);
-
+const FeedLike = ({ item, setOpenLogin, user, usingUser }) => {
+  const [liked, setLiked] = useState(false);
+  const [likesCount, setLikesCount] = useState(item?.likesCount || 0);
   useEffect(() => {
-    (async () => {
-      setLoading(true);
-      try {
-        const dataCall = await getProfile(user?.accessToken);
-        setUsingUser(dataCall);
-        setLoading(false);
-      } catch (e) {
-        setLoading(false);
-      }
-    })();
+    const find = item?.likesUser?.find((x) => x?.userId === user?.uid);
+    if (find) {
+      setLiked(true);
+    } else {
+      setLiked(false);
+    }
   }, [user]);
-
   const icon = () => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -67,46 +45,30 @@ const FeedLike = ({
   );
   //has login
   if (user) {
-    if (item?.likesUser?.find((x) => x?.userId === user?.uid)) {
+    if (liked) {
       return (
         <button
-          key={id}
+          key={item?.feedId}
           type="button"
           onClick={() => {
-            setLoading(true);
+            setLiked(false);
+            setLikesCount(
+              likesCount ? (likesCount > 0 ? likesCount - 1 : 0) : 0
+            );
             deleteUserLike(
               {
                 likeType: "feed",
-                likeValue: id,
+                likeValue: item?.feedId,
               },
               user?.accessToken
-            ).then(async (result) => {
-              updateProfile(
-                {
-                  ...usingUser,
-                  likes: usingUser?.likes.filter(
-                    (x) => x.likeValue !== id && x.likeType === "feed"
-                  ),
-                },
-                user?.accessToken
-              );
-              setLoading(false);
-              getProfile(user?.accessToken).then((dataCall) =>
-                setUsingUser(dataCall)
-              );
-              onCallback();
-            });
+            );
           }}
           tooltip="Bỏ like"
         >
-          {loading ? (
-            <Spinner />
-          ) : (
-            <span class="feed-tool gap-x-1 flex items-center text-base sm:text-lg  text-[#c80000] hover:underline  dark:text-gray-400 ">
-              {iconActive()}
-              {item?.likesCount || "0"} Lượt thích
-            </span>
-          )}
+          <span class="feed-tool gap-x-1 flex items-center text-base sm:text-lg  text-[#c80000] hover:underline  dark:text-gray-400 ">
+            {iconActive()}
+            {likesCount} Lượt thích
+          </span>
         </button>
       );
     } else {
@@ -114,56 +76,23 @@ const FeedLike = ({
         <button
           type="button"
           onClick={() => {
-            setLoading(true);
+            setLiked(true);
+            setLikesCount(likesCount + 1);
             createUserLike(
               {
                 likeType: "feed",
-                likeValue: id,
+                likeValue: item?.feedId,
                 user: usingUser,
               },
               user?.accessToken
-            ).then(async (result) => {
-              console.log("Result", result);
-              updateProfile(
-                {
-                  ...usingUser,
-                  likes:
-                    usingUser?.likes?.length > 0
-                      ? [
-                          ...usingUser?.likes,
-                          {
-                            likeId: result.likeId,
-                            likeType: "feed",
-                            likeValue: id,
-                          },
-                        ]
-                      : [
-                          {
-                            likeId: result.likeId,
-                            likeType: "feed",
-                            likeValue: id,
-                          },
-                        ],
-                },
-                user?.accessToken
-              );
-              setLoading(false);
-              getProfile(user?.accessToken).then((dataCall) =>
-                setUsingUser(dataCall)
-              );
-              onCallback();
-            });
+            );
           }}
           tooltip="Like"
         >
-          {loading ? (
-            <Spinner />
-          ) : (
-            <span class="feed-tool gap-x-1 flex items-center text-base sm:text-lg text-gray-500 hover:underline  dark:text-gray-400 ">
-              {icon()}
-              {item?.likesCount || "0"} Lượt thích
-            </span>
-          )}
+          <span class="feed-tool gap-x-1 flex items-center text-base sm:text-lg text-gray-500 hover:underline  dark:text-gray-400 ">
+            {icon()}
+            {likesCount} Lượt thích
+          </span>
         </button>
       );
     }
@@ -172,14 +101,13 @@ const FeedLike = ({
       <button
         type="button"
         onClick={() => {
-          // router.push(`/auth?url_return=${currentUrl}`);
           setOpenLogin(true);
         }}
         tooltip="Thích"
       >
         <span class="feed-tool gap-x-1 flex items-center text-base sm:text-lg text-gray-500 hover:underline dark:text-gray-400 ">
           {icon()}
-          {item?.likesCount || "0"} Lượt thích
+          {likesCount} Lượt thích
         </span>
       </button>
     );

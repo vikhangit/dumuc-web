@@ -20,50 +20,31 @@ export default function ChatLeft({
   setMobile,
   messages,
   authors,
+  user,
+  usingUser,
+  friendListP,
+  setFriendListp,
+  activeMessage,
+  myFriend,
+  checkFriendType,
+  typeFriend,
+  setTypeFriend,
 }) {
-  const [user] = useAuthState(auth);
   const sizes = useWindowSize();
   const router = useRouter();
   const search = useSearchParams();
-  const [friendList, setFriendList] = useState([]);
   const [valueSearch, setValueSearch] = useState("");
   const [searchFunction, setSearchFunction] = useState(false);
-  const [usingUser, setUsingUser] = useState();
-  const [userTo, setUserTo] = useState();
-  const [activeMessage, setActiveMessage] = useState([]);
   const [showAddFriend, setShowAddFriend] = useState(false);
+  const [friendList, setFriendList] = useState([]);
   useEffect(() => {
-    getProfile(user?.accessToken).then((dataCall) => {
-      setUsingUser(dataCall);
-      console.log(dataCall?.friendList);
-      setFriendList(dataCall?.friendList?.filter((x) => x.status === 2));
-    });
-  }, [user]);
-  useEffect(() => {
-    if (search.get("chatId")) {
-      const q = query(
-        collection(db, "chat-rooms", search.get("chatId"), "messages"),
-        orderBy("createdAt", "asc")
-      );
-      const unsubscribe = onSnapshot(q, (querySnapshot) => {
-        let allMess = [];
-        querySnapshot.forEach((doc) =>
-          allMess.push({
-            id: doc.id,
-            ...doc.data(),
-            createdAt: doc.data()?.createdAt?.toDate(),
-          })
-        );
-        setActiveMessage(allMess);
-      });
-      return () => unsubscribe;
-    } else {
-      setActiveMessage([]);
-    }
-  }, [search]);
+    setFriendList(friendListP?.filter((x) => x.status === 2));
+  }, [friendListP]);
+
   useEffect(() => {
     if (search.get("friendId")) {
       // setSearchFunction(true);
+      setMobile(true);
       const author = authors?.find(
         (x) => x?.authorId === search.get("friendId")
       );
@@ -75,13 +56,14 @@ export default function ChatLeft({
       );
       if (!findChat) {
         setUserRecieved(author);
+        const type = checkFriendType(author?.authorId);
+        setTypeFriend(type);
       } else {
         setUserRecieved();
         router.push(`/chat?chatId=${findChat?.id}`);
       }
     }
   }, [search, messages, authors]);
-  console.log(search.get("chatId"));
   useEffect(() => {
     if (search.get("chatId")) {
       const chatDetail = messages?.find((x) => x?.id === search.get("chatId"));
@@ -91,14 +73,11 @@ export default function ChatLeft({
       const author = authors?.find(
         (item) => item?.authorId === userRecieveds?.authorId
       );
-      console.log(author);
-      setUserTo(author);
-    } else if (userRecieved) {
-      setUserTo(userRecieved);
+      setUserRecieved(author);
     } else {
-      setUserTo();
+      setUserRecieved();
     }
-  }, [messages, search, userRecieved]);
+  }, [messages, search]);
   const searchField = (value) => {
     setValueSearch(value);
     if (value.trim() === "") {
@@ -148,8 +127,10 @@ export default function ChatLeft({
       item?.member?.find((x) => x?.userId === author?.userId)
     );
     if (!findChat) {
+      // router.push("/chat");
+      const type = checkFriendType(author?.authorId);
+      setTypeFriend(type);
       setUserRecieved(author);
-      router.push("/chat");
     } else {
       setUserRecieved();
       router.push(`/chat?chatId=${findChat?.id}`);
@@ -204,6 +185,7 @@ export default function ChatLeft({
             onClick={(e) => {
               e.preventDefault();
               setShowAddFriend(true);
+              router.push("/chat");
             }}
             className={`flex justify-center rounded-[20px] bg-[#EB7F7F] items-center  gap-x-2 text-white  py-[5px] ${
               sizes.width > 380 ? "px-[15px] w-[150px]" : "w-[135px] gap-x-1"
@@ -239,7 +221,7 @@ export default function ChatLeft({
                     selectFriend(author);
                   }}
                   className={`${
-                    userTo?.authorId === author?.authorId
+                    userRecieved?.authorId === author?.authorId
                       ? "bg-[#0084ff] bg-opacity-30"
                       : "bg-white"
                   } rounded-md shadow-md shadow-gray-400 flex items-center gap-x-2 pl-[15px] pr-2 py-[20px] mt-[10px] cursor-pointer`}
@@ -289,10 +271,12 @@ export default function ChatLeft({
                         key={indexChild}
                         onClick={() => {
                           setMobile(true);
+                          const type = checkFriendType(author?.authorId);
+                          setTypeFriend(type);
                           router.push(`/chat?chatId=${item.id}`);
                         }}
                         className={`${
-                          userTo?.authorId === itemChild?.authorId
+                          userRecieved?.authorId === itemChild?.authorId
                             ? "bg-[#0084ff] bg-opacity-30"
                             : "bg-white"
                         } rounded-md shadow-md shadow-gray-400 flex items-center gap-x-2 pl-[15px] pr-2 py-[20px] mt-[10px] cursor-pointer`}
@@ -422,6 +406,10 @@ export default function ChatLeft({
         onCancel={() => setShowAddFriend(false)}
         visible={showAddFriend}
         onChooseUser={(author) => selectFriend(author)}
+        user={user}
+        usingUser={usingUser}
+        checkFriendType={checkFriendType}
+        setFriendList={setFriendListp}
       />
     </div>
   );

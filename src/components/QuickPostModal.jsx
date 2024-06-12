@@ -22,19 +22,19 @@ const CustomEditor = dynamic(
   { ssr: false }
 );
 export default function QuickPostModal({
+  user,
+  usingUser,
   visible,
   setEmotion,
   onCancel,
   emotion,
   setShowPostEmotion,
-  showImage,
-  setShowImage,
   onCallback,
   feed,
+  callData,
 }) {
-  const [user] = useAuthState(auth);
+  const [showImage, setShowImage] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [usingUser, setUsingUser] = useState();
   const refImage = useRef();
   const [description, setDescription] = useState();
   const [descriptionError, setDescriptionError] = useState();
@@ -71,9 +71,6 @@ export default function QuickPostModal({
   const [inputValue, setInputValue] = useState("");
   const inputRef = useRef(null);
   const [active, setActive] = useState();
-  useEffect(() => {
-    getProfile(user?.accessToken).then((dataCall) => setUsingUser(dataCall));
-  }, [user]);
   useEffect(() => {
     if (inputVisible) {
       inputRef.current?.focus();
@@ -137,6 +134,9 @@ export default function QuickPostModal({
       setEmotion(feed?.emotion);
       setTags(feed?.tags);
       setActive(feed?.isPrivate == true ? 0 : 1);
+      setShowImage(
+        feed?.photos ? (feed?.photos?.length > 0 ? true : false) : false
+      );
     }
   }, [feed]);
   const save = () => {
@@ -173,9 +173,7 @@ export default function QuickPostModal({
         },
         user?.accessToken
       )
-        .then(async (result) => {
-          // const findIndex = photos?.filter( ai => !usingUser
-          //   .photos.includes(ai));
+        .then((result) => {
           updateProfile(
             {
               ...usingUser,
@@ -187,12 +185,9 @@ export default function QuickPostModal({
             },
             user?.accessToken
           );
+          callData(feed?.feedId);
           setLoading(false);
-          getProfile(user?.accessToken).then((dataCall) =>
-            setUsingUser(dataCall)
-          );
           onCancel();
-          onCallback();
           message.success("Sửa tin thành công");
         })
         .catch((error) => {
@@ -201,7 +196,7 @@ export default function QuickPostModal({
         });
     } else {
       createFeedByUser(item, user?.accessToken)
-        .then(async (result) => {
+        .then((result) => {
           updateProfile(
             {
               ...usingUser,
@@ -211,9 +206,6 @@ export default function QuickPostModal({
                   : [...photos],
             },
             user?.accessToken
-          );
-          getProfile(user?.accessToken).then((dataCall) =>
-            setUsingUser(dataCall)
           );
           setLoading(false);
           setPhotos([]);

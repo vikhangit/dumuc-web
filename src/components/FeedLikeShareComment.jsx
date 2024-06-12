@@ -17,40 +17,21 @@ import FeedComments from "./FeedComments";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@utils/firebase";
 import { useWindowSize } from "@hooks/useWindowSize";
+import { nestedComment } from "@utils/covertCommets";
+import { getFeed } from "@apis/feeds";
 
-const FeedLikeShareComment = ({
-  item,
-  url,
-  index,
-  onCallback,
-  setOpenLogin,
-}) => {
+const FeedLikeShareComment = ({ item, url, setOpenLogin, user, usingUser }) => {
   const sizes = useWindowSize();
-  const [user] = useAuthState(auth);
   const [showLike, setShowLike] = useState(false);
   const [showComment, setShowComment] = useState(false);
-  const [usingUser, setUsingUser] = useState();
+  const [comments, setComments] = useState(nestedComment(item?.comments));
   useEffect(() => {
-    getProfile(user?.accessToken).then((dataCall) => setUsingUser(dataCall));
-  }, [user]);
-  const renderCountComment = () => {
-    if (!item?.likesCount) {
-      return "0 Lượt thích";
-    } else {
-      if (item?.likesCount === 0) {
-        return "0 Lượt thích";
-      } else {
-        if (item?.likesUser) {
-          if (item?.likesUser?.length > 1) {
-            return `${item?.likesUser[0]?.name || "No name"} và ${
-              item?.likesUser?.length - 1
-            } người khác đã thích`;
-          } else {
-            return `${item?.likesUser[0]?.name || "No name"} đã thích`;
-          }
-        }
-      }
-    }
+    setComments(nestedComment(item?.comments));
+  }, [item]);
+  const onCallback = (feedId) => {
+    getFeed({ feedId }).then((data) =>
+      setComments(nestedComment(data?.comments))
+    );
   };
   return (
     <div>
@@ -209,14 +190,10 @@ const FeedLikeShareComment = ({
           setOpenLogin={setOpenLogin}
         />
         <FeedLike
-          style={"feed"}
-          id={item?.feedId}
-          currentUrl={url}
-          count={item?.likesCount}
-          onCallback={onCallback}
-          renderCountComment={renderCountComment}
           item={item}
           setOpenLogin={setOpenLogin}
+          user={user}
+          usingUser={usingUser}
         />
 
         <FeedShare item={item} />
@@ -232,7 +209,7 @@ const FeedLikeShareComment = ({
             </button>
           </div>
           <FeedComments
-            items={item?.comments}
+            items={comments}
             feed={item}
             onCallback={onCallback}
             setOpenLogin={setOpenLogin}

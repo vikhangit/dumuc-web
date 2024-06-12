@@ -14,28 +14,27 @@ import { useEffect } from "react";
 import { getAuthors } from "@apis/posts";
 import { useWindowSize } from "@hooks/useWindowSize";
 
-export default function RequestFriend({ items, onCallback }) {
-  const [user] = useAuthState(auth);
+export default function RequestFriend({ items, onCallback, authors, user }) {
   const [loading, setLoading] = useState(-1);
   const [loadingRemove, setLoadingRemove] = useState(-1);
-  const [authors, setAuthors] = useState([]);
   const sizes = useWindowSize();
-  useEffect(() => {
-    getAuthors().then((data) => {
-      setAuthors(data);
-    });
-  }, []);
+  const [friendList, setFriendList] = useState(items);
+  // useEffect(() => {
+  //   setFriendList(items);
+  // }, [items]);
   return (
     <div>
-      <div className="font-semibold xl:font-normal">Lời mời kết bạn</div>
+      {friendList?.length > 0 && (
+        <div className="font-semibold xl:font-normal mb-3">Lời mời kết bạn</div>
+      )}
       <div>
         <ul
-          class={`pb-1 mt-3 grid xl:block ${
+          class={`pb-1 grid xl:block ${
             sizes.width > 450 ? "grid-cols-2" : "gap-y-4"
           } gap-x-4`}
         >
-          {items &&
-            items?.map(async (item, index) => {
+          {friendList?.length > 0 &&
+            friendList.map(async (item, index) => {
               const author = authors?.find(
                 (x) => x?.authorId === item?.authorId
               );
@@ -65,104 +64,67 @@ export default function RequestFriend({ items, onCallback }) {
                       </div>
                     </div>
                     <div className="w-full flex gap-x-2 mt-2">
-                      {loading === index ? (
-                        <button
-                          onClick={async (e) => {
-                            message.success("Thao tác đang được thực hiện");
-                          }}
-                          className="px-3 py-1 text-xs font-medium text-center text-white bg-[#c80000] rounded-[4px] hover:brightness-110 focus:ring-4 focus:outline-none focus:ring-blue-300 basis-1/2"
-                        >
-                          <Spinner className="w-4 h-4" />
-                        </button>
-                      ) : (
-                        <button
-                          onClick={async (e) => {
-                            setLoading(index);
-                            e.preventDefault();
-                            await deleteAddFriend(
-                              {
-                                authorId: item?.author?.authorId,
-                              },
-                              user?.accessToken
-                            ).then(async (result) => {
-                              console.log(result);
-                              //update recoil
-                              await deleteRecieveFriend(
-                                {
-                                  authorUserId: item?.author?.userId,
-                                },
-                                user?.accessToken
-                              )
-                                .then((e) => console.log(e))
-                                .catch((e) => console.log(e));
-                            });
-                            await sendRequestAddFriend(
-                              {
-                                authorId: item?.author?.authorId,
-                                status: 2,
-                              },
-                              user?.accessToken
-                            ).then(async (result) => {
-                              console.log(result);
-                              await receiveRequestAddFriend(
-                                {
-                                  authorUserId: item?.author?.userId,
-                                  status: 2,
-                                },
-                                user?.accessToken
-                              )
-                                .then((e) => console.log(e))
-                                .catch((e) => console.log(e));
-                            });
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          friendList.splice(index, 1);
+                          setFriendList([...friendList]);
+                          deleteAddFriend(
+                            {
+                              authorId: item?.author?.authorId,
+                            },
+                            user?.accessToken
+                          );
+                          deleteRecieveFriend(
+                            {
+                              authorUserId: item?.author?.userId,
+                            },
+                            user?.accessToken
+                          );
+                          sendRequestAddFriend(
+                            {
+                              authorId: item?.author?.authorId,
+                              status: 2,
+                            },
+                            user?.accessToken
+                          );
+                          receiveRequestAddFriend(
+                            {
+                              authorUserId: item?.author?.userId,
+                              status: 2,
+                            },
+                            user?.accessToken
+                          );
 
-                            await onCallback();
-                            message.success("Đã chấp nhận yêu cầu kết bạn");
-                            setLoading(-1);
-                          }}
-                          className="px-3 py-1 text-xs font-medium text-center text-white bg-[#c80000] rounded-[4px] hover:brightness-110 focus:ring-4 focus:outline-none focus:ring-blue-300 basis-1/2"
-                        >
-                          Chấp nhận
-                        </button>
-                      )}
-                      {loadingRemove === index ? (
-                        <button
-                          onClick={() => {
-                            message.success("Thao tác đang thực hiện");
-                          }}
-                          className="px-3 py-1 text-xs font-medium text-center text-black bg-gray-300 rounded-[4px] hover:brightness-110 focus:ring-4 focus:outline-none focus:ring-blue-300 basis-1/2"
-                        >
-                          <Spinner className="w-4 h-4" />
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => {
-                            setLoadingRemove(index);
-                            deleteAddFriend(
-                              {
-                                authorId: item?.author?.authorId,
-                              },
-                              user?.accessToken
-                            ).then(async (result) => {
-                              console.log(result);
-                              //update recoil
-                              await deleteRecieveFriend(
-                                {
-                                  authorUserId: item?.author?.userId,
-                                },
-                                user?.accessToken
-                              )
-                                .then((e) => console.log(e))
-                                .catch((e) => console.log(e));
-                              await onCallback();
-                              message.success("Đã xóa yêu cầu kết bạn");
-                              setLoadingRemove(-1);
-                            });
-                          }}
-                          className="px-3 py-1 text-xs font-medium text-center text-black bg-gray-300 rounded-[4px] hover:brightness-110 focus:ring-4 focus:outline-none focus:ring-blue-300 basis-1/2"
-                        >
-                          Xóa
-                        </button>
-                      )}
+                          message.success("Đã chấp nhận yêu cầu kết bạn");
+                        }}
+                        className="px-3 py-1 text-xs font-medium text-center text-white bg-[#c80000] rounded-[4px] hover:brightness-110 focus:ring-4 focus:outline-none focus:ring-blue-300 basis-1/2"
+                      >
+                        Chấp nhận
+                      </button>
+                      <button
+                        onClick={() => {
+                          friendList.splice(index, 1);
+                          setFriendList([...friendList]);
+                          deleteAddFriend(
+                            {
+                              authorId: item?.author?.authorId,
+                            },
+                            user?.accessToken
+                          );
+                          deleteRecieveFriend(
+                            {
+                              authorUserId: item?.author?.userId,
+                            },
+                            user?.accessToken
+                          );
+
+                          message.success("Đã xóa yêu cầu kết bạn");
+                        }}
+                        className="px-3 py-1 text-xs font-medium text-center text-black bg-gray-300 rounded-[4px] hover:brightness-110 focus:ring-4 focus:outline-none focus:ring-blue-300 basis-1/2"
+                      >
+                        Xóa
+                      </button>
                     </div>
                   </div>
                 )

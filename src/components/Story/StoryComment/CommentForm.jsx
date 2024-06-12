@@ -29,7 +29,7 @@ export default function CommentForm({
   root,
   item,
   onCallback,
-  completed,
+  setEditItem,
 }) {
   const [user] = useAuthState(auth);
   const router = useRouter();
@@ -218,18 +218,14 @@ export default function CommentForm({
                         },
                         user?.accessToken
                       ).then((result) => {
-                        console.log("Result", result);
                         setLoading(false);
                         message.success("Cập nhật luận thành công");
                         setBody("");
                         setPhotos([]);
                         setQoute();
                         setFocusComment(false);
-                        getStory({
-                          storyId: feed?.storyId,
-                        }).then((results) => {
-                          completed();
-                        });
+                        setEditItem();
+                        onCallback(feed?.storyId);
                       });
                     } else {
                       createCommentStories(
@@ -249,12 +245,7 @@ export default function CommentForm({
                         setPhotos([]);
                         setQoute();
                         setFocusComment(false);
-                        getStory({
-                          storyId: feed?.storyId,
-                        }).then((results) => {
-                          setShowReplyBox && setShowReplyBox(false);
-                          onCallback();
-                        });
+                        onCallback(feed?.storyId);
                       });
                     }
                   }

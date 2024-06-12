@@ -1,17 +1,22 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import { message } from "antd";
+import { createUserBookmark, deleteUserBookmark } from "@apis/users";
 import { useRouter } from "next/navigation";
-import {
-  createUserBookmark,
-  deleteUserBookmark,
-  getProfile,
-} from "@apis/users";
-import { useAuthState, useUpdateProfile } from "react-firebase-hooks/auth";
-import { auth } from "@utils/firebase";
-import { Spinner } from "flowbite-react";
+import { useEffect, useState } from "react";
 
-const FeedBookmark = ({ id, currentUrl = "/", item }) => {
+const FeedBookmark = ({ currentUrl = "/", item, user, usingUser }) => {
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    const find = usingUser?.bookmarks?.find(
+      (x) => x?.bookmarkValue === item?.feedId
+    );
+    if (find) {
+      setSaved(true);
+    } else {
+      setSaved(false);
+    }
+  }, [usingUser]);
+
   const icon = () => (
     <svg
       className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400"
@@ -43,50 +48,27 @@ const FeedBookmark = ({ id, currentUrl = "/", item }) => {
   );
 
   const router = useRouter();
-  const [user] = useAuthState(auth);
-  const [setUser, updating, error] = useUpdateProfile(auth);
-  const [loading, setLoading] = useState(false);
-  const [usingUser, setUsingUser] = useState();
-  useEffect(() => {
-    (async () => {
-      setLoading(true);
-      try {
-        const dataCall = await getProfile(user?.accessToken);
-        setUsingUser(dataCall);
-        setLoading(false);
-      } catch (e) {
-        setLoading(false);
-      }
-    })();
-  }, [user]);
-
   //dot not login
-  if (user?.email) {
-    if (usingUser?.bookmarks?.map((x) => x?.bookmarkValue)?.includes(id)) {
+  if (user) {
+    if (saved) {
       return (
         <button
-          key={id}
+          key={item?.feedId}
           className="hover:bg-gray-100 mx-1"
           type="button"
           onClick={() => {
-            setLoading(true);
+            setSaved(false);
             deleteUserBookmark(
               {
                 bookmarkType: "feed",
-                bookmarkValue: id,
+                bookmarkValue: item?.feedId,
               },
               user?.accessToken
-            ).then(async () => {
-              //update recoil
-              const dataCall = await getProfile(user?.accessToken);
-              setUsingUser(dataCall);
-              setLoading(false);
-              message.success("Đã bỏ lưu thành công");
-            });
+            );
           }}
           tooltip="Bỏ lưu"
         >
-          {loading ? <Spinner /> : iconActive()}
+          {iconActive()}
         </button>
       );
     } else {
@@ -95,24 +77,19 @@ const FeedBookmark = ({ id, currentUrl = "/", item }) => {
           className="hover:bg-gray-100 mx-1"
           type="button"
           onClick={() => {
-            setLoading(true);
+            setSaved(true);
             createUserBookmark(
               {
                 bookmarkType: "feed",
-                bookmarkValue: id,
+                bookmarkValue: item?.feedId,
                 bookmark: item,
               },
               user?.accessToken
-            ).then(async () => {
-              const dataCall = await getProfile(user?.accessToken);
-              setUsingUser(dataCall);
-              setLoading(false);
-              message.success("Đã lưu thành công");
-            });
+            );
           }}
           tooltip="Lưu lại"
         >
-          {loading ? <Spinner /> : icon()}
+          {icon()}
         </button>
       );
     }

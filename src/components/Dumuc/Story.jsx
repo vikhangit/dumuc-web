@@ -1,24 +1,19 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
+import { uploadImage } from "@apis/other";
+import { message } from "antd";
+import dynamic from "next/dynamic";
 import Image from "next/image";
-import { Swiper, SwiperSlide } from "swiper/react";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
+import React, { useEffect, useRef, useState } from "react";
 import {
   HiChevronDoubleLeft,
   HiChevronDoubleRight,
   HiLink,
-  HiOutlineVideoCamera,
 } from "react-icons/hi";
+import { IoMdCloseCircle } from "react-icons/io";
 import { MdOutlineAdd } from "react-icons/md";
-import { auth } from "@utils/firebase";
-import { useAuthState } from "react-firebase-hooks/auth";
-import { getStoriesLoadMore } from "@apis/feeds";
-import {
-  useParams,
-  usePathname,
-  useRouter,
-  useSearchParams,
-} from "next/navigation";
-import { uploadImage } from "@apis/other";
+import { Swiper, SwiperSlide } from "swiper/react";
+import ModalWating from "./ModalWating";
 const QuickAddStory = dynamic(
   () => {
     return import("@components/QuickAddStory");
@@ -31,17 +26,12 @@ const ModalPlayVideos = dynamic(
   },
   { ssr: false }
 );
-import { message } from "antd";
-import ModalWating from "./ModalWating";
-import { IoMdCloseCircle } from "react-icons/io";
-import dynamic from "next/dynamic";
 
-const Story = ({ data, onCallback }) => {
+const Story = ({ data, onCallback, user, usingUser, myFollow, myFriend }) => {
   const [stories, setStories] = useState(data);
   const [loading, setLoading] = useState(false);
   const [swiper, setSwiper] = useState(null);
   const [activeSlide, setActiveSlide] = useState(0);
-  const [user] = useAuthState(auth);
   const [video, setVideo] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [type, setType] = useState("file");
@@ -127,7 +117,11 @@ const Story = ({ data, onCallback }) => {
             >
               <div
                 className="border border-gray-400 rounded-[10px] w-full h-full relative"
-                onClick={() => setShowTool(!showTool)}
+                onClick={() => {
+                  setShowTool(false);
+                  setShowModal(true);
+                  setType("link");
+                }}
               >
                 {showTool ? (
                   <div className="flex flex-col gap-4 justify-center items-center h-full w-full px-[10px] relative z-20">
@@ -137,7 +131,7 @@ const Story = ({ data, onCallback }) => {
                     >
                       <IoMdCloseCircle size={18} />
                     </button>
-                    <button
+                    {/* <button
                       className="flex justify-center items-center bg-[#c80000] text-white w-full text-base font-medium gap-x-2 py-2 rounded-full"
                       onClick={() =>
                         user ? refStory?.current?.click() : router.push("/auth")
@@ -145,7 +139,7 @@ const Story = ({ data, onCallback }) => {
                     >
                       <HiOutlineVideoCamera size={24} />
                       File video
-                    </button>
+                    </button> */}
                     <button
                       className="flex justify-center items-center bg-sky-500 text-white w-full text-base font-medium gap-x-2 py-2 rounded-full"
                       onClick={() => {
@@ -268,6 +262,10 @@ const Story = ({ data, onCallback }) => {
         imageList={stories}
         index={indexImage}
         onCallback={onCallback}
+        user={user}
+        usingUser={usingUser}
+        myFollow={myFollow}
+        myFriend={myFriend}
       />
       <QuickAddStory
         onCallback={() => {
@@ -278,6 +276,8 @@ const Story = ({ data, onCallback }) => {
         visible={showModal}
         url={video}
         type={type}
+        user={user}
+        usingUser={usingUser}
       />
       <ModalWating openModal={loading} setOpenModal={setLoading} />
     </>

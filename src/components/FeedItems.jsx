@@ -14,20 +14,18 @@ const FeedItems = ({
   authorId,
   tagId,
   layout = "scroll",
+  loading,
+  authors,
+  user,
+  usingUser,
   onCallback,
 }) => {
   const [items, setItems] = useState(data?.items);
-  const [authors, setAuthors] = useState();
-  const [user, loading, error] = useAuthState(auth);
   const [hasLoadMore, setHasLoadMore] = useState(true);
   useEffect(() => {
     setItems(data?.items?.sort((a, b) => b?.no - a?.no));
   }, [data]);
-  useEffect(() => {
-    getAuthors().then((data) => {
-      setAuthors(data);
-    });
-  }, []);
+
   const loadMore = async () => {
     setHasLoadMore(true);
     let payload = {};
@@ -54,11 +52,19 @@ const FeedItems = ({
     <div>
       {" "}
       {!authorId ? (
-        <NewQuickPost onCallback={onCallback} />
+        <NewQuickPost
+          onCallback={onCallback}
+          user={user}
+          usingUser={usingUser}
+        />
       ) : authors?.find(
           (x) => x?.userId === user?.uid && x?.authorId === authorId
         ) ? (
-        <NewQuickPost onCallback={onCallback} />
+        <NewQuickPost
+          onCallback={onCallback}
+          user={user}
+          usingUser={usingUser}
+        />
       ) : (
         ""
       )}
@@ -79,16 +85,18 @@ const FeedItems = ({
               user?.email === item?.author?.user?.email ? (
                 <FeedItem
                   key={index}
-                  item={item}
+                  data={item}
                   index={index}
-                  onCallback={onCallback}
+                  user={user}
+                  usingUser={usingUser}
                 />
               ) : !item?.isPrivate ? (
                 <FeedItem
                   key={index}
-                  item={item}
+                  data={item}
                   index={index}
-                  onCallback={onCallback}
+                  user={user}
+                  usingUser={usingUser}
                 />
               ) : (
                 <div key={index}></div>
@@ -101,9 +109,10 @@ const FeedItems = ({
         items?.map((item, index) => (
           <FeedItem
             key={index}
-            item={item}
+            data={item}
             index={index}
-            onCallback={onCallback}
+            user={user}
+            usingUser={usingUser}
           />
         ))}
     </div>

@@ -76,10 +76,7 @@ export default function SingleComment({
             root={false}
             onCallback={onCallback}
             item={editItem}
-            completed={() => {
-              setEditItem();
-              onCallback();
-            }}
+            setEditItem={setEditItem}
           />
         </div>
       ) : (

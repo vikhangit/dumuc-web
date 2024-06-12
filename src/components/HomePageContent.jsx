@@ -31,6 +31,7 @@ const RequestFriend = dynamic(
 );
 import { getProfile } from "@apis/users";
 import dynamic from "next/dynamic";
+import { getAuthors } from "@apis/posts";
 const HomePageContent = () => {
   const [user] = useAuthState(auth);
   const [feedData, setFeedData] = useState({});
@@ -38,18 +39,31 @@ const HomePageContent = () => {
   const [tags, setTags] = useState([]);
   const [stories, setStories] = useState([]);
   const [usingUser, setUsingUser] = useState();
-  const [test, setTest] = useState([]);
+  const [requestFr, setRequestFr] = useState();
+  const [authors, setAuthors] = useState();
+  const [myFollow, setMyFollow] = useState([]);
+  const [myFriend, setMyFriend] = useState([]);
   useEffect(() => {
+    getAuthors().then((data) => {
+      setAuthors(data);
+    });
+  }, []);
+  useEffect(() => {
+    getProfile(user?.accessToken).then((data) => {
+      setUsingUser(data);
+      setRequestFr(
+        data?.friendList?.filter((x) => x.status === 1 && x.type === "recieve")
+      );
+      setMyFollow(data?.follows);
+      setMyFriend(data?.friendList);
+    });
     getFeedsLoadMore({ limit: 100 }).then((result) => setFeedData(result));
     getTags().then((result) => setTags(result));
     getStoriesLoadMore({ limit: 100 }).then((data) => {
       setStories(data);
     });
-    getProfile(user?.accessToken).then((data) => setUsingUser(data));
-
     setLoading(false);
   }, [user]);
-  console.log("eqweqweqweqw", test);
   return loading ? (
     <Loading />
   ) : (
@@ -59,29 +73,23 @@ const HomePageContent = () => {
         <div class="flex w-full ">
           <div class="hidden xl:block pb-4" aria-labelledby="sidebar-label">
             <div class="">
-              <div className="bg-white rounded-lg shadow shadow-gray-400 py-2 px-2 w-[280px] mt-4 ">
+              <div className="bg-white rounded-lg shadow shadow-gray-400 py-2 px-2 w-[280px] mt-4">
                 <div className="">
                   <TrendingTopFive items={tags} limit={5} />
                 </div>
               </div>
-              {usingUser?.friendList?.filter(
-                (x) => x.status === 1 && x.type === "recieve"
-              )?.length > 0 && (
-                <div className="bg-white rounded-lg shadow shadow-gray-400 py-2 px-2 w-[280px] mt-4 ">
-                  <div className="">
-                    <RequestFriend
-                      items={usingUser?.friendList?.filter(
-                        (x) => x.status === 1 && x.type === "recieve"
-                      )}
-                      onCallback={async () =>
-                        await getProfile(user?.accessToken).then((data) =>
-                          setUsingUser(data)
-                        )
-                      }
-                    />
-                  </div>
-                </div>
-              )}
+              <div
+                className={`rounded-lg  shadow-gray-400 w-[280px]${
+                  requestFr?.length > 0 ? "shadow bg-white py-2 px-2 mt-4" : ""
+                }`}
+              >
+                <RequestFriend
+                  items={requestFr}
+                  onCallback={async () => {}}
+                  authors={authors}
+                  user={user}
+                />
+              </div>
               <div className="rounded-lg w-[280px] shadow shadow-gray-400">
                 <Newsletter isFixed={false} isLeft={true} />
               </div>
@@ -97,46 +105,45 @@ const HomePageContent = () => {
                 </div>
               </div>
               <div>
-                {usingUser?.friendList?.filter(
-                  (x) => x.status === 1 && x.type === "recieve"
-                )?.length > 0 && (
-                  <div className="mt-4 block xl:hidden">
-                    <div className="">
-                      <RequestFriend
-                        items={usingUser?.friendList?.filter(
-                          (x) => x.status === 1 && x.type === "recieve"
-                        )}
-                        onCallback={async () =>
-                          await getProfile(user?.accessToken).then((data) =>
-                            setUsingUser(data)
-                          )
-                        }
-                      />
-                    </div>
+                <div className="mt-4 block xl:hidden">
+                  <div className="">
+                    <RequestFriend
+                      items={requestFr}
+                      onCallback={async () => {}}
+                      authors={authors}
+                      user={user}
+                    />
                   </div>
-                )}
+                </div>
               </div>
               <div>
                 {
                   <Story
                     data={stories}
-                    onCallback={async () => {
-                      await getStoriesLoadMore({ limit: 100 }).then((data) => {
+                    user={user}
+                    usingUser={usingUser}
+                    onCallback={() => {
+                      getStoriesLoadMore({ limit: 100 }).then((data) => {
                         setStories(data);
                       });
                     }}
+                    myFollow={myFollow}
+                    myFriend={myFriend}
                   />
                 }
               </div>
               <FeedItems
                 setFeedData={setFeedData}
                 data={feedData}
-                onCallback={async () => {
-                  await getFeedsLoadMore({ limit: 100 }).then((result) =>
+                user={user}
+                usingUser={usingUser}
+                loading={loading}
+                authors={authors}
+                onCallback={() =>
+                  getFeedsLoadMore({ limit: 100 }).then((result) =>
                     setFeedData(result)
-                  );
-                  await getTags().then((result) => setTags(result));
-                }}
+                  )
+                }
               />
             </section>
           </div>

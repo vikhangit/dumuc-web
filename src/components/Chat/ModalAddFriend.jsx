@@ -32,25 +32,56 @@ export default function ModalAddFriend({
   onCallback,
   authors,
   onChooseUser,
+  user,
+  usingUser,
+  checkFriendType,
+  setFriendList,
 }) {
-  const [user] = useAuthState(auth);
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
-  const [usingUser, setUsingUser] = useState();
   const [name, setName] = useState("");
   const [valueSearch, setValueSearch] = useState("");
-  const [friendList, setFriendList] = useState([]);
   const [findAuthor, setFindAuthor] = useState([]);
-  const [memberList, setMemberList] = useState([]);
   const [loadingAdd, setLoadingAdd] = useState(-1);
   const [loadingFeedback, setLoadingFeedback] = useState(-1);
   const [loadingRemove, setLoadingRemove] = useState(-1);
+  const [typeArr, setTypeArr] = useState([]);
   useEffect(() => {
-    getProfile(user?.accessToken).then((dataCall) => {
-      setUsingUser(dataCall);
-      setFriendList(dataCall?.friendList?.filter((x) => x.status === 2));
-    });
-  }, [user]);
+    setTypeArr([]);
+    findAuthor
+      ?.filter((n) => n?.userId !== user?.uid)
+      ?.map((x) => {
+        const friendType = checkFriendType(x?.authorId);
+        if (typeArr?.find((a) => a.author === x?.authorId)) {
+          setTypeArr(typeArr);
+        } else {
+          if (friendType === 2) {
+            typeArr.push({
+              author: x?.authorId,
+              type: 2,
+            });
+            setTypeArr([...typeArr]);
+          } else if (friendType === 3) {
+            typeArr.push({
+              author: x?.authorId,
+              type: 3,
+            });
+            setTypeArr([...typeArr]);
+          } else if (friendType === 4) {
+            typeArr.push({
+              author: x?.authorId,
+              type: 3,
+            });
+            setTypeArr([...typeArr]);
+          } else {
+            typeArr.push({
+              author: x?.authorId,
+              type: 1,
+            });
+            setTypeArr([...typeArr]);
+          }
+        }
+      });
+  }, [findAuthor]);
 
   const searchField = (value) => {
     setValueSearch(value);
@@ -72,6 +103,7 @@ export default function ModalAddFriend({
       }
     }
   };
+
   return (
     <Modal
       visible={visible}
@@ -165,484 +197,195 @@ export default function ModalAddFriend({
 
                         {x?.userId !== user.uid && (
                           <div className="flex items-center gap-x-2 mt-2">
-                            {usingUser?.friendList?.length > 0 &&
-                              usingUser?.friendList?.map((item, index) => {
-                                if (
-                                  item?.type === "send" &&
-                                  item?.authorId === x?.authorId &&
-                                  item?.status === 1
-                                ) {
-                                  return loadingAdd === indexParent ? (
-                                    <button
-                                      key={index}
-                                      onClick={async () => {
-                                        message.warning(
-                                          "Thao tác đang được thực hiện."
-                                        );
-                                      }}
-                                      type="button"
-                                      class="flex items-center gap-x-1 px-2 py-1 text-xs font-medium text-center text-white bg-[#c80000] rounded-[4px] hover:brightness-110 focus:ring-4 focus:outline-none focus:ring-blue-300"
-                                    >
-                                      <Spinner className="w-4 h-4" />
-                                    </button>
-                                  ) : (
-                                    <button
-                                      key={index}
-                                      onClick={async () => {
-                                        setLoadingAdd(index);
-                                        await deleteAddFriend(
+                            {typeArr.find(
+                              (i) => i?.author === x?.authorId && i?.type === 1
+                            ) ? (
+                              <button
+                                onClick={() => {
+                                  sendRequestAddFriend(
+                                    {
+                                      authorId: x?.authorId,
+                                    },
+                                    user?.accessToken
+                                  );
+                                  receiveRequestAddFriend(
+                                    {
+                                      authorUserId: x?.userId,
+                                    },
+                                    user?.accessToken
+                                  );
+                                  const findIndex = typeArr.findIndex(
+                                    (ab) => ab?.author === x?.authorId
+                                  );
+                                  typeArr.splice(findIndex, 1);
+                                  setTypeArr([...typeArr]);
+                                  typeArr.push({
+                                    type: 3,
+                                    author: x?.authorId,
+                                  });
+                                  setTypeArr([...typeArr]);
+                                  message.success("Đã gữi yêu cầu kết bạn.");
+                                  setFriendList(usingUser?.friendList);
+                                }}
+                                type="button"
+                                class="flex items-center gap-x-1 px-2 py-1 text-xs font-medium text-center text-white bg-[#c80000] rounded-[4px] hover:brightness-110 focus:ring-4 focus:outline-none focus:ring-blue-300"
+                              >
+                                Kết bạn
+                              </button>
+                            ) : typeArr.find(
+                                (i) =>
+                                  i?.author === x?.authorId && i?.type === 2
+                              ) ? (
+                              <button
+                                type="button"
+                                class="flex items-center gap-x-1 px-2 py-1 text-xs font-medium text-center text-white bg-[#c80000] rounded-[4px] hover:brightness-110 focus:ring-4 focus:outline-none focus:ring-blue-300"
+                                onClick={() =>
+                                  router.push(
+                                    `/author/${x?.slug}/${x?.authorId}`
+                                  )
+                                }
+                              >
+                                Bạn bè
+                              </button>
+                            ) : typeArr.find(
+                                (i) =>
+                                  i?.author === x?.authorId && i?.type === 3
+                              ) ? (
+                              <button
+                                onClick={async () => {
+                                  deleteAddFriend(
+                                    {
+                                      authorId: x?.authorId,
+                                    },
+                                    user?.accessToken
+                                  );
+                                  deleteRecieveFriend(
+                                    {
+                                      authorUserId: x?.userId,
+                                    },
+                                    user?.accessToken
+                                  );
+                                  const findIndex = typeArr.findIndex(
+                                    (ab) => ab?.author === x?.authorId
+                                  );
+                                  typeArr.splice(findIndex, 1);
+                                  setTypeArr([...typeArr]);
+                                  typeArr.push({
+                                    type: 1,
+                                    author: x?.authorId,
+                                  });
+                                  setTypeArr([...typeArr]);
+                                  message.success("Đã hủy kết bạn.");
+                                  setFriendList(usingUser?.friendList);
+                                }}
+                                type="button"
+                                class="flex items-center gap-x-1 px-2 py-1 text-xs font-medium text-center text-white bg-[#c80000] rounded-[4px] hover:brightness-110 focus:ring-4 focus:outline-none focus:ring-blue-300"
+                              >
+                                <>Hủy lời mời</>
+                              </button>
+                            ) : typeArr.find(
+                                (i) =>
+                                  i?.author === x?.authorId && i?.type === 4
+                              ) ? (
+                              <button
+                                type="button"
+                                class="flex items-center group gap-x-1 px-2 py-1 text-xs font-medium text-center text-white bg-[#c80000] rounded-[4px] hover:brightness-110 focus:ring-4 focus:outline-none focus:ring-blue-300"
+                              >
+                                {loadingAdd === indexParent ? (
+                                  <Spinner className="w-4 h-4" />
+                                ) : (
+                                  <>Phản hồi</>
+                                )}
+                                <div className="absolute hidden group-hover:flex flex-col justify-start items-start top-full left-0 bg-white shadow-sm shadow-gray-500 text-[10px] sm:text-xs font-medium w-[120px] rounded p-1">
+                                  <Link
+                                    href={``}
+                                    onClick={async (e) => {
+                                      e.preventDefault();
+                                      deleteAddFriend(
+                                        {
+                                          authorId: x?.authorId,
+                                        },
+                                        user?.accessToken
+                                      ).then(async (result) => {
+                                        //update recoil
+                                        deleteRecieveFriend(
                                           {
-                                            authorId: x?.authorId,
+                                            authorUserId: x?.userId,
                                           },
                                           user?.accessToken
-                                        ).then(async (result) => {
-                                          //update recoil
-                                          await deleteRecieveFriend(
-                                            {
-                                              authorUserId: x?.userId,
-                                            },
-                                            user?.accessToken
-                                          )
-                                            .then((e) => console.log(e))
-                                            .catch((e) => console.log(e));
-                                          const dataCall = await getProfile(
-                                            user?.accessToken
-                                          );
-                                          setUsingUser(dataCall);
-                                          message.success("Đã hủy kết bạn.");
-                                          setLoadingAdd(-1);
-                                        });
-                                      }}
-                                      type="button"
-                                      class="flex items-center gap-x-1 px-2 py-1 text-xs font-medium text-center text-white bg-[#c80000] rounded-[4px] hover:brightness-110 focus:ring-4 focus:outline-none focus:ring-blue-300"
-                                    >
-                                      <>Hủy lời mời</>
-                                    </button>
-                                  );
-                                } else if (
-                                  item?.type === "recieve" &&
-                                  item?.authorId === x?.authorId &&
-                                  item?.status === 1
-                                ) {
-                                  return (
-                                    <button
-                                      key={index}
-                                      type="button"
-                                      class="flex items-center group gap-x-1 px-2 py-1 text-xs font-medium text-center text-white bg-[#c80000] rounded-[4px] hover:brightness-110 focus:ring-4 focus:outline-none focus:ring-blue-300"
-                                    >
-                                      {loadingAdd === indexParent ? (
-                                        <Spinner className="w-4 h-4" />
-                                      ) : (
-                                        <>Phản hồi</>
-                                      )}
-                                      <div className="absolute hidden group-hover:flex flex-col justify-start items-start top-full left-0 bg-white shadow-sm shadow-gray-500 text-[10px] sm:text-xs font-medium w-[120px] rounded p-1">
-                                        {loadingFeedback === indexParent ? (
-                                          <Link
-                                            href={``}
-                                            onClick={(e) => {
-                                              e.preventDefault();
-                                              message.warning(
-                                                "Thao tác đang được thực hiện"
-                                              );
-                                            }}
-                                            className="hover:bg-[#c80000] text-black hover:text-white w-full rounded px-1.5 py-0.5 text-left"
-                                          >
-                                            <Spinner className="w-4 h-4" />
-                                          </Link>
-                                        ) : (
-                                          <Link
-                                            href={``}
-                                            onClick={async (e) => {
-                                              e.preventDefault();
-                                              setLoadingAdd(indexParent);
-                                              setLoadingFeedback(indexParent);
-                                              await deleteAddFriend(
-                                                {
-                                                  authorId: x?.authorId,
-                                                },
-                                                user?.accessToken
-                                              ).then(async (result) => {
-                                                //update recoil
-                                                await deleteRecieveFriend(
-                                                  {
-                                                    authorUserId: x?.userId,
-                                                  },
-                                                  user?.accessToken
-                                                )
-                                                  .then((e) => console.log(e))
-                                                  .catch((e) => console.log(e));
-                                              });
-                                              await sendRequestAddFriend(
-                                                {
-                                                  authorId: x?.authorId,
-                                                  status: 2,
-                                                },
-                                                user?.accessToken
-                                              ).then(async (result) => {
-                                                await receiveRequestAddFriend(
-                                                  {
-                                                    authorUserId: x?.userId,
-                                                    status: 2,
-                                                  },
-                                                  user?.accessToken
-                                                )
-                                                  .then((e) => console.log(e))
-                                                  .catch((e) => console.log(e));
-                                              });
-
-                                              await getProfile(
-                                                user?.accessToken
-                                              ).then((dataCall) =>
-                                                setUsingUser(dataCall)
-                                              );
-
-                                              setLoadingAdd(-1);
-                                              setLoadingFeedback(-1);
-                                            }}
-                                            className="hover:bg-[#c80000] text-black hover:text-white w-full rounded px-1.5 py-0.5 text-left"
-                                          >
-                                            Xác nhận
-                                          </Link>
-                                        )}
-                                        {loadingRemove === indexParent ? (
-                                          <Link
-                                            href={``}
-                                            onClick={async (e) => {
-                                              e.preventDefault();
-                                              message.warning(
-                                                "Thao tác đang được thực hiện"
-                                              );
-                                            }}
-                                            className="hover:bg-[#c80000] text-black hover:text-white w-full rounded px-1.5 py-0.5 text-left"
-                                          >
-                                            <Spinner className="h-4 w-4" />{" "}
-                                          </Link>
-                                        ) : (
-                                          <Link
-                                            href={``}
-                                            onClick={async (e) => {
-                                              e.preventDefault();
-                                              setLoadingAdd(indexParent);
-                                              setLoadingRemove(indexParent);
-                                              await deleteAddFriend(
-                                                {
-                                                  authorId: x?.authorId,
-                                                },
-                                                user?.accessToken
-                                              ).then(async (result) => {
-                                                //update recoil
-                                                await deleteRecieveFriend(
-                                                  {
-                                                    authorUserId: x?.userId,
-                                                  },
-                                                  user?.accessToken
-                                                )
-                                                  .then((e) => console.log(e))
-                                                  .catch((e) => console.log(e));
-                                                const dataCall =
-                                                  await getProfile(
-                                                    user?.accessToken
-                                                  );
-                                                setUsingUser(dataCall);
-                                                message.success(
-                                                  "Đã xóa yêu cầu kết bạn"
-                                                );
-                                                setLoadingAdd(-1);
-                                                setLoadingRemove(-1);
-                                              });
-                                            }}
-                                            className="hover:bg-[#c80000] text-black hover:text-white w-full rounded px-1.5 py-0.5 text-left"
-                                          >
-                                            Xóa lời mời
-                                          </Link>
-                                        )}
-                                      </div>
-                                    </button>
-                                  );
-                                } else if (
-                                  item?.authorId === x?.authorId &&
-                                  item?.status === 2
-                                ) {
-                                  return (
-                                    <button
-                                      key={index}
-                                      type="button"
-                                      class="flex items-center group gap-x-1 px-2 py-1 text-xs font-medium text-center text-white bg-[#c80000] rounded-[4px] hover:brightness-110 focus:ring-4 focus:outline-none focus:ring-blue-300"
-                                    >
-                                      {loadingAdd === indexParent ? (
-                                        <Spinner className="w-4 h-4" />
-                                      ) : (
-                                        <>Bạn bè</>
-                                      )}
-                                      <div className="absolute hidden group-hover:flex flex-col justify-start items-start top-full left-0 bg-white shadow-sm shadow-gray-500 text-[10px] sm:text-xs font-medium w-[120px] rounded p-1">
-                                        {usingUser?.follows?.find(
-                                          (x) => x.authorId === x?.authorId
-                                        ) ? (
-                                          loadingFeedback === indexParent ? (
-                                            <Link
-                                              href={``}
-                                              onClick={async (e) => {
-                                                e.preventDefault();
-                                                message.success(
-                                                  "Thao tác đang được thực hiện"
-                                                );
-                                              }}
-                                              className="hover:bg-[#c80000] text-black hover:text-white w-full rounded px-1.5 py-0.5 text-left"
-                                            >
-                                              <Spinner className="w-4 h-4" />
-                                            </Link>
-                                          ) : (
-                                            <Link
-                                              href={``}
-                                              onClick={async (e) => {
-                                                e.preventDefault();
-                                                setLoadingAdd(indexParent);
-                                                setLoadingFeedback(indexParent);
-                                                await deleteUserFollow(
-                                                  {
-                                                    authorId: x?.authorId,
-                                                  },
-                                                  user?.accessToken
-                                                ).then(async (result) => {
-                                                  //update recoil
-                                                  await deleteUserInFollowerList(
-                                                    {
-                                                      authorUserId: x?.userId,
-                                                    },
-                                                    user?.accessToken
-                                                  )
-                                                    .then((e) => console.log(e))
-                                                    .catch((e) =>
-                                                      console.log(e)
-                                                    );
-                                                  message.success(
-                                                    "Hủy theo dõi thành công"
-                                                  );
-                                                });
-                                                await getProfile(
-                                                  user?.accessToken
-                                                ).then((dataCall) =>
-                                                  setUsingUser(dataCall)
-                                                );
-
-                                                setLoadingAdd(-1);
-                                                setLoadingFeedback(-1);
-                                              }}
-                                              className="hover:bg-[#c80000] text-black hover:text-white w-full rounded px-1.5 py-0.5 text-left"
-                                            >
-                                              Hủy theo dõi
-                                            </Link>
-                                          )
-                                        ) : loadingFeedback === indexParent ? (
-                                          <Link
-                                            href={``}
-                                            onClick={async (e) => {
-                                              e.preventDefault();
-                                              message.success(
-                                                "Thao tác đang được thực hiện"
-                                              );
-                                            }}
-                                            className="hover:bg-[#c80000] text-black hover:text-white w-full rounded px-1.5 py-0.5 text-left"
-                                          >
-                                            <Spinner className="w-4 h-4" />
-                                          </Link>
-                                        ) : (
-                                          <Link
-                                            href={``}
-                                            onClick={async (e) => {
-                                              e.preventDefault();
-                                              setLoadingAdd(indexParent);
-                                              setLoadingFeedback(indexParent);
-                                              await createUserFollow(
-                                                {
-                                                  authorId: x?.authorId,
-                                                },
-                                                user?.accessToken
-                                              ).then(async (result) => {
-                                                await createUserToFollowerList(
-                                                  {
-                                                    authorUserId: x?.userId,
-                                                  },
-                                                  user?.accessToken
-                                                )
-                                                  .then((e) => console.log(e))
-                                                  .catch((e) => console.log(e));
-                                              });
-                                              await getProfile(
-                                                user?.accessToken
-                                              ).then((dataCall) =>
-                                                setUsingUser(dataCall)
-                                              );
-
-                                              message.success(
-                                                "Theo dõi thành công"
-                                              );
-                                              setLoadingAdd(-1);
-                                              setLoadingFeedback(-1);
-                                            }}
-                                            className="hover:bg-[#c80000] text-black hover:text-white w-full rounded px-1.5 py-0.5 text-left"
-                                          >
-                                            Theo dõi
-                                          </Link>
-                                        )}
-                                        {loadingRemove === indexParent ? (
-                                          <Link
-                                            href={``}
-                                            onClick={(e) => {
-                                              e.preventDefault();
-                                              message.success(
-                                                "Thao tác đang được thực hiện"
-                                              );
-                                            }}
-                                            className="hover:bg-[#c80000] text-black hover:text-white w-full rounded px-1.5 py-0.5 text-left"
-                                          >
-                                            <Spinner className="w-4 h-4" />{" "}
-                                          </Link>
-                                        ) : (
-                                          <Link
-                                            href={``}
-                                            onClick={async (e) => {
-                                              e.preventDefault();
-                                              setLoadingAdd(indexParent);
-                                              setLoadingRemove(indexParent);
-                                              await deleteAddFriend(
-                                                {
-                                                  authorId: x?.authorId,
-                                                },
-                                                user?.accessToken
-                                              ).then(async (result) => {
-                                                //update recoil
-                                                await deleteRecieveFriend(
-                                                  {
-                                                    authorUserId: x?.userId,
-                                                  },
-                                                  user?.accessToken
-                                                )
-                                                  .then((e) => console.log(e))
-                                                  .catch((e) => console.log(e));
-                                              });
-
-                                              await getProfile(
-                                                user?.accessToken
-                                              ).then((dataCall) =>
-                                                setUsingUser(dataCall)
-                                              );
-
-                                              message.success("Đã xóa bạn");
-                                              setLoadingAdd(-1);
-                                              setLoadingRemove(-1);
-                                            }}
-                                            className="hover:bg-[#c80000] text-black hover:text-white w-full rounded px-1.5 py-0.5 text-left"
-                                          >
-                                            Xóa bạn
-                                          </Link>
-                                        )}
-                                      </div>
-                                    </button>
-                                  );
-                                }
-                              })}
-                            {usingUser?.friendList?.length > 0 &&
-                              !usingUser?.friendList?.find(
-                                (y) => y?.authorId === x?.authorId
-                              ) &&
-                              (loadingAdd === indexParent ? (
-                                <button
-                                  onClick={async () => {
-                                    message.warning("Thao tác đang thực hiện");
-                                  }}
-                                  type="button"
-                                  class="flex items-center gap-x-1 px-2 py-1 text-xs font-medium text-center text-white bg-[#c80000] rounded-[4px] hover:brightness-110 focus:ring-4 focus:outline-none focus:ring-blue-300"
-                                >
-                                  {<Spinner className="w-4 h-4" />}
-                                </button>
-                              ) : (
-                                <button
-                                  onClick={async () => {
-                                    setLoadingAdd(indexParent);
-                                    await sendRequestAddFriend(
-                                      {
-                                        authorId: x?.authorId,
-                                      },
-                                      user?.accessToken
-                                    ).then(async (result) => {
-                                      await receiveRequestAddFriend(
+                                        )
+                                          .then((e) => console.log(e))
+                                          .catch((e) => console.log(e));
+                                      });
+                                      sendRequestAddFriend(
+                                        {
+                                          authorId: x?.authorId,
+                                          status: 2,
+                                        },
+                                        user?.accessToken
+                                      );
+                                      receiveRequestAddFriend(
+                                        {
+                                          authorUserId: x?.userId,
+                                          status: 2,
+                                        },
+                                        user?.accessToken
+                                      );
+                                      const findIndex = typeArr.findIndex(
+                                        (ab) => ab?.author === x?.authorId
+                                      );
+                                      typeArr.splice(findIndex, 1);
+                                      setTypeArr([...typeArr]);
+                                      typeArr.push({
+                                        type: 2,
+                                        author: x?.authorId,
+                                      });
+                                      setTypeArr([...typeArr]);
+                                      message.success("Bạn đã đồng ý kết bạn");
+                                      setFriendList(usingUser?.friendList);
+                                    }}
+                                    className="hover:bg-[#c80000] text-black hover:text-white w-full rounded px-1.5 py-0.5 text-left"
+                                  >
+                                    Xác nhận
+                                  </Link>
+                                  <Link
+                                    href={``}
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      deleteAddFriend(
+                                        {
+                                          authorId: x?.authorId,
+                                        },
+                                        user?.accessToken
+                                      );
+                                      deleteRecieveFriend(
                                         {
                                           authorUserId: x?.userId,
                                         },
                                         user?.accessToken
-                                      )
-                                        .then((e) => console.log(e))
-                                        .catch((e) => console.log(e));
-                                    });
-
-                                    await getProfile(user?.accessToken).then(
-                                      (dataCall) => setUsingUser(dataCall)
-                                    );
-
-                                    setLoadingAdd(-1);
-                                    message.success("Đã gữi yêu cầu kết bạn.");
-                                  }}
-                                  type="button"
-                                  class="flex items-center gap-x-1 px-2 py-1 text-xs font-medium text-center text-white bg-[#c80000] rounded-[4px] hover:brightness-110 focus:ring-4 focus:outline-none focus:ring-blue-300"
-                                >
-                                  {loadingAdd === indexParent ? (
-                                    <Spinner className="w-4 h-4" />
-                                  ) : (
-                                    <>Kết bạn</>
-                                  )}
-                                </button>
-                              ))}
-                            {usingUser?.friendList?.length === 0 &&
-                              (loadingAdd === indexParent ? (
-                                <button
-                                  onClick={async () => {
-                                    message.warning(
-                                      "Thao tác đang được thực hiện"
-                                    );
-                                  }}
-                                  type="button"
-                                  class="flex items-center gap-x-1 px-2 py-1 text-xs font-medium text-center text-white bg-[#c80000] rounded-[4px] hover:brightness-110 focus:ring-4 focus:outline-none focus:ring-blue-300"
-                                >
-                                  {<Spinner className="w-4 h-4" />}
-                                </button>
-                              ) : (
-                                <button
-                                  onClick={async () => {
-                                    setLoadingAdd(indexParent);
-                                    await sendRequestAddFriend(
-                                      {
-                                        authorId: x?.authorId,
-                                      },
-                                      user?.accessToken
-                                    ).then(async (result) => {
-                                      await receiveRequestAddFriend(
-                                        {
-                                          authorUserId: x?.userId,
-                                        },
-                                        user?.accessToken
-                                      )
-                                        .then((e) => console.log(e))
-                                        .catch((e) => console.log(e));
-                                    });
-
-                                    await getProfile(user?.accessToken).then(
-                                      (dataCall) => setUsingUser(dataCall)
-                                    );
-
-                                    setLoadingAdd(-1);
-                                    message.success("Đã gữi yêu cầu kết bạn.");
-                                  }}
-                                  type="button"
-                                  class="flex items-center gap-x-1 px-2 py-1 text-xs font-medium text-center text-white bg-[#c80000] rounded-[4px] hover:brightness-110 focus:ring-4 focus:outline-none focus:ring-blue-300"
-                                >
-                                  {loadingAdd === indexParent ? (
-                                    <Spinner className="w-4 h-4" />
-                                  ) : (
-                                    <>Kết bạn</>
-                                  )}
-                                </button>
-                              ))}
+                                      );
+                                      const findIndex = typeArr.findIndex(
+                                        (ab) => ab?.author === x?.authorId
+                                      );
+                                      typeArr.splice(findIndex, 1);
+                                      setTypeArr([...typeArr]);
+                                      typeArr.push({
+                                        type: 1,
+                                        author: x?.authorId,
+                                      });
+                                      setTypeArr([...typeArr]);
+                                      message.success("Đã xóa yêu cầu kết bạn");
+                                      setFriendList(usingUser?.friendList);
+                                    }}
+                                    className="hover:bg-[#c80000] text-black hover:text-white w-full rounded px-1.5 py-0.5 text-left"
+                                  >
+                                    Xóa lời mời
+                                  </Link>
+                                </div>
+                              </button>
+                            ) : (
+                              ""
+                            )}
                           </div>
                         )}
                       </div>
