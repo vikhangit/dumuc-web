@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import CategoryItem from "./CategoryItem";
-export default function CategoryList({ categories, parent }) {
+export default function CategoryList({ categories, parent, user }) {
   return (
     <div>
       {parent?.map((item) => {
@@ -17,7 +17,7 @@ export default function CategoryList({ categories, parent }) {
               {item?.name.toUpperCase()}
             </div>
             {child?.map((sub) => {
-              return <CategoryItem key={sub} sub={sub} />;
+              return <CategoryItem key={sub} sub={sub} user={user} />;
             })}
           </div>
         );

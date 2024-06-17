@@ -10,6 +10,7 @@ import { message } from "antd";
 import { MdFormatQuote } from "react-icons/md";
 import { useRouter } from "next/navigation";
 import { getPost, updateComment } from "@apis/posts";
+import ModalImageZoom from "@components/ModalImageZoom";
 
 export default function SingleComment({
   item,
@@ -18,8 +19,8 @@ export default function SingleComment({
   qoute,
   setQoute,
   onCallback,
+  user,
 }) {
-  const [user] = useAuthState(auth);
   const [showReplyBox, setShowReplyBox] = useState(false);
   const [editItem, setEditItem] = useState();
   const router = useRouter();
@@ -36,6 +37,9 @@ export default function SingleComment({
       .replace("year", "năm");
   };
   const url_return = `${process.env.NEXT_PUBLIC_HOMEPAGE_URL}/forum/post/${post.slug}/${post.postId}`;
+  const [showImage, setShowImage] = useState(false);
+  const [imageList, setImageList] = useState([]);
+  const [indexImage, setIndexImage] = useState(0);
   return (
     <div
       className="flex flex-row w-full mt-2"
@@ -72,6 +76,7 @@ export default function SingleComment({
               setEditItem();
               onCallback();
             }}
+            user={user}
           />
         </div>
       ) : (
@@ -127,7 +132,11 @@ export default function SingleComment({
                     return (
                       <div key={indexC} className={`rounded-md w-full h-full`}>
                         <a
-                          // onClick={() => handleShowImage(item)}
+                          onClick={() => {
+                            setShowImage(true);
+                            setImageList(item?.photos);
+                            setIndexImage(indexC);
+                          }}
                           className={`w-full relative cursor-pointer h-full`}
                         >
                           <Image
@@ -270,6 +279,12 @@ export default function SingleComment({
           </div>
         </div>
       )}
+      <ModalImageZoom
+        openImage={showImage}
+        setOpenImage={setShowImage}
+        imageList={imageList}
+        index={indexImage}
+      />
     </div>
   );
 }

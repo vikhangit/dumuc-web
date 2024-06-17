@@ -7,8 +7,7 @@ import ArticeForumChild from "./ArticeForumChild";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@utils/firebase";
 
-const ArticleForumItems = ({ data, title, authorId, category, tagId }) => {
-  const [user] = useAuthState(auth);
+const ArticleForumItems = ({ data, user, authorId, category, tagId }) => {
   const [posts, setPosts] = useState(data?.items);
   const [hasLoadMore, setHasLoadMore] = useState(true);
   useEffect(() => {

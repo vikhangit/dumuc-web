@@ -1,23 +1,27 @@
 "use client";
-import React, { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import {
   createUserLike,
   deleteUserLike,
   getProfile,
   updateProfile,
 } from "@apis/users";
-import { useAuthState } from "react-firebase-hooks/auth";
-import { auth } from "@utils/firebase";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { useState } from "react";
 
-const ArticleLike = ({ id, currentUrl, count = 0, onCallback }) => {
+const ArticleLike = ({ item, currentUrl, user, usingUser }) => {
   const router = useRouter();
-  const [user] = useAuthState(auth);
-  const [usingUser, setUsingUser] = useState();
+  const [liked, setLiked] = useState(false);
+  const [likesCount, setLikesCount] = useState(item?.likesCount || 0);
   useEffect(() => {
-    getProfile(user?.accessToken).then((dataCall) => setUsingUser(dataCall));
-  }, [user]);
-
+    setLikesCount(item?.likesCount);
+    const find = item?.likesUser?.find((x) => x?.userId === user?.uid);
+    if (find) {
+      setLiked(true);
+    } else {
+      setLiked(false);
+    }
+  }, [item, user]);
   const icon = () => (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -45,43 +49,31 @@ const ArticleLike = ({ id, currentUrl, count = 0, onCallback }) => {
       <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" />
     </svg>
   );
-
-  //has login
-  if (user?.email) {
-    if (usingUser?.likes?.map((x) => x?.likeValue)?.includes(id)) {
+  console.log("Lqwjoieoasdsad", likesCount);
+  if (user) {
+    if (liked) {
       return (
         <button
-          key={id}
           type="button"
           onClick={() => {
             deleteUserLike(
               {
                 likeType: "post",
-                likeValue: id,
+                likeValue: item?.postId,
               },
               user?.accessToken
-            ).then(async () => {
-              //update recoil
-              updateProfile(
-                {
-                  ...usingUser,
-                  likes: usingUser?.likes.filter(
-                    (x) => x.likeValue !== id && x.likeType === "post"
-                  ),
-                },
-                user?.accessToken
+            ).then(() => {
+              setLiked(false);
+              setLikesCount(
+                likesCount ? (likesCount > 0 ? likesCount - 1 : 0) : 0
               );
-              getProfile(user?.accessToken).then((dataCall) =>
-                setUsingUser(dataCall)
-              );
-              onCallback();
             });
           }}
           tooltip="Bỏ like"
         >
           <div className="flex items-center text-center gap-1 text-center text-[#c80000] article-tool font-semibold sm:font-normal text-xs sm:text-sm">
             {iconActive()}
-            <span className="text-[#c80000]">{count} Lượt thích</span>
+            <span className="text-[#c80000]">{likesCount} lượt thích</span>
           </div>
         </button>
       );
@@ -93,44 +85,20 @@ const ArticleLike = ({ id, currentUrl, count = 0, onCallback }) => {
             createUserLike(
               {
                 likeType: "post",
-                likeValue: id,
+                likeValue: item?.postId,
                 user: usingUser,
               },
               user?.accessToken
-            ).then(async () => {
-              //update recoil
-              updateProfile(
-                {
-                  ...usingUser,
-                  likes:
-                    usingUser?.likes?.length > 0
-                      ? [
-                          ...usingUser?.likes,
-                          {
-                            likeType: "post",
-                            likeValue: id,
-                          },
-                        ]
-                      : [
-                          {
-                            likeType: "post",
-                            likeValue: id,
-                          },
-                        ],
-                },
-                user?.accessToken
-              );
-              getProfile(user?.accessToken).then((dataCall) =>
-                setUsingUser(dataCall)
-              );
-              onCallback();
+            ).then(() => {
+              setLiked(true);
+              setLikesCount(likesCount + 1);
             });
           }}
           tooltip="Like"
         >
           <div className="flex items-center text-center gap-1 text-center font-semibold sm:font-normal text-xs sm:text-sm article-tool">
             {icon()}
-            <span className="">{count} Lượt thích</span>
+            <span className="">{likesCount} lượt thích</span>
           </div>
         </button>
       );
@@ -146,7 +114,7 @@ const ArticleLike = ({ id, currentUrl, count = 0, onCallback }) => {
       >
         <div className="flex items-center text-center gap-1 text-center font-semibold sm:font-normal text-xs sm:text-sm article-tool">
           {icon()}
-          <span className="">{count} Lượt thích</span>
+          <span className="">{likesCount} lượt thích</span>
         </div>
       </button>
     );

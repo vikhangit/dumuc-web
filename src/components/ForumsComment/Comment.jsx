@@ -8,6 +8,7 @@ export default function Comment({
   qoute,
   setQoute,
   onCallback,
+  user,
 }) {
   const [showReply, setShowReply] = useState(false);
   return (
@@ -21,6 +22,7 @@ export default function Comment({
         showReply={showReply}
         setShowReply={setShowReply}
         onCallback={onCallback}
+        user={user}
       />
       {comment.children &&
         comment.children.length > 0 &&

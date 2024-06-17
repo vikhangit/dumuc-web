@@ -17,7 +17,7 @@ export default function CommentForm({
   parentId,
   post,
   replyToName,
-  setComments,
+  user,
   showReplyBox,
   setShowReplyBox,
   qoute,
@@ -27,14 +27,9 @@ export default function CommentForm({
   onCallback,
   completed,
 }) {
-  const [user] = useAuthState(auth);
   const router = useRouter();
   const [photos, setPhotos] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [usingUser, setUsingUser] = useState();
-  useEffect(() => {
-    getProfile(user?.accessToken).then((res) => setUsingUser(res));
-  }, [user]);
 
   const [body, setBody] = useState("");
   const [loadingImage, setLoadingImage] = useState(false);
@@ -218,18 +213,13 @@ export default function CommentForm({
                         },
                         user?.accessToken
                       ).then((result) => {
-                        console.log("Result", result);
+                        completed();
                         setLoading(false);
                         message.success("Cập nhật luận thành công");
                         setBody("");
                         setPhotos([]);
                         setQoute();
                         setFocusComment(false);
-                        getPost({
-                          postId: post?.postId,
-                        }).then((results) => {
-                          completed();
-                        });
                       });
                     } else {
                       createComment(
@@ -243,18 +233,14 @@ export default function CommentForm({
                         },
                         user?.accessToken
                       ).then((result) => {
+                        setShowReplyBox && setShowReplyBox(false);
+                        onCallback();
                         setLoading(false);
                         message.success("Đăng bình luận thành công");
                         setBody("");
                         setPhotos([]);
                         setQoute();
                         setFocusComment(false);
-                        getPost({
-                          postId: post?.postId,
-                        }).then((results) => {
-                          setShowReplyBox && setShowReplyBox(false);
-                          onCallback();
-                        });
                       });
                     }
                   }

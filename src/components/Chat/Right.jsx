@@ -152,6 +152,7 @@ export default function ChatRight({
                     createdAt: serverTimestamp(),
                     formAuthor: myAuthor,
                     recall: false,
+                    read: false,
                   }
                 );
               } else {
@@ -168,6 +169,7 @@ export default function ChatRight({
                       createdAt: serverTimestamp(),
                       formAuthor: myAuthor,
                       recall: false,
+                      read: false,
                     }
                   );
                   router.push(`/chat?chatId=${data.id}`);
@@ -175,7 +177,6 @@ export default function ChatRight({
               }
               setNewMessage("");
               setPhotos([]);
-              setUserRecieved();
               scroll.current?.scrollIntoView({ behavior: "smooth" });
             }
             setShowWating(false);
@@ -220,6 +221,8 @@ export default function ChatRight({
                       files: [x],
                       createdAt: serverTimestamp(),
                       formAuthor: myAuthor,
+                      recall: false,
+                      read: false,
                     }
                   );
                 });
@@ -237,6 +240,8 @@ export default function ChatRight({
                         files: [x],
                         createdAt: serverTimestamp(),
                         formAuthor: myAuthor,
+                        recall: false,
+                        read: false,
                       }
                     );
                     router.push(`/chat?chatId=${data.id}`);
@@ -244,7 +249,6 @@ export default function ChatRight({
                 });
               }
               setNewMessage("");
-              setUserRecieved();
               scroll.current?.scrollIntoView({ behavior: "smooth" });
             }
             setShowWating(false);
@@ -1519,6 +1523,7 @@ export default function ChatRight({
                             createdAt: serverTimestamp(),
                             formAuthor: myAuthor,
                             recall: false,
+                            read: false,
                             reply: chooseQuote || null,
                           }
                         );
@@ -1542,6 +1547,7 @@ export default function ChatRight({
                               createdAt: serverTimestamp(),
                               formAuthor: myAuthor,
                               recall: false,
+                              read: false,
                               reply: chooseQuote || null,
                             }
                           );
@@ -1551,7 +1557,6 @@ export default function ChatRight({
                       }
                       setNewMessage("");
                       setPhotos([]);
-                      setUserRecieved();
                       scroll.current?.scrollIntoView({ behavior: "smooth" });
                     }}
                     className={`text-[#0084ff] w-fit ${

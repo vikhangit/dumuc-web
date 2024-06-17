@@ -11,7 +11,14 @@ import { auth, db } from "@utils/firebase";
 import { getProfile } from "@apis/users";
 import moment from "moment";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  onSnapshot,
+  orderBy,
+  query,
+  updateDoc,
+} from "firebase/firestore";
 import ModalAddFriend from "./ModalAddFriend";
 export default function ChatLeft({
   setUserRecieved,
@@ -73,6 +80,25 @@ export default function ChatLeft({
       const author = authors?.find(
         (item) => item?.authorId === userRecieveds?.authorId
       );
+      const newMessage = chatDetail?.messages
+        ?.filter(
+          (ele, ind) =>
+            ind ===
+            chatDetail?.messages?.findIndex((elem) => elem.id === ele.id)
+        )
+        ?.filter((x) => x?.formAuthor?.userId !== user?.uid && !x?.read);
+      newMessage?.map(async (x) => {
+        const washingtonRef = doc(
+          db,
+          "chat-rooms",
+          chatDetail?.id,
+          "messages",
+          x?.id
+        );
+        await updateDoc(washingtonRef, {
+          read: true,
+        });
+      });
       setUserRecieved(author);
     } else {
       setUserRecieved();
@@ -136,6 +162,7 @@ export default function ChatLeft({
       router.push(`/chat?chatId=${findChat?.id}`);
     }
   };
+
   return (
     <div
       className={`h-full ${
@@ -260,6 +287,15 @@ export default function ChatLeft({
           )
         ) : messages?.length > 0 ? (
           messages?.map((item, index) => {
+            console.log(item?.messages[item?.messages.length - 1]?.text);
+            const newMessage = item?.messages
+              ?.filter(
+                (ele, ind) =>
+                  ind ===
+                  item?.messages?.findIndex((elem) => elem.id === ele.id)
+              )
+              ?.filter((x) => x?.formAuthor?.userId !== user?.uid && !x?.read);
+            console.log("Lefft", newMessage);
             return item?.member?.find((x) => x?.userId === user?.uid)
               ? item?.member?.map((itemChild, indexChild) => {
                   const author = authors?.find(
@@ -271,8 +307,7 @@ export default function ChatLeft({
                         key={indexChild}
                         onClick={() => {
                           setMobile(true);
-                          const type = checkFriendType(author?.authorId);
-                          setTypeFriend(type);
+
                           router.push(`/chat?chatId=${item.id}`);
                         }}
                         className={`${
@@ -319,74 +354,85 @@ export default function ChatLeft({
                               </span>
                             )}
                           </div>
-                          {search.get("chatId") === item?.id &&
-                          activeMessage?.length > 0 ? (
-                            <p className="text-[13px] text-gray-600 mt-2 line-clamp-1">
-                              {activeMessage[activeMessage?.length - 1]
-                                ?.recall ? (
-                                <span className="italic">
-                                  Tin nhắn đã thu hồi
-                                </span>
-                              ) : activeMessage[activeMessage?.length - 1]
-                                  ?.files?.length > 0 ? (
-                                `[File] ${
-                                  activeMessage[activeMessage?.length - 1]
-                                    ?.files[
+                          <div className="flex justify-between mt-2">
+                            {search.get("chatId") === item?.id &&
+                            activeMessage?.length > 0 ? (
+                              <p className="text-[13px] text-gray-600 line-clamp-1">
+                                {activeMessage[activeMessage?.length - 1]
+                                  ?.recall ? (
+                                  <span className="italic">
+                                    Tin nhắn đã thu hồi
+                                  </span>
+                                ) : activeMessage[activeMessage?.length - 1]
+                                    ?.files?.length > 0 ? (
+                                  `[File] ${
                                     activeMessage[activeMessage?.length - 1]
-                                      ?.files?.length - 1
-                                  ]?.name
-                                }`
-                              ) : activeMessage[activeMessage?.length - 1]
-                                  ?.photos?.length > 0 ? (
-                                "[Hình ảnh]"
-                              ) : activeMessage[activeMessage?.length - 1]?.text
-                                  ?.length > 0 ? (
-                                [
-                                  `${
-                                    activeMessage[activeMessage?.length - 1]
-                                      ?.text
-                                  }`,
-                                ]
-                              ) : (
-                                <span className="italic">
-                                  Chưa có tin nhắn mới
-                                </span>
-                              )}
-                            </p>
-                          ) : (
-                            <p className="text-[13px] text-gray-600 mt-2 line-clamp-1">
-                              {item?.messages[item?.messages.length - 1]
-                                ?.recall ? (
-                                <span className="italic">
-                                  Tin nhắn đã thu hồi
-                                </span>
-                              ) : item?.messages[item?.messages.length - 1]
-                                  ?.files?.length > 0 ? (
-                                `[File] ${
-                                  item?.messages[item?.messages.length - 1]
-                                    ?.files[
+                                      ?.files[
+                                      activeMessage[activeMessage?.length - 1]
+                                        ?.files?.length - 1
+                                    ]?.name
+                                  }`
+                                ) : activeMessage[activeMessage?.length - 1]
+                                    ?.photos?.length > 0 ? (
+                                  "[Hình ảnh]"
+                                ) : activeMessage[activeMessage?.length - 1]
+                                    ?.text?.length > 0 ? (
+                                  [
+                                    `${
+                                      activeMessage[activeMessage?.length - 1]
+                                        ?.text
+                                    }`,
+                                  ]
+                                ) : (
+                                  <span className="italic">
+                                    Chưa có tin nhắn mới
+                                  </span>
+                                )}
+                              </p>
+                            ) : (
+                              <p className="text-[13px] text-gray-600  line-clamp-1">
+                                {item?.messages[item?.messages.length - 1]
+                                  ?.recall ? (
+                                  <span className="italic">
+                                    Tin nhắn đã thu hồi
+                                  </span>
+                                ) : item?.messages[item?.messages.length - 1]
+                                    ?.files?.length > 0 ? (
+                                  `[File] ${
                                     item?.messages[item?.messages.length - 1]
-                                      ?.files?.length - 1
-                                  ]?.name
-                                }`
-                              ) : item?.messages[item?.messages.length - 1]
-                                  ?.photos?.length > 0 ? (
-                                "[Hình ảnh]"
-                              ) : item?.messages[item?.messages.length - 1]
-                                  ?.text?.length > 0 ? (
-                                [
-                                  `${
-                                    item?.messages[item?.messages.length - 1]
-                                      ?.text
-                                  }`,
-                                ]
-                              ) : (
-                                <span className="italic">
-                                  Chưa có tin nhắn mới
-                                </span>
-                              )}
-                            </p>
-                          )}
+                                      ?.files[
+                                      item?.messages[item?.messages.length - 1]
+                                        ?.files?.length - 1
+                                    ]?.name
+                                  }`
+                                ) : item?.messages[item?.messages.length - 1]
+                                    ?.photos?.length > 0 ? (
+                                  "[Hình ảnh]"
+                                ) : item?.messages[item?.messages.length - 1]
+                                    ?.text?.length > 0 ? (
+                                  [
+                                    `${
+                                      item?.messages[item?.messages.length - 1]
+                                        ?.text
+                                    }`,
+                                  ]
+                                ) : (
+                                  <span className="italic">
+                                    Chưa có tin nhắn mới
+                                  </span>
+                                )}
+                              </p>
+                            )}
+                            {
+                              <p>
+                                {newMessage?.length > 5
+                                  ? "5+"
+                                  : newMessage?.length > 0
+                                  ? newMessage?.length
+                                  : ""}
+                              </p>
+                            }
+                          </div>
                         </div>
                       </div>
                     )

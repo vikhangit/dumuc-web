@@ -51,17 +51,18 @@ const FeedLike = ({ item, setOpenLogin, user, usingUser }) => {
           key={item?.feedId}
           type="button"
           onClick={() => {
-            setLiked(false);
-            setLikesCount(
-              likesCount ? (likesCount > 0 ? likesCount - 1 : 0) : 0
-            );
             deleteUserLike(
               {
                 likeType: "feed",
                 likeValue: item?.feedId,
               },
               user?.accessToken
-            );
+            ).then(() => {
+              setLiked(false);
+              setLikesCount(
+                likesCount ? (likesCount > 0 ? likesCount - 1 : 0) : 0
+              );
+            });
           }}
           tooltip="Bỏ like"
         >
@@ -76,8 +77,6 @@ const FeedLike = ({ item, setOpenLogin, user, usingUser }) => {
         <button
           type="button"
           onClick={() => {
-            setLiked(true);
-            setLikesCount(likesCount + 1);
             createUserLike(
               {
                 likeType: "feed",
@@ -85,7 +84,10 @@ const FeedLike = ({ item, setOpenLogin, user, usingUser }) => {
                 user: usingUser,
               },
               user?.accessToken
-            );
+            ).then(() => {
+              setLiked(true);
+              setLikesCount(likesCount + 1);
+            });
           }}
           tooltip="Like"
         >
