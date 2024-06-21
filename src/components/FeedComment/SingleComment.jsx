@@ -39,14 +39,24 @@ export default function SingleComment({
 
   const time = () => {
     moment.locale("vi");
-    return moment(item.createdAt)
+    return moment(item?.createdAt)
       .fromNow()
-      .replace("ago", "")
+
+      .replace("seconds", "giây")
+      .replace("second", "giây")
+      .replace("minutes", "phút")
+      .replace("minute", "phút")
+      .replace("hours", "giờ")
+      .replace("hour", "giờ")
       .replace("days", "ngày")
       .replace("day", "ngày")
       .replace("a ", "1 ")
+      .replace("an ", "1 ")
       .replace("month", "tháng")
-      .replace("year", "năm");
+      .replace("year", "năm")
+      .replace("in", "")
+      .replace("ago", "")
+      .replace("few", "");
   };
   useEffect(() => {
     setFormHeight(formRef.current?.offsetHeight);
