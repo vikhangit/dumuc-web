@@ -1,14 +1,12 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Input, Tag, message } from 'antd';
-import { PlusOutlined } from '@ant-design/icons';
-import { TweenOneGroup } from 'rc-tween-one';
+import { Input, Tag, message } from "antd";
+import { PlusOutlined } from "@ant-design/icons";
+import { TweenOneGroup } from "rc-tween-one";
 
 import { uploadImage } from "apis/other";
-import {
-  createUserRanking,
-} from "@apis/users";
+import { createUserRanking } from "@apis/users";
 import {
   getCategories,
   createPostByUser,
@@ -17,7 +15,7 @@ import {
   getLabels,
 } from "@apis/posts";
 
-import {UnderlineInlineTool} from 'editorjs-inline-tool';
+import { UnderlineInlineTool } from "editorjs-inline-tool";
 
 import Header from "@components/Header";
 import BannerRight from "@components/BannerRight";
@@ -26,45 +24,47 @@ import axios from "axios";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@utils/firebase";
 import dynamic from "next/dynamic";
-const TabbarBottom = dynamic( () => {
-  return import( '@components/TabbarBottom' );
-}, { ssr: false } );
+const TabbarBottom = dynamic(
+  () => {
+    return import("@components/TabbarBottom");
+  },
+  { ssr: false }
+);
 
 const PostWritePage = ({ searchParams }) => {
   const postId = searchParams?.id;
 
-  
   const router = useRouter();
   const [user] = useAuthState(auth);
   const [loading, setLoading] = useState(false);
-  
+
   const [isMounted, setIsMounted] = useState(false);
   const ref = useRef();
   const [categories, setCategories] = useState([]);
-  
+
   const [title, setTitle] = useState();
   const [titleError, setTitleError] = useState("");
-  
+
   const [description, setDescription] = useState();
   const [descriptionError, setDescriptionError] = useState();
-  const [label, setLabel] = useState("")
-  
+  const [label, setLabel] = useState("");
+
   const [category, setCategory] = useState();
   const [categoryError, setCategoryError] = useState("");
-  
+
   const [isLongform, setIsLongform] = useState(false);
   const [editor, setEditor] = useState();
   const [editorError, setEditorError] = useState();
 
-  const [labelList, setLabelList] = useState([])
-  
+  const [labelList, setLabelList] = useState([]);
+
   const initializeEditor = async (accessToken, data) => {
     const EditorJS = (await require("@editorjs/editorjs")).default;
     const Header = await require("@editorjs/header");
     const Embed = await require("@editorjs/embed");
     const InlineCode = await require("@editorjs/inline-code");
     const ImageTool = await require("@editorjs/image");
-    const ImageLink = await require('editorjs-inline-image');;
+    const ImageLink = await require("editorjs-inline-image");
     const Quote = await require("@editorjs/quote");
     const Paragraph = await require("@editorjs/paragraph");
     const TextAlignmentTool =
@@ -73,7 +73,7 @@ const PostWritePage = ({ searchParams }) => {
     const TextVariantTune = await require("@editorjs/text-variant-tune");
     const Marker = await require("@editorjs/marker");
     const Strikethrough = await require("@sotaproject/strikethrough");
-    if(!ref.current){
+    if (!ref.current) {
       const editor = new EditorJS({
         holder: "editorjs-container",
         tools: {
@@ -92,31 +92,30 @@ const PostWritePage = ({ searchParams }) => {
             Toolbar: true,
             toolbox: [
               {
-                icon:"<p style='font-size: 14px; font-weight:700'>H<span style='font-size: 9px; font-weight:800'>1</span></p>",
-                title: 'Tiêu đề 1 (32px)',
+                icon: "<p style='font-size: 14px; font-weight:700'>H<span style='font-size: 9px; font-weight:800'>1</span></p>",
+                title: "Tiêu đề 1 (32px)",
                 data: {
                   level: 1,
                 },
               },
               {
-                icon:"<p style='font-size: 14px; font-weight:700'>H<span style='font-size: 9px; font-weight:800'>2</span></p>",
-                title: 'Tiêu đề 2 (24px)',
+                icon: "<p style='font-size: 14px; font-weight:700'>H<span style='font-size: 9px; font-weight:800'>2</span></p>",
+                title: "Tiêu đề 2 (24px)",
                 data: {
                   level: 2,
                 },
               },
               {
-                icon:"<p style='font-size: 14px; font-weight:700'>H<span style='font-size: 9px; font-weight:800'>3</span></p>",
-                title: 'Tiêu đề 3 (18.72px)',
+                icon: "<p style='font-size: 14px; font-weight:700'>H<span style='font-size: 9px; font-weight:800'>3</span></p>",
+                title: "Tiêu đề 3 (18.72px)",
                 data: {
                   level: 3,
                 },
-              }
-            ]
-            ,
+              },
+            ],
             tunes: ["textAlignment", "textVariant"],
             config: {
-              placeholder: 'Nhập tiêu đề',
+              placeholder: "Nhập tiêu đề",
               levels: [2, 3, 4, 5, 6],
               defaultLevel: 3,
             },
@@ -148,33 +147,34 @@ const PostWritePage = ({ searchParams }) => {
                         type: contentType,
                       });
                       // access file here
-                      return uploadImage(file, user?.accessToken).then((data) => {
-                        return {
-                          success: 1,
-                          file: {
-                            url: data?.url,
-                          },
-                        };
-                      });
+                      return uploadImage(file, user?.accessToken).then(
+                        (data) => {
+                          return {
+                            success: 1,
+                            file: {
+                              url: data?.url,
+                            },
+                          };
+                        }
+                      );
                     })
                     .catch((err) => console.log("err", err));
                 },
               },
             },
           },
-           imageInline: {
+          imageInline: {
             class: ImageLink,
             inlineToolbar: true,
-            toolbox:{
+            toolbox: {
               icon: '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-link-45deg" viewBox="0 0 16 16"> <path d="M4.715 6.542 3.343 7.914a3 3 0 1 0 4.243 4.243l1.828-1.829A3 3 0 0 0 8.586 5.5L8 6.086a1.002 1.002 0 0 0-.154.199 2 2 0 0 1 .861 3.337L6.88 11.45a2 2 0 1 1-2.83-2.83l.793-.792a4.018 4.018 0 0 1-.128-1.287z"/> <path d="M6.586 4.672A3 3 0 0 0 7.414 9.5l.775-.776a2 2 0 0 1-.896-3.346L9.12 3.55a2 2 0 1 1 2.83 2.83l-.793.792c.112.42.155.855.128 1.287l1.372-1.372a3 3 0 1 0-4.243-4.243L6.586 4.672z"/> </svg>',
             },
             config: {
               embed: {
                 display: true,
               },
-            
-            }
-           },
+            },
+          },
           // code: {
           //   class: Code,
           //   inlineToolbar: true,
@@ -213,108 +213,108 @@ const PostWritePage = ({ searchParams }) => {
         },
         i18n: {
           /**
-         * @type {I18nDictionary}
-          */
-         messages: {
-           ui: {
+           * @type {I18nDictionary}
+           */
+          messages: {
+            ui: {
               // Translations of internal UI components of the editor.js core
-              "blockTunes": {
-                "toggler": {
+              blockTunes: {
+                toggler: {
                   "Click to tune": "Bấm để điều chỉnh",
-                  "or drag to move": "hoặc kéo để di chuyển"
+                  "or drag to move": "hoặc kéo để di chuyển",
                 },
               },
-              "inlineToolbar": {
-                "converter": {
-                  "Convert to": "Chuyển đổi sang"
-                }
+              inlineToolbar: {
+                converter: {
+                  "Convert to": "Chuyển đổi sang",
+                },
               },
-              "toolbar": {
-                "toolbox": {
-                  "Add": "Thêm mới"
-                }
-              }
+              toolbar: {
+                toolbox: {
+                  Add: "Thêm mới",
+                },
+              },
             },
             toolNames: {
               // Section for translation Tool Names: both block and inline tools
-              "Text": "Đoạn văn",
-              "Heading": "Tiêu đề",
-              "Quote": "Trích dẫn",
-              "Delimiter": "Phân cách",
-              "Link": "Đường đẫn",
-              "Marker": "Đánh dấu",
-              "Bold": "In đậm",
-              "Italic": "In đậm",
-              "InlineCode": "Code",
-              "InlineImage": "Đường dẫn ảnh",
-              "Image": "Hình ảnh",
-              "Strikethrough": "Gạch ngang",
-              "Underline": "Gách dưới",
-              "ChangeCase": "Thay đổi kiểu chữ",
-              
+              Text: "Đoạn văn",
+              Heading: "Tiêu đề",
+              Quote: "Trích dẫn",
+              Delimiter: "Phân cách",
+              Link: "Đường đẫn",
+              Marker: "Đánh dấu",
+              Bold: "In đậm",
+              Italic: "In đậm",
+              InlineCode: "Code",
+              InlineImage: "Đường dẫn ảnh",
+              Image: "Hình ảnh",
+              Strikethrough: "Gạch ngang",
+              Underline: "Gách dưới",
+              ChangeCase: "Thay đổi kiểu chữ",
             },
             tools: {
-              "warning": { // <-- 'Warning' tool will accept this dictionary section
-                "Title": "Название",
-                "Message": "Сообщение",
+              warning: {
+                // <-- 'Warning' tool will accept this dictionary section
+                Title: "Название",
+                Message: "Сообщение",
               },
-              "link": {
-                "Add a link": "Thêm một đường dẫn"
+              link: {
+                "Add a link": "Thêm một đường dẫn",
               },
-              "stub": {
-                'The block can not be displayed correctly.': 'Блок не может быть отображен'
-              }
+              stub: {
+                "The block can not be displayed correctly.":
+                  "Блок не может быть отображен",
+              },
             },
             blockTunes: {
               // Section allows to translate Block Tunes
-              "delete": {
-                "Delete": "Xóa"
+              delete: {
+                Delete: "Xóa",
               },
-              "moveUp": {
-                "Move up": "Di chuyển lên"
+              moveUp: {
+                "Move up": "Di chuyển lên",
               },
-              "moveDown": {
-                "Move down": "Di chuyển xuống"
-              }, 
+              moveDown: {
+                "Move down": "Di chuyển xuống",
+              },
             },
-          }
+          },
         },
         tunes: ["textAlignment", "textVariant"],
         data: {
           blocks: data,
         },
-        
       });
-      ref.current = editor
+      ref.current = editor;
     }
   };
 
   //tags
   const [tags, setTags] = useState([]);
   const [inputVisible, setInputVisible] = useState(false);
-  const [inputValue, setInputValue] = useState('');
+  const [inputValue, setInputValue] = useState("");
   const inputRef = useRef(null);
   useEffect(() => {
-    getLabels().then(list => setLabelList(list));
+    getLabels().then((list) => setLabelList(list));
   }, []);
   useEffect(() => {
     getPost({
       postId,
     }).then((data) => {
-        setTitle(data?.title);
-        setTags(data?.tags);
-        setCategory(data?.category);
-        setIsLongform(data?.isLongform);
-        setEditor(data?.body?.blocks);
-        setLabel(data?.label?.labelId)
-    })
-  }, [postId])
+      setTitle(data?.title);
+      setTags(data?.tags);
+      setCategory(data?.category);
+      setIsLongform(data?.isLongform);
+      setEditor(data?.body?.blocks);
+      setLabel(data?.label?.labelId);
+    });
+  }, [postId]);
 
   useEffect(() => {
     if (inputVisible) {
       inputRef.current?.focus();
     }
-  }, [inputVisible]);
+  }, [inputVisible, inputRef]);
 
   const handleClose = (removedTag) => {
     const newTags = tags.filter((tag) => tag !== removedTag);
@@ -330,52 +330,50 @@ const PostWritePage = ({ searchParams }) => {
   };
 
   const handleInputConfirm = () => {
+    const newArr = tags?.length > 0 ? [...tags] : [];
     if (inputValue && tags?.indexOf(inputValue) === -1) {
-      setTags([...tags, inputValue]);
+      newArr.push(inputValue);
     }
+    setTags([...newArr]);
     setInputVisible(false);
-    setInputValue('');
+    setInputValue("");
   };
 
-  const forMap = (tag) => {
-    const tagElem = (
-      <Tag
-        closable
-        onClose={(e) => {
-          e.preventDefault();
-          handleClose(tag);
-        }}
-      >
-        {tag}
-      </Tag>
-    );
+  const tagChild = tags?.map((tag) => {
     return (
       <span
         key={tag}
         style={{
-          display: 'inline-block',
+          display: "inline-block",
         }}
       >
-        {tagElem}
+        <Tag
+          closable
+          onClose={(e) => {
+            e.preventDefault();
+            handleClose(tag);
+          }}
+        >
+          {tag}
+        </Tag>
       </span>
     );
+  });
+  const tagPlusStyle = {
+    borderStyle: "dashed",
+    marginTop: 5,
   };
 
-  const tagChild = tags?.map(forMap);
-  const tagPlusStyle = {
-    borderStyle: 'dashed',
-  };
-  
   useEffect(() => {
     if (typeof window !== "undefined") {
       setIsMounted(true);
     }
     getCategories().then((result) =>
-      setCategories(result.filter(x => x.type === 'posts'))
+      setCategories(result.filter((x) => x.type === "posts"))
     );
   }, []);
   useEffect(() => {
-    if(window !== undefined){
+    if (window !== undefined) {
       if (user) {
         if (postId) {
           if (editor) {
@@ -393,7 +391,7 @@ const PostWritePage = ({ searchParams }) => {
           };
           if (isMounted) {
             init();
-  
+
             return () => {
               if (ref.current) {
                 ref.current?.destroy();
@@ -419,14 +417,14 @@ const PostWritePage = ({ searchParams }) => {
     //   return;
     // }
 
-    if (category === undefined || category === '') {
-      setTitleError('Vui lòng chọn danh mục!');
+    if (category === undefined || category === "") {
+      setTitleError("Vui lòng chọn danh mục!");
       setLoading(false);
       return;
     }
 
     if (ref.current) {
-      ref.current.save().then((outputData) => {;
+      ref.current.save().then((outputData) => {
         if (outputData?.blocks.length === 0) {
           setEditorError("Vui lòng nhập nội dung!");
           setLoading(false);
@@ -451,7 +449,10 @@ const PostWritePage = ({ searchParams }) => {
           categoryParent,
           isLongform,
           postId,
-          label: label != "" && label?.length > 0 ? labelList?.find(item => item.labelId === label) : {}
+          label:
+            label != "" && label?.length > 0
+              ? labelList?.find((item) => item.labelId === label)
+              : {},
         };
 
         if (tags?.length > 0) {
@@ -474,17 +475,17 @@ const PostWritePage = ({ searchParams }) => {
           // create
           createPostByUser(item, user?.accessToken)
             .then((result) => {
-              message.success(result.message);
               //ranking
               createUserRanking(
                 {
-                  rankingType: 'post_creat',
+                  rankingType: "post_creat",
                   rankingValue: 1,
                   rankingDocId: result?.postId,
                 },
                 user?.accessToken
               ).then(() => {
-                 router.push(`/forum/topic/${categoryParent}/${category}`);
+                message.success(result.message);
+                router.push(`/forum/topic/${categoryParent}/${category}`);
                 setLoading(false);
               });
             })
@@ -592,12 +593,13 @@ const PostWritePage = ({ searchParams }) => {
             <option key={""} value={""}>
               {"--Chọn chủ đề--"}
             </option>
-            {labelList
-              .map((item, index) => {
-              return  <option key={index} value={item?.labelId}>
-                            {item?.name}
+            {labelList.map((item, index) => {
+              return (
+                <option key={index} value={item?.labelId}>
+                  {item?.name}
                 </option>
-              })}
+              );
+            })}
           </select>
         </div>
 
@@ -783,7 +785,7 @@ const PostWritePage = ({ searchParams }) => {
         </div>
       </div>
       <div className="mb-24"></div>
-      <TabbarBottom active='forum' />
+      <TabbarBottom active="forum" />
       <BannerRight isAppInstall={true} />
     </main>
   );

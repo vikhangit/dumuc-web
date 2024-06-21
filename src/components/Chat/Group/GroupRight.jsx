@@ -22,10 +22,13 @@ import {
   onSnapshot,
   doc,
   updateDoc,
+  arrayUnion,
+  deleteDoc,
+  deleteField,
 } from "firebase/firestore";
 import { uploadImage } from "@apis/other";
 import ModalWating from "@components/Dumuc/ModalWating";
-import { message } from "antd";
+import { Popconfirm, message } from "antd";
 const ModalImageZoom = dynamic(
   () => {
     return import("@components/ModalImageZoom");
@@ -58,8 +61,9 @@ export default function ChatGroupRight({
   authors,
   activeGroup,
   setActiveGroup,
+  user,
+  usingUser,
 }) {
-  const [user] = useAuthState(auth);
   const router = useRouter();
   const search = useSearchParams();
   const refImg = useRef();
@@ -113,8 +117,19 @@ export default function ChatGroupRight({
       window.removeEventListener("mousedown", handleOutSideClick);
     };
   }, [ref]);
+  const read = async () => {
+    if (groupTo?.lastMessage?.formAuthor?.userId !== user?.uid) {
+      const washingtonRef = doc(db, "chat-groups", groupTo?.id);
+      await updateDoc(washingtonRef, {
+        new: false,
+      });
+    }
+  };
   useEffect(() => {
     scroll.current?.scrollIntoView({ behavior: "smooth" });
+    if (groupTo) {
+      read();
+    }
   });
   useEffect(() => {
     if (search.get("groupId")) {
@@ -143,10 +158,10 @@ export default function ChatGroupRight({
   useEffect(() => {
     if (search.get("groupId")) {
       const chatDetail = messages?.find((x) => x?.id === search.get("groupId"));
-      const myGroup = chatDetail?.member?.find((x) => x?.user === user?.uid);
-      setGroupTo(myGroup && chatDetail);
+      // const myGroup = chatDetail?.member?.find((x) => x?.user === user?.uid);
+      setGroupTo(chatDetail);
     }
-  }, [messages, search, message]);
+  }, [messages, search]);
   const handleSendImage = async (e) => {
     setShowWating(true);
     if (e?.target?.files) {
@@ -161,6 +176,14 @@ export default function ChatGroupRight({
             newPhoto.push(data?.url);
             if (newPhoto.length === array.length) {
               const myAuthor = authors?.find((x) => x?.userId === user?.uid);
+              let dataItem = {
+                text: newMessage,
+                photos: newPhoto,
+                files: [],
+                createdAt: serverTimestamp(),
+                formAuthor: myAuthor,
+                recall: false,
+              };
               await addDoc(
                 collection(
                   db,
@@ -168,15 +191,22 @@ export default function ChatGroupRight({
                   search.get("groupId"),
                   "messages"
                 ),
-                {
-                  text: newMessage,
-                  photos: newPhoto,
-                  files: [],
-                  createdAt: serverTimestamp(),
-                  formAuthor: myAuthor,
-                  recall: false,
-                }
-              );
+                dataItem
+              ).then(async (data) => {
+                const washingtonRef = doc(
+                  db,
+                  "chat-groups",
+                  search.get("groupId")
+                );
+                await updateDoc(washingtonRef, {
+                  lastMessage: {
+                    messageId: data?.id,
+                    ...dataItem,
+                    text: "[Hình ảnh]",
+                  },
+                  new: true,
+                });
+              });
               setNewMessage("");
               setPhotos([]);
               scroll.current?.scrollIntoView({ behavior: "smooth" });
@@ -209,6 +239,14 @@ export default function ChatGroupRight({
             if (newPhoto.length === array.length) {
               const myAuthor = authors?.find((x) => x?.userId === user?.uid);
               newPhoto?.map(async (x) => {
+                let dataItem = {
+                  text: newMessage,
+                  photos,
+                  files: [x],
+                  createdAt: serverTimestamp(),
+                  formAuthor: myAuthor,
+                  recall: false,
+                };
                 await addDoc(
                   collection(
                     db,
@@ -216,23 +254,31 @@ export default function ChatGroupRight({
                     search.get("groupId"),
                     "messages"
                   ),
-                  {
-                    text: newMessage,
-                    photos,
-                    files: [x],
-                    createdAt: serverTimestamp(),
-                    formAuthor: myAuthor,
-                    recall: false,
-                  }
-                );
+                  dataItem
+                ).then(async (data) => {
+                  const washingtonRef = doc(
+                    db,
+                    "chat-groups",
+                    search.get("groupId")
+                  );
+                  await updateDoc(washingtonRef, {
+                    lastMessage: {
+                      messageId: data?.id,
+                      ...dataItem,
+                      text: "[File]",
+                    },
+                    new: true,
+                  });
+                });
               });
+
               setNewMessage("");
               scroll.current?.scrollIntoView({ behavior: "smooth" });
             }
             setShowWating(false);
           })
           .catch((err) => {
-            message.error("Đã có lỗi do kích thước file quá lớn");
+            // message.error("Đã có lỗi do kích thước file quá lớn");
             setShowWating(false);
           });
       });
@@ -246,6 +292,7 @@ export default function ChatGroupRight({
   const [openAbout, setOpenAbout] = useState(false);
   const [typeAbout, setTypeAbout] = useState("about");
   const [activeAbout, setActiveAbout] = useState();
+
   return (
     <div
       className={`h-full ${
@@ -294,17 +341,6 @@ export default function ChatGroupRight({
                 <div className="absolute z-[99999] hidden group-hover:flex flex-col justify-start items-start top-full right-0 bg-white shadow-sm shadow-gray-500 text-[10px] sm:text-xs font-medium w-[125px] rounded p-1">
                   <Link
                     href={``}
-                    onClick={async (e) => {
-                      e.preventDefault();
-                      setOpenAbout(true);
-                      setTypeAbout("member");
-                    }}
-                    className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left`}
-                  >
-                    Xem thành viên
-                  </Link>
-                  <Link
-                    href={``}
                     onClick={(e) => {
                       e.preventDefault();
                       setOpenAbout(true);
@@ -314,6 +350,77 @@ export default function ChatGroupRight({
                   >
                     Thông tin nhóm
                   </Link>
+                  <Link
+                    href={``}
+                    onClick={async (e) => {
+                      e.preventDefault();
+                      setOpenAbout(true);
+                      setTypeAbout("member");
+                    }}
+                    className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left`}
+                  >
+                    Xem thành viên
+                  </Link>
+                  <Popconfirm
+                    placement="topLeft"
+                    title="Xóa tin nhắn"
+                    description="Toàn bộ tin nhắn sẽ bị xóa vĩnh viễn. Bạn có chắc chắn xóa?"
+                    onConfirm={() => {
+                      myMessage?.map(async (x) => {
+                        const washingtonRef = doc(
+                          db,
+                          "chat-groups",
+                          groupTo?.id,
+                          "messages",
+                          x?.id
+                        );
+                        await updateDoc(washingtonRef, {
+                          isDelete: arrayUnion({
+                            user: user?.uid,
+                          }),
+                        });
+                      });
+                      message.success("Đã xóa tin nhắn thành công!!");
+                    }}
+                    onCancel={() => {}}
+                    okText="Đồng ý"
+                    cancelText="Hủy bỏ"
+                    style={{
+                      width: 200,
+                    }}
+                  >
+                    <button className="border-0 hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left">
+                      Xóa tin nhắn
+                    </button>
+                  </Popconfirm>
+                  {groupTo?.leader === user?.uid && (
+                    <Popconfirm
+                      placement="topLeft"
+                      title="Xóa nhóm"
+                      description="Toàn bộ thông tin tin nhắn, hình ảnh, video,,,, sẽ bị xóa vĩnh viễn. Bạn có chắc chắn xóa nhóm?"
+                      onConfirm={async () => {
+                        const cityRef = doc(db, "chat-groups", groupTo?.id);
+                        await updateDoc(cityRef, {
+                          messages: deleteField(),
+                        });
+                        await deleteDoc(cityRef).then(() => {
+                          message.success("Đã xóa nhóm thành công!!");
+                          setGroupTo();
+                          router.push("/chat/group");
+                        });
+                      }}
+                      onCancel={() => {}}
+                      okText="Đồng ý"
+                      cancelText="Hủy bỏ"
+                      style={{
+                        width: 200,
+                      }}
+                    >
+                      <button className="border-0 hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left">
+                        Xóa nhóm
+                      </button>
+                    </Popconfirm>
+                  )}
                 </div>
               </button>
             </div>
@@ -348,253 +455,891 @@ export default function ChatGroupRight({
                   const authorReply =
                     item?.reply &&
                     authors?.find((item) => item?.authorId === abc);
-                  if (!item?.notify) {
-                    return (
-                      <div
-                        key={index}
-                        className={`flex gap-x-2 cursor-pointer sm:gap-x-4 ${
-                          item?.formAuthor?.userId === user?.uid
-                            ? "flex-row-reverse"
-                            : "flex-row"
-                        } ${index !== 0 && "mt-3"}`}
-                      >
-                        <Image
-                          onClick={() =>
-                            router.push(
-                              `/author/${author?.slug}/${author?.authorId}`
-                            )
-                          }
-                          src={
-                            author?.user?.photo &&
-                            author?.user?.photo?.length > 0
-                              ? author?.user?.photo
-                              : "/dumuc/avatar.png"
-                          }
-                          width={0}
-                          height={0}
-                          sizes="100vw"
-                          className={`${
-                            sizes.width > 400
-                              ? "w-[45px] h-[45px]"
-                              : "w-[40px] h-[40px]"
-                          }  rounded-full cursor-pointer`}
-                        />
+                  if (item?.isDelete?.find((x) => x?.user === user?.uid)) {
+                  } else {
+                    if (!item?.notify) {
+                      return (
                         <div
-                          className={`w-2/3 sm-w-1/2 flex items-center gap-x-2 ${
+                          key={index}
+                          className={`flex gap-x-2 cursor-pointer sm:gap-x-4 ${
                             item?.formAuthor?.userId === user?.uid
                               ? "flex-row-reverse"
                               : "flex-row"
-                          }`}
+                          } ${index !== 0 && "mt-3"}`}
                         >
-                          {item?.photos?.length > 0 &&
-                            (item?.recall ? (
+                          <Image
+                            onClick={() =>
+                              router.push(
+                                `/author/${author?.slug}/${author?.authorId}`
+                              )
+                            }
+                            src={
+                              author?.user?.photo &&
+                              author?.user?.photo?.length > 0
+                                ? author?.user?.photo
+                                : "/dumuc/avatar.png"
+                            }
+                            width={0}
+                            height={0}
+                            sizes="100vw"
+                            className={`${
+                              sizes.width > 400
+                                ? "w-[45px] h-[45px]"
+                                : "w-[40px] h-[40px]"
+                            }  rounded-full cursor-pointer`}
+                          />
+                          <div
+                            className={`w-2/3 sm-w-1/2 flex items-center gap-x-2 ${
+                              item?.formAuthor?.userId === user?.uid
+                                ? "flex-row-reverse"
+                                : "flex-row"
+                            }`}
+                          >
+                            {item?.photos?.length > 0 &&
+                              (item?.recall ? (
+                                <div
+                                  id={item?.id}
+                                  className={`w-fit text-sm ${
+                                    item?.formAuthor?.userId === user?.uid
+                                      ? "ml-auto"
+                                      : ""
+                                  }`}
+                                >
+                                  <div
+                                    className={`w-full text-sm ${
+                                      item?.formAuthor?.userId === user?.uid
+                                        ? "bg-[#e5efff]"
+                                        : "bg-white"
+                                    }  rounded-[10px] px-[10px] py-[20px] ${
+                                      item?.recall
+                                        ? "text-gray-400"
+                                        : "text-gray-900"
+                                    }`}
+                                  >
+                                    Tin nhắn đã thu hồi
+                                  </div>
+                                </div>
+                              ) : (
+                                <div
+                                  id={item?.id}
+                                  className={`w-full sm:w-3/4 ${
+                                    author?.userId === user?.uid
+                                      ? "ml-auto"
+                                      : ""
+                                  }`}
+                                >
+                                  <div
+                                    className={`w-full flex items-center gap-x-2 flex-wrap ${
+                                      item?.formAuthor?.userId === user?.uid
+                                        ? "justify-end"
+                                        : ""
+                                    } `}
+                                  >
+                                    {item?.formAuthor?.userId === user?.uid &&
+                                      !item?.recall && (
+                                        <button className="relative group w-fit mr-1">
+                                          <HiOutlineDotsHorizontal />
+                                          <div
+                                            className={`absolute z-[9999] hidden group-hover:flex flex-col justify-start items-start top-full ${
+                                              item?.formAuthor?.userId ===
+                                              user?.uid
+                                                ? "left-0"
+                                                : "right-0"
+                                            } bg-white shadow-sm shadow-gray-500 text-[10px] sm:text-xs font-medium w-[120px] rounded p-1`}
+                                          >
+                                            {item?.formAuthor?.userId ===
+                                              user?.uid && (
+                                              <Link
+                                                href={``}
+                                                onClick={async (e) => {
+                                                  e.preventDefault();
+                                                  const washingtonRef = doc(
+                                                    db,
+                                                    "chat-groups",
+                                                    search.get("groupId"),
+                                                    "messages",
+                                                    item?.id
+                                                  );
+                                                  await updateDoc(
+                                                    washingtonRef,
+                                                    {
+                                                      recall: true,
+                                                    }
+                                                  );
+                                                  if (
+                                                    groupTo?.lastMessage
+                                                      ?.messageId === item?.id
+                                                  ) {
+                                                    const wRef = doc(
+                                                      db,
+                                                      "chat-groups",
+                                                      search.get("groupId")
+                                                    );
+                                                    await updateDoc(wRef, {
+                                                      lastMessage: {
+                                                        recall: true,
+                                                      },
+                                                    });
+                                                  }
+                                                }}
+                                                className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left flex items-center gap-x-2 text-black`}
+                                              >
+                                                <MdReplay size={20} /> Thu hồi
+                                              </Link>
+                                            )}
+                                            <Link
+                                              href={``}
+                                              onClick={async (e) => {
+                                                e.preventDefault();
+                                                setChooseQuote(item);
+                                              }}
+                                              className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left  flex items-center gap-x-2 text-black`}
+                                            >
+                                              <MdReply size={20} /> Trả lời
+                                            </Link>
+                                            {/* <Link
+                                               href={``}
+                                               onClick={async (e) => {
+                                                 e.preventDefault();
+                                                 setPhotoForward(item?.photos);
+                                                 setMessageForward("");
+                                                 setFieldForward([]);
+                                                 setShowForward(true);
+                                               }}
+                                               className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left  flex items-center gap-x-2 text-black`}
+                                             >
+                                               <IoMdShareAlt size={20} />
+                                               Chuyển tiếp
+                                             </Link> */}
+                                          </div>
+                                        </button>
+                                      )}
+                                    {item?.photos?.map((photo, indexC) => {
+                                      return (
+                                        <div
+                                          key={indexC}
+                                          className={`rounded-md h-full relative w-1/2 sm:w-1/3 2xl:w-1/4 `}
+                                        >
+                                          <button
+                                            onClick={() => {
+                                              setImageList(item?.photos);
+                                              setIndexImage(indexC);
+                                              setOpenImage(true);
+                                              setType("image");
+                                            }}
+                                            className="w-full h-full"
+                                          >
+                                            <Image
+                                              width={0}
+                                              height={0}
+                                              style={{
+                                                objectFit: "cover",
+                                              }}
+                                              sizes="100vw"
+                                              className={`px-[3px] py-[2px] rounded-lg w-full ${
+                                                sizes.width > 450
+                                                  ? "h-[110px] sm:h-[105px] md:h-[105px] lg:h-[90px] 2xl:h-[110px]"
+                                                  : "h-[70px]"
+                                              }`}
+                                              src={photo}
+                                              alt=""
+                                            />
+                                          </button>
+                                        </div>
+                                      );
+                                    })}
+                                    {item?.formAuthor?.userId !== user?.uid &&
+                                      !item?.recall && (
+                                        <button className="relative group w-fit mr-1">
+                                          <HiOutlineDotsHorizontal />
+                                          <div
+                                            className={`absolute z-[9999] hidden group-hover:flex flex-col justify-start items-start top-full ${
+                                              item?.formAuthor?.userId ===
+                                              user?.uid
+                                                ? "left-0"
+                                                : "right-0"
+                                            } bg-white shadow-sm shadow-gray-500 text-[10px] sm:text-xs font-medium w-[120px] rounded p-1`}
+                                          >
+                                            {item?.formAuthor?.userId ===
+                                              user?.uid && (
+                                              <Link
+                                                href={``}
+                                                onClick={async (e) => {
+                                                  e.preventDefault();
+                                                  const washingtonRef = doc(
+                                                    db,
+                                                    "chat-groups",
+                                                    search.get("groupId"),
+                                                    "messages",
+                                                    item?.id
+                                                  );
+                                                  await updateDoc(
+                                                    washingtonRef,
+                                                    {
+                                                      recall: true,
+                                                    }
+                                                  );
+                                                  if (
+                                                    groupTo?.lastMessage
+                                                      ?.messageId === item?.id
+                                                  ) {
+                                                    const wRef = doc(
+                                                      db,
+                                                      "chat-groups",
+                                                      search.get("groupId")
+                                                    );
+                                                    await updateDoc(wRef, {
+                                                      lastMessage: {
+                                                        recall: true,
+                                                      },
+                                                    });
+                                                  }
+                                                }}
+                                                className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left flex items-center gap-x-2 text-black`}
+                                              >
+                                                <MdReplay size={20} /> Thu hồi
+                                              </Link>
+                                            )}
+                                            <Link
+                                              href={``}
+                                              onClick={async (e) => {
+                                                e.preventDefault();
+                                                setChooseQuote(item);
+                                              }}
+                                              className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left  flex items-center gap-x-2 text-black`}
+                                            >
+                                              <MdReply size={20} /> Trả lời
+                                            </Link>
+                                            {/* <Link
+                                               href={``}
+                                               onClick={async (e) => {
+                                                 e.preventDefault();
+                                                 setPhotoForward(item?.photos);
+                                                 setMessageForward("");
+                                                 setFieldForward([]);
+                                                 setShowForward(true);
+                                               }}
+                                               className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left  flex items-center gap-x-2 text-black`}
+                                             >
+                                               <IoMdShareAlt size={20} />
+                                               Chuyển tiếp
+                                             </Link> */}
+                                          </div>
+                                        </button>
+                                      )}
+                                  </div>
+                                  <div
+                                    className={`w-fit ${
+                                      author?.userId === user?.uid && "ml-auto"
+                                    } text-[10px] text-white px-[8px] pt-[3px] pb-[2px]  rounded-full font-normal mt-[4px] bg-black bg-opacity-40`}
+                                  >
+                                    {moment(item?.createdAt).isBefore(
+                                      new Date(),
+                                      "days"
+                                    )
+                                      ? `${moment(item?.createdAt).format(
+                                          "hh:mm DD/MM/yyyy"
+                                        )}`
+                                      : `${moment(item?.createdAt).format(
+                                          "hh:mm"
+                                        )}`}
+                                  </div>
+                                </div>
+                              ))}
+                            {item?.files?.length > 0 &&
+                              (item?.recall ? (
+                                <div
+                                  id={item?.id}
+                                  className={`w-fit  text-sm ${
+                                    item?.formAuthor?.userId === user?.uid
+                                      ? "ml-auto"
+                                      : ""
+                                  }`}
+                                >
+                                  <div
+                                    className={`w-full text-sm ${
+                                      item?.formAuthor?.userId === user?.uid
+                                        ? "bg-[#e5efff]"
+                                        : "bg-white"
+                                    }  rounded-[10px] px-[10px] py-[20px] ${
+                                      item?.recall
+                                        ? "text-gray-400"
+                                        : "text-gray-900"
+                                    }`}
+                                  >
+                                    Tin nhắn đã thu hồi
+                                  </div>
+                                </div>
+                              ) : (
+                                <div
+                                  id={item?.id}
+                                  className={`flex items-start gap-x-2 w-full ${
+                                    item?.formAuthor?.userId === user?.uid
+                                      ? "flex-row-reverse"
+                                      : "flex-row"
+                                  } sm:w-3/4 lg:w-2/3 xl:w-7/12 2xl:w-1/2`}
+                                >
+                                  <div className="w-full flex flex-col">
+                                    {item?.files?.map((photo, indexC) => {
+                                      return (
+                                        <div className="w-full" key={indexC}>
+                                          <div
+                                            className={`w-full flex gap-x-2 items-center ${
+                                              item?.formAuthor?.userId ===
+                                              user?.uid
+                                                ? "flex-row"
+                                                : "flex-row-reverse"
+                                            }`}
+                                          >
+                                            <Link
+                                              className="w-full"
+                                              href={photo?.url}
+                                              target="_blank"
+                                            >
+                                              <div
+                                                className={`cursor-pointer w-full text-sm  sm:text-base font-medium cursor-pointer ${
+                                                  item?.formAuthor?.userId ===
+                                                  user?.uid
+                                                    ? "bg-[#e5efff] ml-auto"
+                                                    : "bg-white"
+                                                }  rounded-[10px] px-[10px] py-[20px] mb-2`}
+                                              >
+                                                <div className="flex items-center gap-x-2">
+                                                  {photo?.type?.includes(
+                                                    "image"
+                                                  ) ? (
+                                                    <FaFileImage
+                                                      className="text-amber-500"
+                                                      size={
+                                                        sizes.width > 440
+                                                          ? 48
+                                                          : sizes.width > 320
+                                                          ? 40
+                                                          : 32
+                                                      }
+                                                    />
+                                                  ) : photo?.name?.includes(
+                                                      "pptx"
+                                                    ) ? (
+                                                    <SiMicrosoftpowerpoint
+                                                      className="text-rose-700"
+                                                      size={
+                                                        sizes.width > 440
+                                                          ? 48
+                                                          : sizes.width > 320
+                                                          ? 40
+                                                          : 32
+                                                      }
+                                                    />
+                                                  ) : photo?.name?.includes(
+                                                      "xlsx"
+                                                    ) ? (
+                                                    <FaFileLines
+                                                      className="text-green-600"
+                                                      size={
+                                                        sizes.width > 440
+                                                          ? 48
+                                                          : sizes.width > 320
+                                                          ? 40
+                                                          : 32
+                                                      }
+                                                    />
+                                                  ) : photo?.type?.includes(
+                                                      "video"
+                                                    ) ? (
+                                                    <RiFileVideoFill
+                                                      size={
+                                                        sizes.width > 440
+                                                          ? 48
+                                                          : sizes.width > 320
+                                                          ? 40
+                                                          : 32
+                                                      }
+                                                      className="text-yellow-300"
+                                                    />
+                                                  ) : photo?.type?.includes(
+                                                      "pdf"
+                                                    ) ? (
+                                                    <BiSolidFilePdf
+                                                      size={
+                                                        sizes.width > 440
+                                                          ? 48
+                                                          : sizes.width > 320
+                                                          ? 40
+                                                          : 32
+                                                      }
+                                                      className="text-rose-500"
+                                                    />
+                                                  ) : photo?.type?.includes(
+                                                      "doc"
+                                                    ) ? (
+                                                    <BsFileEarmarkWordFill
+                                                      size={
+                                                        sizes.width > 440
+                                                          ? 48
+                                                          : sizes.width > 320
+                                                          ? 40
+                                                          : 32
+                                                      }
+                                                      className="text-[#4367A5]"
+                                                    />
+                                                  ) : photo?.type?.includes(
+                                                      "audio/mpeg"
+                                                    ) ? (
+                                                    <FaFileAudio
+                                                      size={
+                                                        sizes.width > 440
+                                                          ? 48
+                                                          : sizes.width > 320
+                                                          ? 40
+                                                          : 32
+                                                      }
+                                                      className="text-purple-600"
+                                                    />
+                                                  ) : photo?.type?.includes(
+                                                      "text/plain"
+                                                    ) ? (
+                                                    <BiSolidFileTxt
+                                                      size={
+                                                        sizes.width > 440
+                                                          ? 48
+                                                          : sizes.width > 320
+                                                          ? 40
+                                                          : 32
+                                                      }
+                                                      className="text-sky-400"
+                                                    />
+                                                  ) : (
+                                                    <FaFile
+                                                      size={
+                                                        sizes.width > 440
+                                                          ? 48
+                                                          : sizes.width > 320
+                                                          ? 40
+                                                          : 32
+                                                      }
+                                                      className="text-sky-400"
+                                                    />
+                                                  )}
+                                                  <div className="">
+                                                    {" "}
+                                                    {photo?.name?.slice(
+                                                      0,
+                                                      sizes.width > 500
+                                                        ? 20
+                                                        : sizes.width > 380
+                                                        ? 10
+                                                        : 5
+                                                    )}
+                                                    {photo?.name?.length >
+                                                      (sizes.width > 450
+                                                        ? 20
+                                                        : 6) && (
+                                                      <>
+                                                        ...
+                                                        {photo?.name?.slice(
+                                                          photo?.name?.length -
+                                                            (sizes.width > 450
+                                                              ? 8
+                                                              : 5),
+                                                          photo?.name?.length
+                                                        )}
+                                                      </>
+                                                    )}
+                                                  </div>
+                                                </div>
+                                              </div>
+                                            </Link>
+                                          </div>
+                                          <div
+                                            className={`w-fit ${
+                                              author?.userId === user?.uid &&
+                                              "ml-auto"
+                                            } text-[10px] text-white px-[8px] pt-[3px] pb-[2px]  rounded-full font-normal mt-[4px] bg-black bg-opacity-40`}
+                                          >
+                                            {moment(item?.createdAt).isBefore(
+                                              new Date(),
+                                              "days"
+                                            )
+                                              ? `${moment(
+                                                  item?.createdAt
+                                                ).format("hh:mm DD/MM/yyyy")}`
+                                              : `${moment(
+                                                  item?.createdAt
+                                                ).format("hh:mm")}`}
+                                          </div>
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                  {!item?.recall && (
+                                    <button className="relative group w-fit  pt-[40px]">
+                                      <HiOutlineDotsHorizontal />
+                                      <div
+                                        className={`absolute z-[9999] hidden group-hover:flex flex-col justify-start items-start top-full ${
+                                          item?.formAuthor?.userId === user?.uid
+                                            ? "left-0"
+                                            : "right-0"
+                                        } bg-white shadow-sm shadow-gray-500 text-[10px] sm:text-xs font-medium w-[120px] rounded p-1`}
+                                      >
+                                        {item?.formAuthor?.userId ===
+                                          user?.uid && (
+                                          <Link
+                                            href={``}
+                                            onClick={async (e) => {
+                                              e.preventDefault();
+                                              const washingtonRef = doc(
+                                                db,
+                                                "chat-groups",
+                                                search.get("groupId"),
+                                                "messages",
+                                                item?.id
+                                              );
+                                              await updateDoc(washingtonRef, {
+                                                recall: true,
+                                              });
+                                              if (
+                                                groupTo?.lastMessage
+                                                  ?.messageId === item?.id
+                                              ) {
+                                                const wRef = doc(
+                                                  db,
+                                                  "chat-groups",
+                                                  search.get("groupId")
+                                                );
+                                                await updateDoc(wRef, {
+                                                  lastMessage: {
+                                                    recall: true,
+                                                  },
+                                                });
+                                              }
+                                            }}
+                                            className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left flex items-center gap-x-2 text-black`}
+                                          >
+                                            <MdReplay size={20} /> Thu hồi
+                                          </Link>
+                                        )}
+                                        <Link
+                                          href={``}
+                                          onClick={async (e) => {
+                                            e.preventDefault();
+                                            setChooseQuote(item);
+                                          }}
+                                          className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left  flex items-center gap-x-2 text-black`}
+                                        >
+                                          <MdReply size={20} /> Trả lời
+                                        </Link>
+                                        {/* <Link
+                                           href={``}
+                                           onClick={async (e) => {
+                                             e.preventDefault();
+                                             setFieldForward(item?.files);
+                                             setMessageForward("");
+                                             setPhotoForward([]);
+                                             setShowForward(true);
+                                           }}
+                                           className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left  flex items-center gap-x-2 text-black`}
+                                         >
+                                           <IoMdShareAlt size={20} />
+                                           Chuyển tiếp
+                                         </Link> */}
+                                      </div>
+                                    </button>
+                                  )}
+                                </div>
+                              ))}
+                            {item?.text?.trim() !== "" && (
                               <div
                                 id={item?.id}
-                                className={`w-fit text-sm ${
+                                className={`${
+                                  item?.recall
+                                    ? "w-fit"
+                                    : item?.text?.length < 30
+                                    ? `${
+                                        item?.reply ? "w-[250px]" : "w-[170px]"
+                                      }`
+                                    : "w-fit"
+                                } text-sm ${
                                   item?.formAuthor?.userId === user?.uid
                                     ? "ml-auto"
                                     : ""
                                 }`}
                               >
                                 <div
-                                  className={`w-full text-sm ${
+                                  className={`flex gap-x-2 items-center ${
                                     item?.formAuthor?.userId === user?.uid
-                                      ? "bg-[#e5efff]"
-                                      : "bg-white"
-                                  }  rounded-[10px] px-[10px] py-[20px] ${
-                                    item?.recall
-                                      ? "text-gray-400"
-                                      : "text-gray-900"
+                                      ? "flex-row"
+                                      : "flex-row-reverse"
                                   }`}
                                 >
-                                  Tin nhắn đã thu hồi
-                                </div>
-                              </div>
-                            ) : (
-                              <div
-                                id={item?.id}
-                                className={`w-full sm:w-3/4 ${
-                                  author?.userId === user?.uid ? "ml-auto" : ""
-                                }`}
-                              >
-                                <div
-                                  className={`w-full flex items-center gap-x-2 flex-wrap ${
-                                    item?.formAuthor?.userId === user?.uid
-                                      ? "justify-end"
-                                      : ""
-                                  } `}
-                                >
-                                  {item?.formAuthor?.userId === user?.uid &&
-                                    !item?.recall && (
-                                      <button className="relative group w-fit mr-1">
-                                        <HiOutlineDotsHorizontal />
-                                        <div
-                                          className={`absolute z-[9999] hidden group-hover:flex flex-col justify-start items-start top-full ${
-                                            item?.formAuthor?.userId ===
-                                            user?.uid
-                                              ? "left-0"
-                                              : "right-0"
-                                          } bg-white shadow-sm shadow-gray-500 text-[10px] sm:text-xs font-medium w-[120px] rounded p-1`}
-                                        >
-                                          {item?.formAuthor?.userId ===
-                                            user?.uid && (
-                                            <Link
-                                              href={``}
-                                              onClick={async (e) => {
-                                                e.preventDefault();
-                                                const washingtonRef = doc(
-                                                  db,
-                                                  "chat-groups",
-                                                  search.get("groupId"),
-                                                  "messages",
-                                                  item?.id
-                                                );
-                                                await updateDoc(washingtonRef, {
-                                                  recall: true,
-                                                });
-                                                console.log(
-                                                  moment(
-                                                    item?.createdAt
-                                                  ).isAfter(new Date())
-                                                );
-                                              }}
-                                              className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left flex items-center gap-x-2 text-black`}
-                                            >
-                                              <MdReplay size={20} /> Thu hồi
-                                            </Link>
-                                          )}
-                                          <Link
-                                            href={``}
-                                            onClick={async (e) => {
-                                              e.preventDefault();
-                                              setChooseQuote(item);
-                                            }}
-                                            className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left  flex items-center gap-x-2 text-black`}
-                                          >
-                                            <MdReply size={20} /> Trả lời
-                                          </Link>
-                                          {/* <Link
-                                            href={``}
-                                            onClick={async (e) => {
-                                              e.preventDefault();
-                                              setPhotoForward(item?.photos);
-                                              setMessageForward("");
-                                              setFieldForward([]);
-                                              setShowForward(true);
-                                            }}
-                                            className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left  flex items-center gap-x-2 text-black`}
-                                          >
-                                            <IoMdShareAlt size={20} />
-                                            Chuyển tiếp
-                                          </Link> */}
-                                        </div>
-                                      </button>
-                                    )}
-                                  {item?.photos?.map((photo, indexC) => {
-                                    return (
+                                  {!item?.recall && (
+                                    <button className="relative group w-fit">
+                                      <HiOutlineDotsHorizontal />
                                       <div
-                                        key={indexC}
-                                        className={`rounded-md h-full relative w-1/2 sm:w-1/3 2xl:w-1/4 `}
+                                        className={`absolute z-[9999] hidden group-hover:flex flex-col justify-start items-start top-full ${
+                                          item?.formAuthor?.userId === user?.uid
+                                            ? "left-0"
+                                            : "right-0"
+                                        } bg-white shadow-sm shadow-gray-500 text-[10px] sm:text-xs font-medium w-[120px] rounded p-1`}
                                       >
-                                        <button
-                                          onClick={() => {
-                                            setImageList(item?.photos);
-                                            setIndexImage(indexC);
-                                            setOpenImage(true);
-                                            setType("image");
-                                          }}
-                                          className="w-full h-full"
-                                        >
-                                          <Image
-                                            width={0}
-                                            height={0}
-                                            style={{
-                                              objectFit: "cover",
-                                            }}
-                                            sizes="100vw"
-                                            className={`px-[3px] py-[2px] rounded-lg w-full ${
-                                              sizes.width > 450
-                                                ? "h-[110px] sm:h-[105px] md:h-[105px] lg:h-[90px] 2xl:h-[110px]"
-                                                : "h-[70px]"
-                                            }`}
-                                            src={photo}
-                                            alt=""
-                                          />
-                                        </button>
-                                      </div>
-                                    );
-                                  })}
-                                  {item?.formAuthor?.userId !== user?.uid &&
-                                    !item?.recall && (
-                                      <button className="relative group w-fit mr-1">
-                                        <HiOutlineDotsHorizontal />
-                                        <div
-                                          className={`absolute z-[9999] hidden group-hover:flex flex-col justify-start items-start top-full ${
-                                            item?.formAuthor?.userId ===
-                                            user?.uid
-                                              ? "left-0"
-                                              : "right-0"
-                                          } bg-white shadow-sm shadow-gray-500 text-[10px] sm:text-xs font-medium w-[120px] rounded p-1`}
-                                        >
-                                          {item?.formAuthor?.userId ===
-                                            user?.uid && (
-                                            <Link
-                                              href={``}
-                                              onClick={async (e) => {
-                                                e.preventDefault();
-                                                const washingtonRef = doc(
-                                                  db,
-                                                  "chat-groups",
-                                                  search.get("groupId"),
-                                                  "messages",
-                                                  item?.id
-                                                );
-                                                await updateDoc(washingtonRef, {
-                                                  recall: true,
-                                                });
-                                                console.log(
-                                                  moment(
-                                                    item?.createdAt
-                                                  ).isAfter(new Date())
-                                                );
-                                              }}
-                                              className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left flex items-center gap-x-2 text-black`}
-                                            >
-                                              <MdReplay size={20} /> Thu hồi
-                                            </Link>
-                                          )}
+                                        {item?.formAuthor?.userId ===
+                                          user?.uid && (
                                           <Link
                                             href={``}
                                             onClick={async (e) => {
                                               e.preventDefault();
-                                              setChooseQuote(item);
+                                              const washingtonRef = doc(
+                                                db,
+                                                "chat-groups",
+                                                search.get("groupId"),
+                                                "messages",
+                                                item?.id
+                                              );
+                                              await updateDoc(washingtonRef, {
+                                                recall: true,
+                                              });
+                                              if (
+                                                groupTo?.lastMessage
+                                                  ?.messageId === item?.id
+                                              ) {
+                                                const wRef = doc(
+                                                  db,
+                                                  "chat-groups",
+                                                  search.get("groupId")
+                                                );
+                                                await updateDoc(wRef, {
+                                                  lastMessage: {
+                                                    recall: true,
+                                                  },
+                                                });
+                                              }
                                             }}
-                                            className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left  flex items-center gap-x-2 text-black`}
+                                            className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left flex items-center gap-x-2 text-black`}
                                           >
-                                            <MdReply size={20} /> Trả lời
+                                            <MdReplay size={20} /> Thu hồi
                                           </Link>
-                                          {/* <Link
-                                            href={``}
-                                            onClick={async (e) => {
-                                              e.preventDefault();
-                                              setPhotoForward(item?.photos);
-                                              setMessageForward("");
-                                              setFieldForward([]);
-                                              setShowForward(true);
-                                            }}
-                                            className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left  flex items-center gap-x-2 text-black`}
-                                          >
-                                            <IoMdShareAlt size={20} />
-                                            Chuyển tiếp
-                                          </Link> */}
-                                        </div>
-                                      </button>
+                                        )}
+                                        <Link
+                                          href={``}
+                                          onClick={async (e) => {
+                                            e.preventDefault();
+                                            setChooseQuote(item);
+                                          }}
+                                          className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left  flex items-center gap-x-2 text-black`}
+                                        >
+                                          <MdReply size={20} /> Trả lời
+                                        </Link>
+                                        {/* <Link
+                                           href={``}
+                                           onClick={async (e) => {
+                                             e.preventDefault();
+                                             setMessageForward(item?.text);
+                                             setPhotoForward([]);
+                                             setFieldForward([]);
+                                             setShowForward(true);
+                                           }}
+                                           className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left  flex items-center gap-x-2 text-black`}
+                                         >
+                                           <IoMdShareAlt size={20} />
+                                           Chuyển tiếp
+                                         </Link> */}
+                                      </div>
+                                    </button>
+                                  )}
+
+                                  <div
+                                    className={`w-full text-sm ${
+                                      item?.formAuthor?.userId === user?.uid
+                                        ? "bg-[#e5efff]"
+                                        : "bg-white"
+                                    }  rounded-[10px] px-[10px] py-[20px] ${
+                                      item?.recall
+                                        ? "text-gray-400"
+                                        : "text-gray-900"
+                                    }`}
+                                  >
+                                    {item?.recall ? (
+                                      "Tin nhắn đã thu hồi"
+                                    ) : (
+                                      <div>
+                                        {item?.reply && (
+                                          <div className="">
+                                            <Link
+                                              href={`#${item?.reply?.id}`}
+                                              className="flex w-full"
+                                            >
+                                              <div className="cursor-pointer px-2  border-l-2 border-l-indigo-800 w-full flex items-center gap-x-2">
+                                                {item?.reply?.files?.length >
+                                                0 ? (
+                                                  item?.reply?.files[
+                                                    item?.reply?.files?.length -
+                                                      1
+                                                  ]?.type?.includes("image") ? (
+                                                    <FaFileImage
+                                                      className="text-amber-500"
+                                                      size={28}
+                                                    />
+                                                  ) : item?.reply?.files[
+                                                      item?.reply?.files
+                                                        ?.length - 1
+                                                    ]?.name?.includes(
+                                                      "pptx"
+                                                    ) ? (
+                                                    <SiMicrosoftpowerpoint
+                                                      className="text-rose-700"
+                                                      size={28}
+                                                    />
+                                                  ) : item?.reply?.files[
+                                                      item?.reply?.files
+                                                        ?.length - 1
+                                                    ]?.name?.includes(
+                                                      "xlsx"
+                                                    ) ? (
+                                                    <FaFileLines
+                                                      className="text-green-600"
+                                                      size={28}
+                                                    />
+                                                  ) : item?.reply?.files[
+                                                      item?.reply?.files
+                                                        ?.length - 1
+                                                    ]?.type?.includes(
+                                                      "video"
+                                                    ) ? (
+                                                    <RiFileVideoFill
+                                                      size={28}
+                                                      className="text-yellow-300"
+                                                    />
+                                                  ) : item?.reply?.files[
+                                                      item?.reply?.files
+                                                        ?.length - 1
+                                                    ]?.type?.includes("pdf") ? (
+                                                    <BiSolidFilePdf
+                                                      size={28}
+                                                      className="text-rose-500"
+                                                    />
+                                                  ) : item?.reply?.files[
+                                                      item?.reply?.files
+                                                        ?.length - 1
+                                                    ]?.type?.includes("doc") ? (
+                                                    <BsFileEarmarkWordFill
+                                                      size={28}
+                                                      className="text-[#4367A5]"
+                                                    />
+                                                  ) : item?.reply?.files[
+                                                      item?.reply?.files
+                                                        ?.length - 1
+                                                    ]?.type?.includes(
+                                                      "audio/mpeg"
+                                                    ) ? (
+                                                    <FaFileAudio
+                                                      size={28}
+                                                      className="text-purple-600"
+                                                    />
+                                                  ) : item?.reply?.files[
+                                                      item?.reply?.files
+                                                        ?.length - 1
+                                                    ]?.type?.includes(
+                                                      "text/plain"
+                                                    ) ? (
+                                                    <BiSolidFileTxt
+                                                      size={28}
+                                                      className="text-sky-400"
+                                                    />
+                                                  ) : (
+                                                    <FaFile
+                                                      size={28}
+                                                      className="text-sky-400"
+                                                    />
+                                                  )
+                                                ) : (
+                                                  ""
+                                                )}
+                                                {item?.reply?.photos?.length >
+                                                0 ? (
+                                                  <div>
+                                                    <Image
+                                                      src={
+                                                        item?.reply?.photos[0]
+                                                      }
+                                                      width={0}
+                                                      height={0}
+                                                      className="w-[28px] h-[24px]"
+                                                      objectFit="contain"
+                                                      sizes="100vw"
+                                                    />
+                                                  </div>
+                                                ) : (
+                                                  ""
+                                                )}
+
+                                                <div className="w-full">
+                                                  <div className="font-bold">
+                                                    {authorReply?.name}
+                                                  </div>
+                                                  <div className="mt-1 line-clamp-1 text-xs">
+                                                    {item?.reply?.text?.length >
+                                                      0 && item?.reply?.text}
+                                                    {item?.reply?.files
+                                                      ?.length > 0 &&
+                                                      `${
+                                                        sizes.width > 450
+                                                          ? item?.reply?.files[
+                                                              item?.reply?.files
+                                                                ?.length - 1
+                                                            ]?.name
+                                                          : `${item?.reply?.files[
+                                                              item?.reply?.files
+                                                                ?.length - 1
+                                                            ]?.name?.slice(
+                                                              0,
+                                                              10
+                                                            )}...${
+                                                              item?.reply
+                                                                ?.files[
+                                                                item?.reply
+                                                                  ?.files
+                                                                  ?.length - 1
+                                                              ]?.name?.length >
+                                                                5 &&
+                                                              item?.reply?.files[
+                                                                item?.reply
+                                                                  ?.files
+                                                                  ?.length - 1
+                                                              ]?.name?.slice(
+                                                                item?.reply
+                                                                  ?.files[
+                                                                  item?.reply
+                                                                    ?.files
+                                                                    ?.length - 1
+                                                                ]?.name
+                                                                  ?.length - 5,
+                                                                item?.reply
+                                                                  ?.files[
+                                                                  item?.reply
+                                                                    ?.files
+                                                                    ?.length - 1
+                                                                ]?.name?.length
+                                                              )
+                                                            }`
+                                                      }`}
+                                                    {item?.reply?.photos
+                                                      ?.length > 0 &&
+                                                      "[Hình ảnh]"}
+                                                  </div>
+                                                </div>
+                                              </div>
+                                            </Link>
+                                          </div>
+                                        )}
+                                        <div className="mt-1">{item?.text}</div>
+                                      </div>
                                     )}
+                                  </div>
                                 </div>
                                 <div
                                   className={`w-fit ${
                                     author?.userId === user?.uid && "ml-auto"
-                                  } text-[10px] text-white px-[8px] pt-[3px] pb-[2px]  rounded-full font-normal mt-[4px] bg-black bg-opacity-40`}
+                                  } text-[10px] text-white px-[8px] py-[0px]  rounded-full font-normal mt-[4px] bg-black bg-opacity-40`}
                                 >
                                   {moment(item?.createdAt).isBefore(
                                     new Date(),
@@ -608,686 +1353,115 @@ export default function ChatGroupRight({
                                       )}`}
                                 </div>
                               </div>
-                            ))}
-                          {item?.files?.length > 0 &&
-                            (item?.recall ? (
-                              <div
-                                id={item?.id}
-                                className={`w-fit  text-sm ${
-                                  item?.formAuthor?.userId === user?.uid
-                                    ? "ml-auto"
-                                    : ""
-                                }`}
-                              >
-                                <div
-                                  className={`w-full text-sm ${
-                                    item?.formAuthor?.userId === user?.uid
-                                      ? "bg-[#e5efff]"
-                                      : "bg-white"
-                                  }  rounded-[10px] px-[10px] py-[20px] ${
-                                    item?.recall
-                                      ? "text-gray-400"
-                                      : "text-gray-900"
-                                  }`}
-                                >
-                                  Tin nhắn đã thu hồi
-                                </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    } else {
+                      const author = authors?.find(
+                        (x) => x?.userId === item?.user
+                      );
+                      return (
+                        <div className="flex justify-center mt-2">
+                          <div className="flex items-center gap-x-1 w-fit bg-gray-200 rounded-full px-[8px] py-[2px]">
+                            {item?.type === "name" && (
+                              <HiPencil size={16} color="green" />
+                            )}
+                            {item.type === "name" ? (
+                              <div className="flex items-center gap-x-1">
+                                <Image
+                                  src={
+                                    author?.user?.photo &&
+                                    author?.user?.photo?.length > 0
+                                      ? author?.user?.photo
+                                      : "/dumuc/avatar.png"
+                                  }
+                                  width={0}
+                                  height={0}
+                                  sizes="100vw"
+                                  className="w-[15px] h-[15px] rounded-full"
+                                />
+                                <p className="text-[12px]">
+                                  <strong>{author?.name}</strong> đã đổi tên
+                                  nhóm thành
+                                  <strong>"{item?.text}"</strong>
+                                </p>
+                              </div>
+                            ) : item.type === "avatar" ? (
+                              <div className="flex items-center gap-x-1">
+                                <Image
+                                  src={
+                                    author?.user?.photo &&
+                                    author?.user?.photo?.length > 0
+                                      ? author?.user?.photo
+                                      : "/dumuc/avatar.png"
+                                  }
+                                  width={0}
+                                  height={0}
+                                  sizes="100vw"
+                                  className="w-[15px] h-[15px] rounded-full"
+                                />
+                                <p className="text-[12px]">
+                                  <strong>{author?.name}</strong> đã đổi ảnh đại
+                                  diện
+                                </p>
+                              </div>
+                            ) : item.type === "exit" ||
+                              item.type === "remove" ? (
+                              <div className="flex items-center gap-x-1">
+                                <Image
+                                  src={
+                                    author?.user?.photo &&
+                                    author?.user?.photo?.length > 0
+                                      ? author?.user?.photo
+                                      : "/dumuc/avatar.png"
+                                  }
+                                  width={0}
+                                  height={0}
+                                  sizes="100vw"
+                                  className="w-[15px] h-[15px] rounded-full"
+                                />
+                                <p className="text-[12px]">
+                                  <strong>{author?.name}</strong> đã{" "}
+                                  {item.type === "remove" ? "bị xóa" : "rời"}{" "}
+                                  khỏi nhóm
+                                </p>
+                              </div>
+                            ) : item.type === "leader" ||
+                              item.type === "deputy-leader" ||
+                              item.type === "deputy-leader-remove" ? (
+                              <div className="flex items-center gap-x-1">
+                                <Image
+                                  src={
+                                    author?.user?.photo &&
+                                    author?.user?.photo?.length > 0
+                                      ? author?.user?.photo
+                                      : "/dumuc/avatar.png"
+                                  }
+                                  width={0}
+                                  height={0}
+                                  sizes="100vw"
+                                  className="w-[15px] h-[15px] rounded-full"
+                                />
+                                <p className="text-[12px]">
+                                  <strong>{author?.name}</strong> đã{" "}
+                                  {item.type === "deputy-leader-remove"
+                                    ? "bị xóa quyền nhóm phó"
+                                    : `trở thành
+                                   ${
+                                     item?.type === "leader"
+                                       ? " nhóm trưởng"
+                                       : " nhóm phó"
+                                   }`}
+                                </p>
                               </div>
                             ) : (
-                              <div
-                                id={item?.id}
-                                className={`flex items-start gap-x-2 w-full ${
-                                  item?.formAuthor?.userId === user?.uid
-                                    ? "flex-row-reverse"
-                                    : "flex-row"
-                                } sm:w-3/4 lg:w-2/3 xl:w-7/12 2xl:w-1/2`}
-                              >
-                                <div className="w-full flex flex-col">
-                                  {item?.files?.map((photo, indexC) => {
-                                    return (
-                                      <div className="w-full" key={indexC}>
-                                        <div
-                                          className={`w-full flex gap-x-2 items-center ${
-                                            item?.formAuthor?.userId ===
-                                            user?.uid
-                                              ? "flex-row"
-                                              : "flex-row-reverse"
-                                          }`}
-                                        >
-                                          <Link
-                                            className="w-full"
-                                            href={photo?.url}
-                                            target="_blank"
-                                          >
-                                            <div
-                                              className={`cursor-pointer w-full text-sm  sm:text-base font-medium cursor-pointer ${
-                                                item?.formAuthor?.userId ===
-                                                user?.uid
-                                                  ? "bg-[#e5efff] ml-auto"
-                                                  : "bg-white"
-                                              }  rounded-[10px] px-[10px] py-[20px] mb-2`}
-                                            >
-                                              <div className="flex items-center gap-x-2">
-                                                {photo?.type?.includes(
-                                                  "image"
-                                                ) ? (
-                                                  <FaFileImage
-                                                    className="text-amber-500"
-                                                    size={
-                                                      sizes.width > 440
-                                                        ? 48
-                                                        : sizes.width > 320
-                                                        ? 40
-                                                        : 32
-                                                    }
-                                                  />
-                                                ) : photo?.name?.includes(
-                                                    "pptx"
-                                                  ) ? (
-                                                  <SiMicrosoftpowerpoint
-                                                    className="text-rose-700"
-                                                    size={
-                                                      sizes.width > 440
-                                                        ? 48
-                                                        : sizes.width > 320
-                                                        ? 40
-                                                        : 32
-                                                    }
-                                                  />
-                                                ) : photo?.name?.includes(
-                                                    "xlsx"
-                                                  ) ? (
-                                                  <FaFileLines
-                                                    className="text-green-600"
-                                                    size={
-                                                      sizes.width > 440
-                                                        ? 48
-                                                        : sizes.width > 320
-                                                        ? 40
-                                                        : 32
-                                                    }
-                                                  />
-                                                ) : photo?.type?.includes(
-                                                    "video"
-                                                  ) ? (
-                                                  <RiFileVideoFill
-                                                    size={
-                                                      sizes.width > 440
-                                                        ? 48
-                                                        : sizes.width > 320
-                                                        ? 40
-                                                        : 32
-                                                    }
-                                                    className="text-yellow-300"
-                                                  />
-                                                ) : photo?.type?.includes(
-                                                    "pdf"
-                                                  ) ? (
-                                                  <BiSolidFilePdf
-                                                    size={
-                                                      sizes.width > 440
-                                                        ? 48
-                                                        : sizes.width > 320
-                                                        ? 40
-                                                        : 32
-                                                    }
-                                                    className="text-rose-500"
-                                                  />
-                                                ) : photo?.type?.includes(
-                                                    "doc"
-                                                  ) ? (
-                                                  <BsFileEarmarkWordFill
-                                                    size={
-                                                      sizes.width > 440
-                                                        ? 48
-                                                        : sizes.width > 320
-                                                        ? 40
-                                                        : 32
-                                                    }
-                                                    className="text-[#4367A5]"
-                                                  />
-                                                ) : photo?.type?.includes(
-                                                    "audio/mpeg"
-                                                  ) ? (
-                                                  <FaFileAudio
-                                                    size={
-                                                      sizes.width > 440
-                                                        ? 48
-                                                        : sizes.width > 320
-                                                        ? 40
-                                                        : 32
-                                                    }
-                                                    className="text-purple-600"
-                                                  />
-                                                ) : photo?.type?.includes(
-                                                    "text/plain"
-                                                  ) ? (
-                                                  <BiSolidFileTxt
-                                                    size={
-                                                      sizes.width > 440
-                                                        ? 48
-                                                        : sizes.width > 320
-                                                        ? 40
-                                                        : 32
-                                                    }
-                                                    className="text-sky-400"
-                                                  />
-                                                ) : (
-                                                  <FaFile
-                                                    size={
-                                                      sizes.width > 440
-                                                        ? 48
-                                                        : sizes.width > 320
-                                                        ? 40
-                                                        : 32
-                                                    }
-                                                    className="text-sky-400"
-                                                  />
-                                                )}
-                                                <div className="">
-                                                  {" "}
-                                                  {photo?.name?.slice(
-                                                    0,
-                                                    sizes.width > 500
-                                                      ? 20
-                                                      : sizes.width > 380
-                                                      ? 10
-                                                      : 5
-                                                  )}
-                                                  {photo?.name?.length >
-                                                    (sizes.width > 450
-                                                      ? 20
-                                                      : 6) && (
-                                                    <>
-                                                      ...
-                                                      {photo?.name?.slice(
-                                                        photo?.name?.length -
-                                                          (sizes.width > 450
-                                                            ? 8
-                                                            : 5),
-                                                        photo?.name?.length
-                                                      )}
-                                                    </>
-                                                  )}
-                                                </div>
-                                              </div>
-                                            </div>
-                                          </Link>
-                                        </div>
-                                        <div
-                                          className={`w-fit ${
-                                            author?.userId === user?.uid &&
-                                            "ml-auto"
-                                          } text-[10px] text-white px-[8px] pt-[3px] pb-[2px]  rounded-full font-normal mt-[4px] bg-black bg-opacity-40`}
-                                        >
-                                          {moment(item?.createdAt).isBefore(
-                                            new Date(),
-                                            "days"
-                                          )
-                                            ? `${moment(item?.createdAt).format(
-                                                "hh:mm DD/MM/yyyy"
-                                              )}`
-                                            : `${moment(item?.createdAt).format(
-                                                "hh:mm"
-                                              )}`}
-                                        </div>
-                                      </div>
-                                    );
-                                  })}
-                                </div>
-                                {!item?.recall && (
-                                  <button className="relative group w-fit  pt-[40px]">
-                                    <HiOutlineDotsHorizontal />
-                                    <div
-                                      className={`absolute z-[9999] hidden group-hover:flex flex-col justify-start items-start top-full ${
-                                        item?.formAuthor?.userId === user?.uid
-                                          ? "left-0"
-                                          : "right-0"
-                                      } bg-white shadow-sm shadow-gray-500 text-[10px] sm:text-xs font-medium w-[120px] rounded p-1`}
-                                    >
-                                      {item?.formAuthor?.userId ===
-                                        user?.uid && (
-                                        <Link
-                                          href={``}
-                                          onClick={async (e) => {
-                                            e.preventDefault();
-                                            const washingtonRef = doc(
-                                              db,
-                                              "chat-groups",
-                                              search.get("groupId"),
-                                              "messages",
-                                              item?.id
-                                            );
-                                            await updateDoc(washingtonRef, {
-                                              recall: true,
-                                            });
-                                            console.log(
-                                              moment(item?.createdAt).isAfter(
-                                                new Date()
-                                              )
-                                            );
-                                          }}
-                                          className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left flex items-center gap-x-2 text-black`}
-                                        >
-                                          <MdReplay size={20} /> Thu hồi
-                                        </Link>
-                                      )}
-                                      <Link
-                                        href={``}
-                                        onClick={async (e) => {
-                                          e.preventDefault();
-                                          setChooseQuote(item);
-                                        }}
-                                        className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left  flex items-center gap-x-2 text-black`}
-                                      >
-                                        <MdReply size={20} /> Trả lời
-                                      </Link>
-                                      {/* <Link
-                                        href={``}
-                                        onClick={async (e) => {
-                                          e.preventDefault();
-                                          setFieldForward(item?.files);
-                                          setMessageForward("");
-                                          setPhotoForward([]);
-                                          setShowForward(true);
-                                        }}
-                                        className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left  flex items-center gap-x-2 text-black`}
-                                      >
-                                        <IoMdShareAlt size={20} />
-                                        Chuyển tiếp
-                                      </Link> */}
-                                    </div>
-                                  </button>
-                                )}
-                              </div>
-                            ))}
-                          {item?.text?.trim() !== "" && (
-                            <div
-                              id={item?.id}
-                              className={`${
-                                item?.recall
-                                  ? "w-fit"
-                                  : item?.text?.length < 30
-                                  ? `${item?.reply ? "w-[250px]" : "w-[170px]"}`
-                                  : "w-fit"
-                              } text-sm ${
-                                item?.formAuthor?.userId === user?.uid
-                                  ? "ml-auto"
-                                  : ""
-                              }`}
-                            >
-                              <div
-                                className={`flex gap-x-2 items-center ${
-                                  item?.formAuthor?.userId === user?.uid
-                                    ? "flex-row"
-                                    : "flex-row-reverse"
-                                }`}
-                              >
-                                {!item?.recall && (
-                                  <button className="relative group w-fit">
-                                    <HiOutlineDotsHorizontal />
-                                    <div
-                                      className={`absolute z-[9999] hidden group-hover:flex flex-col justify-start items-start top-full ${
-                                        item?.formAuthor?.userId === user?.uid
-                                          ? "left-0"
-                                          : "right-0"
-                                      } bg-white shadow-sm shadow-gray-500 text-[10px] sm:text-xs font-medium w-[120px] rounded p-1`}
-                                    >
-                                      {item?.formAuthor?.userId ===
-                                        user?.uid && (
-                                        <Link
-                                          href={``}
-                                          onClick={async (e) => {
-                                            e.preventDefault();
-                                            const washingtonRef = doc(
-                                              db,
-                                              "chat-groups",
-                                              search.get("groupId"),
-                                              "messages",
-                                              item?.id
-                                            );
-                                            await updateDoc(washingtonRef, {
-                                              recall: true,
-                                            });
-                                            console.log(
-                                              moment(item?.createdAt).isAfter(
-                                                new Date()
-                                              )
-                                            );
-                                          }}
-                                          className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left flex items-center gap-x-2 text-black`}
-                                        >
-                                          <MdReplay size={20} /> Thu hồi
-                                        </Link>
-                                      )}
-                                      <Link
-                                        href={``}
-                                        onClick={async (e) => {
-                                          e.preventDefault();
-                                          setChooseQuote(item);
-                                        }}
-                                        className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left  flex items-center gap-x-2 text-black`}
-                                      >
-                                        <MdReply size={20} /> Trả lời
-                                      </Link>
-                                      {/* <Link
-                                        href={``}
-                                        onClick={async (e) => {
-                                          e.preventDefault();
-                                          setMessageForward(item?.text);
-                                          setPhotoForward([]);
-                                          setFieldForward([]);
-                                          setShowForward(true);
-                                        }}
-                                        className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left  flex items-center gap-x-2 text-black`}
-                                      >
-                                        <IoMdShareAlt size={20} />
-                                        Chuyển tiếp
-                                      </Link> */}
-                                    </div>
-                                  </button>
-                                )}
-
-                                <div
-                                  className={`w-full text-sm ${
-                                    item?.formAuthor?.userId === user?.uid
-                                      ? "bg-[#e5efff]"
-                                      : "bg-white"
-                                  }  rounded-[10px] px-[10px] py-[20px] ${
-                                    item?.recall
-                                      ? "text-gray-400"
-                                      : "text-gray-900"
-                                  }`}
-                                >
-                                  {item?.recall ? (
-                                    "Tin nhắn đã thu hồi"
-                                  ) : (
-                                    <div>
-                                      {item?.reply && (
-                                        <div className="">
-                                          <Link
-                                            href={`#${item?.reply?.id}`}
-                                            className="flex w-full"
-                                          >
-                                            <div className="cursor-pointer px-2  border-l-2 border-l-indigo-800 w-full flex items-center gap-x-2">
-                                              {item?.reply?.files?.length >
-                                              0 ? (
-                                                item?.reply?.files[
-                                                  item?.reply?.files?.length - 1
-                                                ]?.type?.includes("image") ? (
-                                                  <FaFileImage
-                                                    className="text-amber-500"
-                                                    size={28}
-                                                  />
-                                                ) : item?.reply?.files[
-                                                    item?.reply?.files?.length -
-                                                      1
-                                                  ]?.name?.includes("pptx") ? (
-                                                  <SiMicrosoftpowerpoint
-                                                    className="text-rose-700"
-                                                    size={28}
-                                                  />
-                                                ) : item?.reply?.files[
-                                                    item?.reply?.files?.length -
-                                                      1
-                                                  ]?.name?.includes("xlsx") ? (
-                                                  <FaFileLines
-                                                    className="text-green-600"
-                                                    size={28}
-                                                  />
-                                                ) : item?.reply?.files[
-                                                    item?.reply?.files?.length -
-                                                      1
-                                                  ]?.type?.includes("video") ? (
-                                                  <RiFileVideoFill
-                                                    size={28}
-                                                    className="text-yellow-300"
-                                                  />
-                                                ) : item?.reply?.files[
-                                                    item?.reply?.files?.length -
-                                                      1
-                                                  ]?.type?.includes("pdf") ? (
-                                                  <BiSolidFilePdf
-                                                    size={28}
-                                                    className="text-rose-500"
-                                                  />
-                                                ) : item?.reply?.files[
-                                                    item?.reply?.files?.length -
-                                                      1
-                                                  ]?.type?.includes("doc") ? (
-                                                  <BsFileEarmarkWordFill
-                                                    size={28}
-                                                    className="text-[#4367A5]"
-                                                  />
-                                                ) : item?.reply?.files[
-                                                    item?.reply?.files?.length -
-                                                      1
-                                                  ]?.type?.includes(
-                                                    "audio/mpeg"
-                                                  ) ? (
-                                                  <FaFileAudio
-                                                    size={28}
-                                                    className="text-purple-600"
-                                                  />
-                                                ) : item?.reply?.files[
-                                                    item?.reply?.files?.length -
-                                                      1
-                                                  ]?.type?.includes(
-                                                    "text/plain"
-                                                  ) ? (
-                                                  <BiSolidFileTxt
-                                                    size={28}
-                                                    className="text-sky-400"
-                                                  />
-                                                ) : (
-                                                  <FaFile
-                                                    size={28}
-                                                    className="text-sky-400"
-                                                  />
-                                                )
-                                              ) : (
-                                                ""
-                                              )}
-                                              {item?.reply?.photos?.length >
-                                              0 ? (
-                                                <div>
-                                                  <Image
-                                                    src={item?.reply?.photos[0]}
-                                                    width={0}
-                                                    height={0}
-                                                    className="w-[28px] h-[24px]"
-                                                    objectFit="contain"
-                                                    sizes="100vw"
-                                                  />
-                                                </div>
-                                              ) : (
-                                                ""
-                                              )}
-
-                                              <div className="w-full">
-                                                <div className="font-bold">
-                                                  {authorReply?.name}
-                                                </div>
-                                                <div className="mt-1 line-clamp-1 text-xs">
-                                                  {item?.reply?.text?.length >
-                                                    0 && item?.reply?.text}
-                                                  {item?.reply?.files?.length >
-                                                    0 &&
-                                                    `${
-                                                      sizes.width > 450
-                                                        ? item?.reply?.files[
-                                                            item?.reply?.files
-                                                              ?.length - 1
-                                                          ]?.name
-                                                        : `${item?.reply?.files[
-                                                            item?.reply?.files
-                                                              ?.length - 1
-                                                          ]?.name?.slice(
-                                                            0,
-                                                            10
-                                                          )}...${
-                                                            item?.reply?.files[
-                                                              item?.reply?.files
-                                                                ?.length - 1
-                                                            ]?.name?.length >
-                                                              5 &&
-                                                            item?.reply?.files[
-                                                              item?.reply?.files
-                                                                ?.length - 1
-                                                            ]?.name?.slice(
-                                                              item?.reply
-                                                                ?.files[
-                                                                item?.reply
-                                                                  ?.files
-                                                                  ?.length - 1
-                                                              ]?.name?.length -
-                                                                5,
-                                                              item?.reply
-                                                                ?.files[
-                                                                item?.reply
-                                                                  ?.files
-                                                                  ?.length - 1
-                                                              ]?.name?.length
-                                                            )
-                                                          }`
-                                                    }`}
-                                                  {item?.reply?.photos?.length >
-                                                    0 && "[Hình ảnh]"}
-                                                </div>
-                                              </div>
-                                            </div>
-                                          </Link>
-                                        </div>
-                                      )}
-                                      <div className="mt-1">{item?.text}</div>
-                                    </div>
-                                  )}
-                                </div>
-                              </div>
-                              <div
-                                className={`w-fit ${
-                                  author?.userId === user?.uid && "ml-auto"
-                                } text-[10px] text-white px-[8px] py-[0px]  rounded-full font-normal mt-[4px] bg-black bg-opacity-40`}
-                              >
-                                {moment(item?.createdAt).isBefore(
-                                  new Date(),
-                                  "days"
-                                )
-                                  ? `${moment(item?.createdAt).format(
-                                      "hh:mm DD/MM/yyyy"
-                                    )}`
-                                  : `${moment(item?.createdAt).format(
-                                      "hh:mm"
-                                    )}`}
-                              </div>
-                            </div>
-                          )}
+                              <div></div>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    );
-                  } else {
-                    const author = authors?.find(
-                      (x) => x?.userId === item?.user
-                    );
-                    return (
-                      <div className="flex justify-center mt-2">
-                        <div className="flex items-center gap-x-1 w-fit bg-gray-200 rounded-full px-[8px] py-[2px]">
-                          {item?.type === "name" && (
-                            <HiPencil size={16} color="green" />
-                          )}
-                          {item.type === "name" ? (
-                            <div className="flex items-center gap-x-1">
-                              <Image
-                                src={
-                                  author?.user?.photo &&
-                                  author?.user?.photo?.length > 0
-                                    ? author?.user?.photo
-                                    : "/dumuc/avatar.png"
-                                }
-                                width={0}
-                                height={0}
-                                sizes="100vw"
-                                className="w-[15px] h-[15px] rounded-full"
-                              />
-                              <p className="text-[12px]">
-                                <strong>{author?.name}</strong> đã đổi tên nhóm
-                                thành
-                                <strong>"{item?.text}"</strong>
-                              </p>
-                            </div>
-                          ) : item.type === "avatar" ? (
-                            <div className="flex items-center gap-x-1">
-                              <Image
-                                src={
-                                  author?.user?.photo &&
-                                  author?.user?.photo?.length > 0
-                                    ? author?.user?.photo
-                                    : "/dumuc/avatar.png"
-                                }
-                                width={0}
-                                height={0}
-                                sizes="100vw"
-                                className="w-[15px] h-[15px] rounded-full"
-                              />
-                              <p className="text-[12px]">
-                                <strong>{author?.name}</strong> đã đổi ảnh đại
-                                diện
-                              </p>
-                            </div>
-                          ) : item.type === "exit" || item.type === "remove" ? (
-                            <div className="flex items-center gap-x-1">
-                              <Image
-                                src={
-                                  author?.user?.photo &&
-                                  author?.user?.photo?.length > 0
-                                    ? author?.user?.photo
-                                    : "/dumuc/avatar.png"
-                                }
-                                width={0}
-                                height={0}
-                                sizes="100vw"
-                                className="w-[15px] h-[15px] rounded-full"
-                              />
-                              <p className="text-[12px]">
-                                <strong>{author?.name}</strong> đã{" "}
-                                {item.type === "remove" ? "bị xóa" : "rời"} khỏi
-                                nhóm
-                              </p>
-                            </div>
-                          ) : item.type === "leader" ||
-                            item.type === "deputy-leader" ||
-                            item.type === "deputy-leader-remove" ? (
-                            <div className="flex items-center gap-x-1">
-                              <Image
-                                src={
-                                  author?.user?.photo &&
-                                  author?.user?.photo?.length > 0
-                                    ? author?.user?.photo
-                                    : "/dumuc/avatar.png"
-                                }
-                                width={0}
-                                height={0}
-                                sizes="100vw"
-                                className="w-[15px] h-[15px] rounded-full"
-                              />
-                              <p className="text-[12px]">
-                                <strong>{author?.name}</strong> đã{" "}
-                                {item.type === "deputy-leader-remove"
-                                  ? "bị xóa quyền nhóm phó"
-                                  : `trở thành
-                                ${
-                                  item?.type === "leader"
-                                    ? " nhóm trưởng"
-                                    : " nhóm phó"
-                                }`}
-                              </p>
-                            </div>
-                          ) : (
-                            <div></div>
-                          )}
-                        </div>
-                      </div>
-                    );
+                      );
+                    }
                   }
                 })}
               <span ref={scroll}></span>
@@ -1507,7 +1681,15 @@ export default function ChatGroupRight({
                       const myAuthor = authors?.find(
                         (x) => x?.userId === user?.uid
                       );
-
+                      let dataItem = {
+                        text: newMessage,
+                        photos,
+                        files: [],
+                        createdAt: serverTimestamp(),
+                        formAuthor: myAuthor,
+                        recall: false,
+                        reply: chooseQuote || null,
+                      };
                       await addDoc(
                         collection(
                           db,
@@ -1515,16 +1697,21 @@ export default function ChatGroupRight({
                           search.get("groupId"),
                           "messages"
                         ),
-                        {
-                          text: newMessage,
-                          photos,
-                          files: [],
-                          createdAt: serverTimestamp(),
-                          formAuthor: myAuthor,
-                          recall: false,
-                          reply: chooseQuote || null,
-                        }
-                      );
+                        dataItem
+                      ).then(async (data) => {
+                        const washingtonRef = doc(
+                          db,
+                          "chat-groups",
+                          search.get("groupId")
+                        );
+                        await updateDoc(washingtonRef, {
+                          lastMessage: {
+                            messageId: data?.id,
+                            ...dataItem,
+                          },
+                          new: true,
+                        });
+                      });
                       setChooseQuote();
                       setNewMessage("");
                       setPhotos([]);

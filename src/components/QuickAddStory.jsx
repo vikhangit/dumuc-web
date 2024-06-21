@@ -59,7 +59,7 @@ export default function QuickAddStory({
       });
     }
   };
-  const save = async () => {
+  const save = () => {
     setLoading(true);
     if (link === "" || link.length === 0) {
       setLoading(false);
@@ -67,7 +67,7 @@ export default function QuickAddStory({
       return;
     }
     if (activeItem) {
-      await updateStoryByUser(
+      updateStoryByUser(
         {
           ...activeItem,
           description: link,
@@ -87,7 +87,7 @@ export default function QuickAddStory({
         createUserStories({ ...result?.data }, user?.accessToken);
       });
     } else {
-      await createStoryByUser(
+      createStoryByUser(
         {
           type: type,
           description: link,

@@ -24,6 +24,7 @@ export default function ModalPlayVideos({
   usingUser,
   myFollow,
   myFriend,
+  authors,
 }) {
   const [swiper, setSwiper] = useState(null);
 
@@ -129,7 +130,7 @@ export default function ModalPlayVideos({
             sizes.height > 450 ? "h-full sm:h-5/6 xl:h-3/4 my-auto" : "h-full"
           }  mx-auto overflow-y-auto`}
         >
-          <div className="w-full h-full px-2 sm:px-0">
+          <div className="w-full h-full px-2 sm:px-0 bg-white pt-0">
             <Swiper
               className="mySwiper"
               onSwiper={(swiper) => setSwiper(swiper)}
@@ -161,6 +162,7 @@ export default function ModalPlayVideos({
                       onCallback={onCallback}
                       myFollow={myFollow}
                       myFriend={myFriend}
+                      close={() => setOpenImage(false)}
                     />
                   </SwiperSlide>
                 );

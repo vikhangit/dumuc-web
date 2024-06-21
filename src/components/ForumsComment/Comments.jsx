@@ -22,7 +22,7 @@ export const Comments = ({ comments, setComments, post, onCallback, user }) => {
         onCallback={onCallback}
         user={user}
       />
-      <div className="mt-[10px]">
+      <div className="mt-[30px]">
         {comments?.length > 0 &&
           comments.map((comment, index) => {
             return (

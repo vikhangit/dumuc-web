@@ -54,6 +54,7 @@ const ProfilePage = () => {
 
   const [name, setName] = useState("");
   const [nameError, setNameError] = useState("");
+  const [nickName, setNickName] = useState("");
   const [isEditEmail, setIsEditEmail] = useState(false);
   const [isEditPhone, setIsEditPhone] = useState(false);
   const [email, setEmail] = useState("");
@@ -77,27 +78,22 @@ const ProfilePage = () => {
   const [loadingFontSide, setLoadingFontSide] = useState(false);
   const [loadingBackSide, setLoadingBackSide] = useState(false);
   const [usingUser, setUsingUser] = useState();
-  console.log(user);
   useEffect(() => {
-    (async () => {
-      try {
-        const dataCall = await getProfile(user?.accessToken);
-        setUsingUser(dataCall);
-      } catch (e) {}
-    })();
+    getProfile(user?.accessToken).then((dataCall) => {
+      setUsingUser(dataCall);
+      setName(dataCall?.name?.length > 0 ? dataCall?.name : "");
+      setNickName(dataCall?.nickName?.length > 0 ? dataCall?.nickName : "");
+      setAddress(dataCall?.address);
+      setPhone(dataCall?.phone?.length > 0 ? dataCall?.phone : "");
+      setSex(dataCall?.sex);
+      setEmail(dataCall?.email?.length > 0 ? dataCall?.email : "");
+      setPlateArray(
+        dataCall?.numberPlate
+          ? `${dataCall?.numberPlate}`?.replace(/\s/g, "")?.split(",")
+          : []
+      );
+    });
   }, [user]);
-  useEffect(() => {
-    setName(usingUser?.name?.length > 0 ? usingUser?.name : "");
-    setAddress(usingUser?.address);
-    setPhone(usingUser?.phone?.length > 0 ? usingUser?.phone : "");
-    setSex(usingUser?.sex);
-    setEmail(usingUser?.email?.length > 0 ? usingUser?.email : "");
-    setPlateArray(
-      usingUser?.numberPlate
-        ? `${usingUser?.numberPlate}`?.replace(/\s/g, "")?.split(",")
-        : []
-    );
-  }, [usingUser]);
   useEffect(() => {
     setNumberPlate(plateArray[0]);
     setNumberPlate2(plateArray[1]);
@@ -200,6 +196,7 @@ const ProfilePage = () => {
     //post data
     let item = {
       name: name,
+      nickName,
       address,
       sex,
       numberPlate:
@@ -316,6 +313,25 @@ const ProfilePage = () => {
                       {nameError}
                     </p>
                   )}
+                </div>
+              </div>
+              <div class="mb-3 flex items-center">
+                <label
+                  for="default-input"
+                  class="block mb-2 text-xs sm:text-sm font-medium text-gray-900 dark:text-white w-[105px]"
+                >
+                  Biệt danh
+                </label>
+                <div className="w-full">
+                  <input
+                    type="text"
+                    id="default-input"
+                    class="bg-gray-50 border border-gray-300 text-gray-900 text-xs sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full px-2.5 py-1.5"
+                    onChange={(e) => {
+                      setNickName(e.target.value);
+                    }}
+                    value={nickName}
+                  />
                 </div>
               </div>
               <div class="mb-3 flex items-center">

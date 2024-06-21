@@ -25,7 +25,6 @@ export default function ChatLeft({
   userRecieved,
   mobile,
   setMobile,
-  messages,
   authors,
   user,
   usingUser,
@@ -36,6 +35,8 @@ export default function ChatLeft({
   checkFriendType,
   typeFriend,
   setTypeFriend,
+  setActiveMessage,
+  messages,
 }) {
   const sizes = useWindowSize();
   const router = useRouter();
@@ -44,10 +45,13 @@ export default function ChatLeft({
   const [searchFunction, setSearchFunction] = useState(false);
   const [showAddFriend, setShowAddFriend] = useState(false);
   const [friendList, setFriendList] = useState([]);
+  const [me, setMe] = useState(messages);
+  useEffect(() => {
+    setMe(messages);
+  }, [messages]);
   useEffect(() => {
     setFriendList(friendListP?.filter((x) => x.status === 2));
   }, [friendListP]);
-
   useEffect(() => {
     if (search.get("friendId")) {
       // setSearchFunction(true);
@@ -74,36 +78,35 @@ export default function ChatLeft({
   useEffect(() => {
     if (search.get("chatId")) {
       const chatDetail = messages?.find((x) => x?.id === search.get("chatId"));
-      const userRecieveds = chatDetail?.member?.find(
-        (x) => x?.userId !== user.uid
-      );
-      const author = authors?.find(
-        (item) => item?.authorId === userRecieveds?.authorId
-      );
-      const newMessage = chatDetail?.messages
-        ?.filter(
-          (ele, ind) =>
-            ind ===
-            chatDetail?.messages?.findIndex((elem) => elem.id === ele.id)
-        )
-        ?.filter((x) => x?.formAuthor?.userId !== user?.uid && !x?.read);
-      newMessage?.map(async (x) => {
-        const washingtonRef = doc(
-          db,
-          "chat-rooms",
-          chatDetail?.id,
-          "messages",
-          x?.id
+      if (chatDetail) {
+        const userRecieveds = chatDetail?.member?.find(
+          (x) => x?.userId !== user?.uid
         );
-        await updateDoc(washingtonRef, {
-          read: true,
+        const author = authors?.find(
+          (item) => item?.authorId === userRecieveds?.authorId
+        );
+        const newMessage = chatDetail?.messages?.filter(
+          (x) => x?.formAuthor?.userId !== user?.uid
+        );
+        newMessage?.map(async (x) => {
+          const washingtonRef = doc(
+            db,
+            "chat-rooms",
+            chatDetail?.id,
+            "messages",
+            x?.id
+          );
+          await updateDoc(washingtonRef, {
+            read: true,
+          });
         });
-      });
-      setUserRecieved(author);
+        setUserRecieved(author);
+        router.push(`/chat?chatId=${chatDetail?.id}`);
+      }
     } else {
       setUserRecieved();
     }
-  }, [messages, search]);
+  }, [search, messages]);
   const searchField = (value) => {
     setValueSearch(value);
     if (value.trim() === "") {
@@ -153,7 +156,6 @@ export default function ChatLeft({
       item?.member?.find((x) => x?.userId === author?.userId)
     );
     if (!findChat) {
-      // router.push("/chat");
       const type = checkFriendType(author?.authorId);
       setTypeFriend(type);
       setUserRecieved(author);
@@ -162,11 +164,13 @@ export default function ChatLeft({
       router.push(`/chat?chatId=${findChat?.id}`);
     }
   };
+  console.log("Cghaaaaa", messages);
+  console.log("con", me);
 
   return (
     <div
       className={`h-full ${
-        sizes.width > 992 ? "basis-1/3" : `${!mobile ? "basis-full" : "hidden"}`
+        sizes.width > 992 ? "basis-1/4" : `${!mobile ? "basis-full" : "hidden"}`
       }`}
     >
       <div className="flex items-center bg-[#C82027] shadow-md shadow-gray-400 w-full justify-between px-[5px] h-[65px] gap-x-3">
@@ -287,34 +291,45 @@ export default function ChatLeft({
           )
         ) : messages?.length > 0 ? (
           messages?.map((item, index) => {
-            console.log(item?.messages[item?.messages.length - 1]?.text);
-            const newMessage = item?.messages
-              ?.filter(
-                (ele, ind) =>
-                  ind ===
-                  item?.messages?.findIndex((elem) => elem.id === ele.id)
-              )
-              ?.filter((x) => x?.formAuthor?.userId !== user?.uid && !x?.read);
-            console.log("Lefft", newMessage);
+            const messagesAll = messages?.map((items) =>
+              items?.messages
+                ?.filter(
+                  (ele, ind) =>
+                    ind ===
+                    items?.messages?.findLastIndex((elem) => elem.id === ele.id)
+                )
+                ?.filter((ab) =>
+                  ab?.isDelete
+                    ? ab?.isDelete?.find((x) => x.user !== user?.uid)
+                    : ab
+                )
+            );
+            console.log(item?.messages[item?.messages?.length - 1]);
+            const newMessage = messagesAll?.filter(
+              (x) => x?.formAuthor?.userId !== user?.uid && x?.read === false
+            );
             return item?.member?.find((x) => x?.userId === user?.uid)
               ? item?.member?.map((itemChild, indexChild) => {
                   const author = authors?.find(
                     (x) => x?.authorId === itemChild?.authorId
                   );
                   return (
-                    itemChild?.userId !== user.uid && (
+                    itemChild?.userId !== user?.uid && (
                       <div
                         key={indexChild}
-                        onClick={() => {
+                        onClick={async () => {
                           setMobile(true);
-
                           router.push(`/chat?chatId=${item.id}`);
+                          const washingtonRef = doc(db, "chat-rooms", item?.id);
+                          await updateDoc(washingtonRef, {
+                            new: false,
+                          });
                         }}
                         className={`${
                           userRecieved?.authorId === itemChild?.authorId
                             ? "bg-[#0084ff] bg-opacity-30"
                             : "bg-white"
-                        } rounded-md shadow-md shadow-gray-400 flex items-center gap-x-2 pl-[15px] pr-2 py-[20px] mt-[10px] cursor-pointer`}
+                        } rounded-md shadow-md shadow-gray-400 flex items-center gap-x-2 pl-[15px] pr-2 py-[12px] mt-[10px] cursor-pointer`}
                       >
                         <Image
                           src={
@@ -337,101 +352,34 @@ export default function ChatLeft({
                             <Link href="" className="text-base">
                               {author?.name}
                             </Link>
-                            {search.get("chatId") === item?.id &&
-                            activeMessage?.length > 0 ? (
-                              <span className="text-[13px] w- text-gray-600">
-                                {getTimeChat(
-                                  activeMessage[activeMessage?.length - 1]
-                                    ?.createdAt
-                                )}
-                              </span>
-                            ) : (
-                              <span className="text-[13px] text-gray-600">
-                                {getTimeChat(
-                                  item?.messages[item?.messages.length - 1]
-                                    ?.createdAt
-                                )}
-                              </span>
-                            )}
+                            <span className="text-[13px] text-gray-600">
+                              {getTimeChat(
+                                item?.lastMessage?.createdAt?.toDate()
+                              )}
+                            </span>
                           </div>
-                          <div className="flex justify-between mt-2">
-                            {search.get("chatId") === item?.id &&
-                            activeMessage?.length > 0 ? (
-                              <p className="text-[13px] text-gray-600 line-clamp-1">
-                                {activeMessage[activeMessage?.length - 1]
-                                  ?.recall ? (
+                          <div className="flex justify-between mt-0.5">
+                            <p className="text-[13px] text-gray-600  line-clamp-1">
+                              {item?.lastMessage ? (
+                                item?.lastMessage?.recall ? (
                                   <span className="italic">
                                     Tin nhắn đã thu hồi
                                   </span>
-                                ) : activeMessage[activeMessage?.length - 1]
-                                    ?.files?.length > 0 ? (
-                                  `[File] ${
-                                    activeMessage[activeMessage?.length - 1]
-                                      ?.files[
-                                      activeMessage[activeMessage?.length - 1]
-                                        ?.files?.length - 1
-                                    ]?.name
-                                  }`
-                                ) : activeMessage[activeMessage?.length - 1]
-                                    ?.photos?.length > 0 ? (
-                                  "[Hình ảnh]"
-                                ) : activeMessage[activeMessage?.length - 1]
-                                    ?.text?.length > 0 ? (
-                                  [
-                                    `${
-                                      activeMessage[activeMessage?.length - 1]
-                                        ?.text
-                                    }`,
-                                  ]
                                 ) : (
-                                  <span className="italic">
-                                    Chưa có tin nhắn mới
-                                  </span>
-                                )}
-                              </p>
-                            ) : (
-                              <p className="text-[13px] text-gray-600  line-clamp-1">
-                                {item?.messages[item?.messages.length - 1]
-                                  ?.recall ? (
-                                  <span className="italic">
-                                    Tin nhắn đã thu hồi
-                                  </span>
-                                ) : item?.messages[item?.messages.length - 1]
-                                    ?.files?.length > 0 ? (
-                                  `[File] ${
-                                    item?.messages[item?.messages.length - 1]
-                                      ?.files[
-                                      item?.messages[item?.messages.length - 1]
-                                        ?.files?.length - 1
-                                    ]?.name
-                                  }`
-                                ) : item?.messages[item?.messages.length - 1]
-                                    ?.photos?.length > 0 ? (
-                                  "[Hình ảnh]"
-                                ) : item?.messages[item?.messages.length - 1]
-                                    ?.text?.length > 0 ? (
-                                  [
-                                    `${
-                                      item?.messages[item?.messages.length - 1]
-                                        ?.text
-                                    }`,
-                                  ]
-                                ) : (
-                                  <span className="italic">
-                                    Chưa có tin nhắn mới
-                                  </span>
-                                )}
-                              </p>
-                            )}
-                            {
-                              <p>
-                                {newMessage?.length > 5
-                                  ? "5+"
-                                  : newMessage?.length > 0
-                                  ? newMessage?.length
-                                  : ""}
-                              </p>
-                            }
+                                  item?.lastMessage?.text
+                                )
+                              ) : (
+                                <span className="italic">
+                                  Chưa có tin nhắn mới
+                                </span>
+                              )}
+                            </p>
+
+                            {item?.new === true &&
+                              item?.lastMessage?.formAuthor?.userId !==
+                                user?.uid && (
+                                <div className="rounded-full w-[10px] h-[10px] bg-[#C82027] text-white text-xs flex justify-center items-center"></div>
+                              )}
                           </div>
                         </div>
                       </div>

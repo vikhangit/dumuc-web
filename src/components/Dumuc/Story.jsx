@@ -27,7 +27,15 @@ const ModalPlayVideos = dynamic(
   { ssr: false }
 );
 
-const Story = ({ data, onCallback, user, usingUser, myFollow, myFriend }) => {
+const Story = ({
+  data,
+  onCallback,
+  user,
+  usingUser,
+  myFollow,
+  myFriend,
+  authors,
+}) => {
   const [stories, setStories] = useState(data);
   const [loading, setLoading] = useState(false);
   const [swiper, setSwiper] = useState(null);
@@ -51,6 +59,8 @@ const Story = ({ data, onCallback, user, usingUser, myFollow, myFriend }) => {
       setIndexImage(index);
     }
   }, [data]);
+
+  console.log("2222222", stories);
 
   const handleChange = (e) => {
     setLoading(true);
@@ -191,53 +201,55 @@ const Story = ({ data, onCallback, user, usingUser, myFollow, myFriend }) => {
             </SwiperSlide>
           )}
           {stories?.length > 0 &&
-            stories?.map((item, index) => (
-              <SwiperSlide
-                key={index}
-                style={{
-                  height: 250,
-                  cursor: "pointer",
-                }}
-              >
-                <div
-                  onClick={() => {
-                    setShowImage(true);
-                    setIndexImage(index);
+            stories?.map((item, index) => {
+              return (
+                <SwiperSlide
+                  key={index}
+                  style={{
+                    height: 250,
+                    cursor: "pointer",
                   }}
-                  className="border border-gray-400 rounded-[10px] w-full h-full relative flex flex-col"
                 >
-                  <Image
-                    width={0}
-                    height={0}
-                    sizes="100vw"
-                    src={item?.author?.user?.photo || "/dumuc/avatar.png"}
-                    alt=""
-                    className="absolute z-20 top-2 left-2 w-10 h-10 rounded-full border border-sky-700 p-0.5"
-                  />
-                  {item?.type === "file" ? (
-                    <video
-                      className={`w-full h-full rounded-t-[10px] relative z-10 h-[210px]`}
-                    >
-                      <source src={item?.photos} type="video/mp4" />
-                    </video>
-                  ) : (
-                    <div
-                      className="w-full h-full story"
-                      dangerouslySetInnerHTML={{
-                        __html: item?.description,
-                      }}
-                    ></div>
-                  )}
-                  <span
-                    className={`absolute bottom-2 left-2 text-sm font-medium z-20 ${
-                      type === "link" ? "text-white" : "text-black"
-                    }`}
+                  <div
+                    onClick={() => {
+                      setShowImage(true);
+                      setIndexImage(index);
+                    }}
+                    className="border border-gray-400 rounded-[10px] w-full h-full relative flex flex-col"
                   >
-                    {item?.author?.name || "No name"}
-                  </span>
-                </div>
-              </SwiperSlide>
-            ))}
+                    <Image
+                      width={0}
+                      height={0}
+                      sizes="100vw"
+                      src={item?.author?.user?.photo || "/dumuc/avatar.png"}
+                      alt=""
+                      className="absolute z-20 top-2 left-2 w-10 h-10 rounded-full border border-sky-700 p-0.5"
+                    />
+                    {item?.type === "file" ? (
+                      <video
+                        className={`w-full h-full rounded-t-[10px] relative z-10 h-[210px]`}
+                      >
+                        <source src={item?.photos} type="video/mp4" />
+                      </video>
+                    ) : (
+                      <div
+                        className="w-full h-full story"
+                        dangerouslySetInnerHTML={{
+                          __html: item?.description,
+                        }}
+                      ></div>
+                    )}
+                    <span
+                      className={`absolute bottom-2 left-2 text-sm font-medium z-20`}
+                    >
+                      {item?.author?.activeNickName
+                        ? item?.author?.nickName
+                        : item?.author?.name}
+                    </span>
+                  </div>
+                </SwiperSlide>
+              );
+            })}
         </Swiper>
         {activeSlide > 0 && (
           <button
@@ -266,6 +278,7 @@ const Story = ({ data, onCallback, user, usingUser, myFollow, myFriend }) => {
         usingUser={usingUser}
         myFollow={myFollow}
         myFriend={myFriend}
+        authors={authors}
       />
       <QuickAddStory
         onCallback={() => {

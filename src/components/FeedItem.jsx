@@ -2,7 +2,12 @@
 import FeedBookmark from "@components/FeedBookmark";
 import "@fancyapps/ui/dist/fancybox/fancybox.css";
 import { message } from "antd";
-import { createFeedView, getFeed, updateFeedByUser } from "apis/feeds";
+import {
+  createFeedView,
+  deleteFeedByUser,
+  getFeed,
+  updateFeedByUser,
+} from "apis/feeds";
 import { Modal } from "flowbite-react";
 import moment from "moment";
 import dynamic from "next/dynamic";
@@ -33,7 +38,7 @@ const ModalImageZoomFeed = dynamic(
   { ssr: false }
 );
 
-const FeedItem = ({ data, index, onCallback, callData, user, usingUser }) => {
+const FeedItem = ({ data, index, user, usingUser }) => {
   const router = useRouter();
   const videoEl = useRef(null);
   const [showSlide, setshowSlide] = useState(false);
@@ -52,6 +57,9 @@ const FeedItem = ({ data, index, onCallback, callData, user, usingUser }) => {
   createFeedView({
     feedId: item?.feedId,
   }).then((result) => {});
+  const onCallback = (feedId) => {
+    getFeed({ feedId }).then((data) => setItem(data));
+  };
 
   return (
     <div
@@ -85,14 +93,16 @@ const FeedItem = ({ data, index, onCallback, callData, user, usingUser }) => {
             class="text-lg sm:text-xl font-bold leading-none text-gray-900 dark:text-white"
             href={`/author/${item?.author?.slug}/${item?.author?.authorId}`}
           >
-            {item?.author?.name}
+            {item?.author?.activeNickName
+              ? item?.author?.nickName
+              : item?.author?.name}
           </Link>
           <p class="text-lg sm:text-xl font-normal mt-1 mb-1 leading-none text-gray-900 dark:text-white">
             {item?.emotion}
           </p>
           <p class="text-sm sm:text-base font-normal text-gray-500 truncate dark:text-gray-400 flex items-center">
-            {moment(item.publishDate).format("DD")} tháng{" "}
-            {moment(item.publishDate).format("MM")}{" "}
+            {moment(item?.publishDate).format("DD")} tháng{" "}
+            {moment(item?.publishDate).format("MM")}{" "}
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
@@ -116,7 +126,7 @@ const FeedItem = ({ data, index, onCallback, callData, user, usingUser }) => {
             <div className="relative cursor-pointer group">
               <IoMdMore size={24} />
               <div className="absolute z-40 hidden group-hover:flex flex-col top-full right-0 bg-white shadow-sm shadow-gray-500 text-[10px] sm:text-xs font-medium w-[80px] rounded p-1">
-                {item?.author?.user?.email === user?.email && (
+                {item?.userId === user?.uid && (
                   <Link
                     href=""
                     onClick={(e) => {
@@ -129,7 +139,7 @@ const FeedItem = ({ data, index, onCallback, callData, user, usingUser }) => {
                     Sửa
                   </Link>
                 )}
-                {item?.author?.user?.email === user?.email && (
+                {item?.userId === user?.uid && (
                   <Link
                     href=""
                     onClick={(e) => {
@@ -144,7 +154,7 @@ const FeedItem = ({ data, index, onCallback, callData, user, usingUser }) => {
                           user?.accessToken
                         ).then((result) => {
                           message.success("Công khai bài viết thành công");
-                          onCallback();
+                          onCallback(item?.feedId);
                         });
                       } else {
                         return updateFeedByUser(
@@ -156,46 +166,57 @@ const FeedItem = ({ data, index, onCallback, callData, user, usingUser }) => {
                           user?.accessToken
                         ).then((result) => {
                           message.success("Ẩn bài viết thành công");
-                          onCallback();
+                          onCallback(item?.feedId);
                         });
                       }
                     }}
                     className="hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5"
                   >
-                    {item.isPrivate ? "Hủy ẩn" : "Ẩn"}
+                    {item?.isPrivate ? "Hủy ẩn" : "Ẩn"}
                   </Link>
                 )}
-                <Link
-                  href=""
-                  onClick={(e) => {
-                    e.preventDefault();
-                    return updateFeedByUser(
-                      {
-                        ...item,
-                        isReport: true,
-                        feedId: item?.feedId,
-                      },
-                      user?.accessToken
-                    ).then((result) => {
-                      message.success(
-                        "Chúng tôi sẽ xem xét báo cáo của bạn về bài viết này. Xin cảm ơn!!!"
-                      );
-                      onCallback();
-                    });
-                  }}
-                  className="hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5"
-                >
-                  Báo cáo
-                </Link>
-                {/* {item?.author?.user?.email === user?.email && <Link href="" onClick={(e) => {
-            e.preventDefault();
-           return deleteFeedByUser(
-              item?.feedId
-            , user?.accessToken).then((result) =>{
-              message.success("Xóa bài viết thành công");
-              onCallback();
-            })
-          }} className="hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5">Xóa</Link>} */}
+                {item?.userId !== user?.uid && (
+                  <Link
+                    href=""
+                    onClick={(e) => {
+                      e.preventDefault();
+                      return updateFeedByUser(
+                        {
+                          ...item,
+                          isReport: true,
+                          feedId: item?.feedId,
+                        },
+                        user?.accessToken
+                      ).then((result) => {
+                        message.success(
+                          "Chúng tôi sẽ xem xét báo cáo của bạn về bài viết này. Xin cảm ơn!!!"
+                        );
+                        onCallback(item?.feedId);
+                      });
+                    }}
+                    className="hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5"
+                  >
+                    Báo cáo
+                  </Link>
+                )}
+                {item?.userId === user?.uid && (
+                  <Link
+                    href=""
+                    onClick={(e) => {
+                      e.preventDefault();
+                      return deleteFeedByUser(
+                        item?.feedId,
+                        user?.accessToken
+                      ).then((result) => {
+                        message.success("Xóa bài viết thành công");
+                        onCallback(item?.feedId);
+                      });
+                    }}
+                    className="hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5"
+                  >
+                    Xóa
+                  </Link>
+                )}
               </div>
             </div>
           }
@@ -253,7 +274,7 @@ const FeedItem = ({ data, index, onCallback, callData, user, usingUser }) => {
         )}
         <div className="text-base mt-2">
           <div
-            dangerouslySetInnerHTML={{ __html: item.description }}
+            dangerouslySetInnerHTML={{ __html: item?.description }}
             className={`text-lg font-normal text-justify [&>figure]:mt-2 html`}
           ></div>
         </div>
@@ -284,7 +305,7 @@ const FeedItem = ({ data, index, onCallback, callData, user, usingUser }) => {
                         controls
                         loop
                       >
-                        <source src={photo.url} type="video/mp4" />
+                        <source src={photo?.url} type="video/mp4" />
                       </video>
                     ) : (
                       <Image
@@ -297,12 +318,12 @@ const FeedItem = ({ data, index, onCallback, callData, user, usingUser }) => {
                         }}
                         sizes="100vw"
                         className="rounded-lg w-full h-full"
-                        src={photo.url}
-                        alt={photo.url}
+                        src={photo?.url}
+                        alt={photo?.url}
                       />
                     )}
                     {item?.photos?.length > 2 &&
-                      indexC === item.photos?.slice(0, 2).length - 1 && (
+                      indexC === item?.photos?.slice(0, 2).length - 1 && (
                         <div className="absolute top-0 right-0 bg-black bg-opacity-60 w-full h-full flex justify-center items-center rounded-lg">
                           <p className="text-xl text-white text-center">
                             +{item?.photos?.length - 2}

@@ -1,7 +1,7 @@
 import moment from "moment";
 import Image from "next/image";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { IoMdMore } from "react-icons/io";
 import CommentForm from "./CommentForm";
 import { useAuthState } from "react-firebase-hooks/auth";
@@ -34,6 +34,9 @@ export default function SingleComment({
   const [showImage, setShowImage] = useState(false);
   const [imageList, setImageList] = useState([]);
   const [indexImage, setIndexImage] = useState(0);
+  const formRef = useRef(null);
+  const [formHeight, setFormHeight] = useState(0);
+
   const time = () => {
     moment.locale("vi");
     return moment(item.createdAt)
@@ -45,15 +48,22 @@ export default function SingleComment({
       .replace("month", "tháng")
       .replace("year", "năm");
   };
+  useEffect(() => {
+    setFormHeight(formRef.current?.offsetHeight);
+  });
   return (
     <div
-      className="flex flex-row w-full mt-2"
+      className="flex flex-row w-full "
       key={item?.commentId}
       id={item?.commentId}
     >
+      {item?.children && item?.children.length > 0 && (
+        <div className="w-[1px] h-[calc(100%-39px)] sm:h-[calc(100%-48px)] xl:h-[calc(100%-55px)] absolute top-6 sm:top-8 xl:top-10 left-5 bg-black"></div>
+      )}
+
       {editItem ? (
-        <div className="w-full">
-          <div className="flex justify-end text-xs font-medium text-indigo-800 mb-2">
+        <div className="w-full relative py-2">
+          <div className="flex justify-end text-xs font-medium text-indigo-800 mb-2 z-30 absolute -top-[15px] right-[10px]">
             <button
               className="hover:underline"
               onClick={() => {
@@ -61,7 +71,7 @@ export default function SingleComment({
                 setQoute([]);
               }}
             >
-              Hủy
+              Đóng
             </button>
           </div>
           <CommentForm
@@ -82,17 +92,25 @@ export default function SingleComment({
           />
         </div>
       ) : (
-        <div className="flex justify-between my-2 w-full">
+        <div className="flex justify-between items-start w-full py-2 relative">
           <Image
             width={0}
             height={0}
             sizes="100vw"
-            className="w-6 h-6 sm:w-8 sm:h-8 xl:w-10 xl:h-10 rounded-full"
+            className="w-10 h-10 rounded-full overflow-hidden relative z-30"
             src={item?.user?.photo ? item?.user?.photo : "/dumuc/avatar.png"}
             alt={item?.user?.name}
           />
           <div className="mx-2 w-[calc(100%-45px)]">
             <div className="relative">
+              {showReplyBox && (
+                <div
+                  className={`absolute w-[1px] -left-[27px] top-0 bg-black z-20`}
+                  style={{
+                    height: `calc(100% - ${formHeight}px + 45px)`,
+                  }}
+                ></div>
+              )}
               {item?.qoute && item?.qoute.length > 0 && (
                 <div className="mb-[10px]">
                   {item?.qoute.map((item, index) => {
@@ -255,8 +273,9 @@ export default function SingleComment({
                 )}
               </div>
               {showReplyBox && (
-                <div className="">
-                  <div className="flex justify-end text-xs font-medium text-indigo-800 mb-2">
+                <div className="relative" ref={formRef}>
+                  <div className="w-[50px] h-[1px] absolute top-[45px] -left-[27px] bg-black"></div>
+                  <div className="flex justify-end text-xs font-medium text-indigo-800 mb-2 z-30">
                     <button
                       className="hover:underline"
                       onClick={() => setShowReplyBox(false)}

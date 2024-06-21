@@ -5,7 +5,12 @@ import Link from "next/link";
 import React, { useEffect, useRef, useState } from "react";
 import { HiOutlineDotsHorizontal, HiVideoCamera } from "react-icons/hi";
 import { IoIosCall, IoMdClose, IoMdShareAlt } from "react-icons/io";
-import { IoChevronBackOutline, IoImageOutline, IoSend } from "react-icons/io5";
+import {
+  IoChevronBackOutline,
+  IoImageOutline,
+  IoInformationCircleSharp,
+  IoSend,
+} from "react-icons/io5";
 import { RiFileVideoFill } from "react-icons/ri";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth, db } from "@utils/firebase";
@@ -18,10 +23,12 @@ import {
   orderBy,
   doc,
   updateDoc,
+  arrayUnion,
+  deleteField,
 } from "firebase/firestore";
 import { uploadImage } from "@apis/other";
 import ModalWating from "@components/Dumuc/ModalWating";
-import { message } from "antd";
+import { Button, Popconfirm, message } from "antd";
 const ModalImageZoom = dynamic(
   () => {
     return import("@components/ModalImageZoom");
@@ -63,7 +70,7 @@ export default function ChatRight({
   setMobile,
   messages,
   authors,
-  myMessage,
+  activeMessage,
   user,
   usingUser,
   friendList,
@@ -95,14 +102,27 @@ export default function ChatRight({
   const [photoForward, setPhotoForward] = useState([]);
   const [fileForward, setFieldForward] = useState([]);
   const [typeFriend, setTypeFriend] = useState(1);
+  const [myMessage, setMyMessage] = useState(activeMessage);
   useEffect(() => {
-    const type = checkFriendType(userRecieved?.authorId);
-    console.log(type);
-    setTypeFriend(type);
-  }, [userRecieved]);
+    setMyMessage(activeMessage);
+  }, [activeMessage]);
+  const read = async () => {
+    if (
+      messages?.find((x) => x?.id === search.get("chatId")).lastMessage
+        ?.formAuthor?.userId !== user?.uid
+    ) {
+      const washingtonRef = doc(db, "chat-rooms", search.get("chatId"));
+      await updateDoc(washingtonRef, {
+        new: false,
+      });
+    }
+  };
   useEffect(() => {
     scroll.current?.scrollIntoView({ behavior: "smooth" });
-  }, [search, myMessage]);
+    if (search.get("chatId")) {
+      read();
+    }
+  });
   useEffect(() => {
     setHeight(textareaRef.current?.offsetHeight);
     setSendHeight(sendRef.current?.offsetHeight);
@@ -137,7 +157,16 @@ export default function ChatRight({
             newPhoto.push(data?.url);
             if (newPhoto.length === array.length) {
               const myAuthor = authors?.find((x) => x?.userId === user?.uid);
-              if (myMessage.length > 0) {
+              let dataItem = {
+                text: newMessage,
+                photos: newPhoto,
+                files: [],
+                createdAt: serverTimestamp(),
+                formAuthor: myAuthor,
+                recall: false,
+                read: false,
+              };
+              if (myMessage?.length > 0) {
                 await addDoc(
                   collection(
                     db,
@@ -145,16 +174,22 @@ export default function ChatRight({
                     search.get("chatId"),
                     "messages"
                   ),
-                  {
-                    text: newMessage,
-                    photos: newPhoto,
-                    files: [],
-                    createdAt: serverTimestamp(),
-                    formAuthor: myAuthor,
-                    recall: false,
-                    read: false,
-                  }
-                );
+                  dataItem
+                ).then(async (data) => {
+                  const washingtonRef = doc(
+                    db,
+                    "chat-rooms",
+                    search.get("chatId")
+                  );
+                  await updateDoc(washingtonRef, {
+                    lastMessage: {
+                      ...dataItem,
+                      messageId: data?.id,
+                      text: "[Hình ảnh]",
+                    },
+                    new: true,
+                  });
+                });
               } else {
                 await addDoc(collection(db, "chat-rooms"), {
                   member: [userRecieved, myAuthor],
@@ -162,16 +197,18 @@ export default function ChatRight({
                 }).then(async (data) => {
                   await addDoc(
                     collection(db, "chat-rooms", `${data?.id}`, "messages"),
-                    {
-                      text: newMessage,
-                      photos: newPhoto,
-                      files: [],
-                      createdAt: serverTimestamp(),
-                      formAuthor: myAuthor,
-                      recall: false,
-                      read: false,
-                    }
-                  );
+                    dataItem
+                  ).then(async (dataMessage) => {
+                    const washingtonRef = doc(db, "chat-rooms", `${data?.id}`);
+                    await updateDoc(washingtonRef, {
+                      lastMessage: {
+                        ...dataItem,
+                        messageId: dataMessage?.id,
+                        text: "[Hình ảnh]",
+                      },
+                      new: true,
+                    });
+                  });
                   router.push(`/chat?chatId=${data.id}`);
                 });
               }
@@ -208,6 +245,15 @@ export default function ChatRight({
               const myAuthor = authors?.find((x) => x?.userId === user?.uid);
               if (myMessage?.length > 0) {
                 newPhoto.map(async (x) => {
+                  let dataItem = {
+                    text: newMessage,
+                    photos,
+                    files: [x],
+                    createdAt: serverTimestamp(),
+                    formAuthor: myAuthor,
+                    recall: false,
+                    read: false,
+                  };
                   await addDoc(
                     collection(
                       db,
@@ -215,35 +261,56 @@ export default function ChatRight({
                       search.get("chatId"),
                       "messages"
                     ),
-                    {
-                      text: newMessage,
-                      photos,
-                      files: [x],
-                      createdAt: serverTimestamp(),
-                      formAuthor: myAuthor,
-                      recall: false,
-                      read: false,
-                    }
-                  );
+                    dataItem
+                  ).then(async (data) => {
+                    const washingtonRef = doc(
+                      db,
+                      "chat-rooms",
+                      search.get("chatId")
+                    );
+                    await updateDoc(washingtonRef, {
+                      lastMessage: {
+                        ...dataItem,
+                        messageId: data?.id,
+                        text: "[File]",
+                      },
+                      new: true,
+                    });
+                  });
                 });
               } else {
                 newPhoto.map(async (x) => {
+                  let dataItem = {
+                    text: newMessage,
+                    photos,
+                    files: [x],
+                    createdAt: serverTimestamp(),
+                    formAuthor: myAuthor,
+                    recall: false,
+                    read: false,
+                  };
                   await addDoc(collection(db, "chat-rooms"), {
                     member: [userRecieved, myAuthor],
                     createdAt: serverTimestamp(),
                   }).then(async (data) => {
                     await addDoc(
                       collection(db, "chat-rooms", `${data?.id}`, "messages"),
-                      {
-                        text: newMessage,
-                        photos,
-                        files: [x],
-                        createdAt: serverTimestamp(),
-                        formAuthor: myAuthor,
-                        recall: false,
-                        read: false,
-                      }
-                    );
+                      dataItem
+                    ).then(async (data) => {
+                      const washingtonRef = doc(
+                        db,
+                        "chat-rooms",
+                        `${data?.id}`
+                      );
+                      await updateDoc(washingtonRef, {
+                        lastMessage: {
+                          ...dataItem,
+                          messageId: data?.id,
+                          text: "[File]",
+                        },
+                        new: true,
+                      });
+                    });
                     router.push(`/chat?chatId=${data.id}`);
                   });
                 });
@@ -264,11 +331,12 @@ export default function ChatRight({
   const [imageList, setImageList] = useState([]);
   const [indexImage, setIndexImage] = useState(0);
   const [type, setType] = useState("image");
-  console.log("Right", typeFriend);
   return (
     <div
       className={`h-full  ${
-        sizes.width > 992 ? "basis-2/3" : `${mobile ? "basis-full" : "hidden"}`
+        sizes.width > 992
+          ? "basis-3/4"
+          : `${mobile ? "basis-full" : "hidden"} overflow-x-hidden`
       }`}
     >
       <div className="h-[75px] flex justify-between items-center px-[15px] pl-[0px] sm:px-[20px] border-b border-gray-300">
@@ -327,6 +395,59 @@ export default function ChatRight({
             <div className="flex items-center gap-x-3 pr-0 sm:pr-5">
               <IoIosCall color="#0084ff" size={28} />
               <HiVideoCamera color="#0084ff" size={28} />
+              <button className="group relative">
+                <IoInformationCircleSharp color="#0084ff" size={28} />
+                <div className="absolute z-[99999] hidden group-hover:flex flex-col justify-start items-start top-full right-0 bg-white shadow-sm shadow-gray-500 text-[10px] sm:text-xs font-medium w-[125px] rounded p-1">
+                  <Link
+                    href={``}
+                    onClick={async (e) => {
+                      e.preventDefault();
+                    }}
+                    className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left`}
+                  ></Link>
+                  <Popconfirm
+                    placement="topLeft"
+                    title="Xóa tin nhắn"
+                    description="Toàn bộ tin nhắn sẽ bị xóa vĩnh viễn. Bạn có chắc chắn xóa"
+                    onConfirm={() => {
+                      myMessage?.map(async (x) => {
+                        const washingtonRef = doc(
+                          db,
+                          "chat-rooms",
+                          search.get("chatId"),
+                          "messages",
+                          x?.id
+                        );
+                        await updateDoc(washingtonRef, {
+                          isDelete: arrayUnion({
+                            user: user?.uid,
+                          }),
+                        });
+                      });
+                      message.success("Đã xóa tin nhắn thành công!!");
+                    }}
+                    onCancel={() => {}}
+                    okText="Đồng ý"
+                    cancelText="Hủy bỏ"
+                    style={{
+                      width: 200,
+                    }}
+                  >
+                    <button className="border-0 hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left">
+                      Xóa tin nhắn
+                    </button>
+                  </Popconfirm>
+                  <Link
+                    href={``}
+                    onClick={(e) => {
+                      e.preventDefault();
+                    }}
+                    className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left`}
+                  >
+                    Báo cáo
+                  </Link>
+                </div>
+              </button>
             </div>
           </>
         )}
@@ -469,7 +590,7 @@ export default function ChatRight({
                 ?.filter(
                   (ele, ind) =>
                     ind ===
-                    myMessage?.findIndex(
+                    myMessage?.findLastIndex(
                       (elem) => elem.id === ele.id && elem.text === ele.text
                     )
                 )
@@ -482,7 +603,9 @@ export default function ChatRight({
                     item?.reply &&
                     authors?.find((item) => item?.authorId === abc);
 
-                  return (
+                  return item?.isDelete?.find((x) => x?.user === user?.uid) ? (
+                    <div></div>
+                  ) : (
                     <div
                       key={index}
                       className={`flex gap-x-2 cursor-pointer sm:gap-x-4 ${
@@ -583,6 +706,26 @@ export default function ChatRight({
                                               await updateDoc(washingtonRef, {
                                                 recall: true,
                                               });
+
+                                              if (
+                                                messages?.find(
+                                                  (x) =>
+                                                    x?.id ===
+                                                    search.get("chatId")
+                                                )?.lastMessage?.messageId ===
+                                                item?.id
+                                              ) {
+                                                const wRef = doc(
+                                                  db,
+                                                  "chat-rooms",
+                                                  search.get("chatId")
+                                                );
+                                                await updateDoc(wRef, {
+                                                  lastMessage: {
+                                                    recall: true,
+                                                  },
+                                                });
+                                              }
                                             }}
                                             className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left flex items-center gap-x-2 text-black`}
                                           >
@@ -677,11 +820,26 @@ export default function ChatRight({
                                               await updateDoc(washingtonRef, {
                                                 recall: true,
                                               });
-                                              console.log(
-                                                moment(item?.createdAt).isAfter(
-                                                  new Date()
-                                                )
-                                              );
+
+                                              if (
+                                                messages?.find(
+                                                  (x) =>
+                                                    x?.id ===
+                                                    search.get("chatId")
+                                                )?.lastMessage?.messageId ===
+                                                item?.id
+                                              ) {
+                                                const wRef = doc(
+                                                  db,
+                                                  "chat-rooms",
+                                                  search.get("chatId")
+                                                );
+                                                await updateDoc(wRef, {
+                                                  lastMessage: {
+                                                    recall: true,
+                                                  },
+                                                });
+                                              }
                                             }}
                                             className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left flex items-center gap-x-2 text-black`}
                                           >
@@ -984,11 +1142,24 @@ export default function ChatRight({
                                           await updateDoc(washingtonRef, {
                                             recall: true,
                                           });
-                                          console.log(
-                                            moment(item?.createdAt).isAfter(
-                                              new Date()
-                                            )
-                                          );
+                                          if (
+                                            messages?.find(
+                                              (x) =>
+                                                x?.id === search.get("chatId")
+                                            )?.lastMessage?.messageId ===
+                                            item?.id
+                                          ) {
+                                            const wRef = doc(
+                                              db,
+                                              "chat-rooms",
+                                              search.get("chatId")
+                                            );
+                                            await updateDoc(wRef, {
+                                              lastMessage: {
+                                                recall: true,
+                                              },
+                                            });
+                                          }
                                         }}
                                         className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left flex items-center gap-x-2 text-black`}
                                       >
@@ -1071,11 +1242,24 @@ export default function ChatRight({
                                           await updateDoc(washingtonRef, {
                                             recall: true,
                                           });
-                                          console.log(
-                                            moment(item?.createdAt).isAfter(
-                                              new Date()
-                                            )
-                                          );
+                                          if (
+                                            messages?.find(
+                                              (x) =>
+                                                x?.id === search.get("chatId")
+                                            )?.lastMessage?.messageId ===
+                                            item?.id
+                                          ) {
+                                            const wRef = doc(
+                                              db,
+                                              "chat-rooms",
+                                              search.get("chatId")
+                                            );
+                                            await updateDoc(wRef, {
+                                              lastMessage: {
+                                                recall: true,
+                                              },
+                                            });
+                                          }
                                         }}
                                         className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left flex items-center gap-x-2 text-black`}
                                       >
@@ -1508,7 +1692,17 @@ export default function ChatRight({
                       const myAuthor = authors?.find(
                         (x) => x?.userId === user?.uid
                       );
-                      if (myMessage.length > 0) {
+                      let dataItem = {
+                        text: newMessage,
+                        photos,
+                        files: [],
+                        createdAt: serverTimestamp(),
+                        formAuthor: myAuthor,
+                        recall: false,
+                        read: false,
+                        reply: chooseQuote || null,
+                      };
+                      if (myMessage?.length > 0) {
                         await addDoc(
                           collection(
                             db,
@@ -1516,17 +1710,22 @@ export default function ChatRight({
                             search.get("chatId"),
                             "messages"
                           ),
-                          {
-                            text: newMessage,
-                            photos,
-                            files: [],
-                            createdAt: serverTimestamp(),
-                            formAuthor: myAuthor,
-                            recall: false,
-                            read: false,
-                            reply: chooseQuote || null,
-                          }
-                        );
+                          dataItem
+                        ).then(async (data) => {
+                          const washingtonRef = doc(
+                            db,
+                            "chat-rooms",
+                            search.get("chatId")
+                          );
+                          await updateDoc(washingtonRef, {
+                            lastMessage: {
+                              messageId: data?.id,
+                              ...dataItem,
+                            },
+                            new: true,
+                          });
+                        });
+
                         setChooseQuote();
                       } else {
                         await addDoc(collection(db, "chat-rooms"), {
@@ -1540,19 +1739,23 @@ export default function ChatRight({
                               `${data?.id}`,
                               "messages"
                             ),
-                            {
-                              text: newMessage,
-                              photos,
-                              files: [],
-                              createdAt: serverTimestamp(),
-                              formAuthor: myAuthor,
-                              recall: false,
-                              read: false,
-                              reply: chooseQuote || null,
-                            }
-                          );
-                          setChooseQuote();
+                            dataItem
+                          ).then(async (dataMessage) => {
+                            const washingtonRef = doc(
+                              db,
+                              "chat-rooms",
+                              `${data?.id}`
+                            );
+                            await updateDoc(washingtonRef, {
+                              lastMessage: {
+                                messageId: dataMessage?.id,
+                                ...dataItem,
+                              },
+                              new: true,
+                            });
+                          });
                           router.push(`/chat?chatId=${data?.id}`);
+                          setChooseQuote();
                         });
                       }
                       setNewMessage("");

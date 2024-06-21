@@ -1,14 +1,24 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import { MdEmojiEvents } from "react-icons/md";
 import { auth } from "utils/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
+import dynamic from "next/dynamic";
+const SearchForm = dynamic(
+  () => {
+    return import("./SearchForm");
+  },
+  { ssr: false }
+);
 const Header = () => {
   const [user] = useAuthState(auth);
   const router = useRouter();
   const pathname = usePathname();
+  const [showSearchMobile, setShowSearchMobile] = useState(false);
+  const [showSearchMobileModal, setShowSearchMobileModal] = useState(false);
+  const [loadingSearch, setLoadingSearch] = useState(true);
   return (
     <nav
       class={`bg-white border-gray-200 dark:bg-gray-900 p-4 relative z-40 shadow-md shadow-gray-400`}
@@ -30,7 +40,7 @@ const Header = () => {
         </div>
         <div className=" flex items-center justify-end md:justify-between gap-x-2">
           <div className="flex items-center h-full gap-x-2">
-            <div
+            {/* <div
               onClick={() => router.push("/featured?tab=knights")}
               className="cursor-pointer inline-flex flex-col items-center justify-center px-2 hover:bg-gray-50 dark:hover:bg-gray-800 group"
             >
@@ -39,7 +49,15 @@ const Header = () => {
               ) : (
                 <MdEmojiEvents size={30} color="#9C9C9C" />
               )}
-            </div>
+            </div> */}
+            {!loadingSearch ? (
+              <div className="hidden md:flex gap-2 w-full">
+                <div className="h-6 bg-gray-200 rounded-md dark:bg-gray-700 w-36"></div>
+                <div className="h-6 bg-gray-200 rounded-md dark:bg-gray-700 w-6"></div>
+              </div>
+            ) : (
+              <SearchForm />
+            )}
             <div
               onClick={() => router.push(user ? "/account" : "/auth")}
               className={

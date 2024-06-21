@@ -41,6 +41,16 @@ export const createUserBookmark = (payload, token) => {
     });
 };
 
+export const createUserReport = (payload, token) => {
+  return request("api/user/report", payload, { method: "POST", token })
+    .then((data) => {
+      return data;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+
 export const createUserStories = (payload, token) => {
   return request("api/user/stories", payload, { method: "POST", token })
     .then((data) => {

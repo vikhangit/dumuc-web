@@ -25,7 +25,7 @@ import {
 import { getAuthors } from "@apis/posts";
 import dynamic from "next/dynamic";
 import { getProfile } from "@apis/users";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 const ChatLeft = dynamic(
   () => {
     return import("@components/Chat/Left");
@@ -49,7 +49,7 @@ export default function ChatGroup() {
   const [userRecieved, setUserRecieved] = useState();
   const [usingUser, setUsingUser] = useState();
   const [friendList, setFriendList] = useState([]);
-
+  const router = useRouter();
   useEffect(() => {
     getProfile(user?.accessToken).then((dataCall) => {
       setUsingUser(dataCall);
@@ -93,6 +93,7 @@ export default function ChatGroup() {
     return () => unsubscribe;
   }, []);
   const [activeMessage, setActiveMessage] = useState([]);
+
   useEffect(() => {
     if (search.get("chatId")) {
       const q = query(
@@ -100,20 +101,20 @@ export default function ChatGroup() {
         orderBy("createdAt", "asc")
       );
       const unsubscribe = onSnapshot(q, (querySnapshot) => {
-        let allMess = [];
+        let allMessData = [];
         querySnapshot.forEach((doc) =>
-          allMess.push({
+          allMessData.push({
             id: doc.id,
             ...doc.data(),
             createdAt: doc.data()?.createdAt?.toDate(),
           })
         );
-        setActiveMessage(allMess);
+        setActiveMessage(allMessData);
         setMobile(true);
       });
       return () => unsubscribe;
     } else {
-      setActiveMessage([]);
+      setActiveMessage();
     }
   }, [search]);
   const [authors, setAuthors] = useState();
@@ -146,13 +147,12 @@ export default function ChatGroup() {
   useEffect(() => {
     if (userRecieved) {
       const type = checkFriendType(userRecieved?.authorId);
-      console.log("aaaaa", type);
       setTypeFriend(type);
     }
   }, [userRecieved]);
-  console.log(console.log("bbbb", typeFriend));
+  console.log("12312312312", activeMessage);
   return (
-    <main className="w-full h-full fixed left-0 top-0">
+    <main className="w-full h-full fixed left-0 top-0 overflow-x-hidden">
       <div
         className={`w-full h-full relative flex ${
           sizes.width > 992 ? "flex-row" : "flex-col"
@@ -174,6 +174,7 @@ export default function ChatGroup() {
           setFriendListp={setFriendList}
           typeFriend={typeFriend}
           setTypeFriend={setTypeFriend}
+          setActiveMessage={setActiveMessage}
         />
         <ChatRight
           userRecieved={userRecieved}
@@ -182,7 +183,7 @@ export default function ChatGroup() {
           setMobile={setMobile}
           messages={messages}
           authors={authors}
-          myMessage={activeMessage}
+          activeMessage={activeMessage}
           friendList={friendList}
           user={user}
           usingUser={usingUser}

@@ -20,8 +20,8 @@ const FeedItems = ({
   usingUser,
   onCallback,
 }) => {
-  const [items, setItems] = useState(data?.items);
   const [hasLoadMore, setHasLoadMore] = useState(true);
+  const [items, setItems] = useState(data?.items);
   useEffect(() => {
     setItems(data?.items?.sort((a, b) => b?.no - a?.no));
   }, [data]);
@@ -82,13 +82,14 @@ const FeedItems = ({
           {[...items]
             ?.sort((a, b) => b.no - a.no)
             ?.map((item, index) =>
-              user?.email === item?.author?.user?.email ? (
+              user?.uid === item?.userId ? (
                 <FeedItem
                   key={index}
                   data={item}
                   index={index}
                   user={user}
                   usingUser={usingUser}
+                  authors={authors}
                 />
               ) : !item?.isPrivate ? (
                 <FeedItem
@@ -97,6 +98,7 @@ const FeedItems = ({
                   index={index}
                   user={user}
                   usingUser={usingUser}
+                  authors={authors}
                 />
               ) : (
                 <div key={index}></div>
@@ -113,6 +115,7 @@ const FeedItems = ({
             index={index}
             user={user}
             usingUser={usingUser}
+            authors={authors}
           />
         ))}
     </div>

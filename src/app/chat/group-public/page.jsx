@@ -13,6 +13,7 @@ import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
 import { getAuthors } from "@apis/posts";
 import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
+import { getProfile } from "@apis/users";
 const ChatGroupLeft = dynamic(
   () => {
     return import("@components/Chat/GroupPublic/GroupLeft");
@@ -35,6 +36,12 @@ export default function Chat() {
   const [messages, setMessages] = useState([]);
   const [userRecieved, setUserRecieved] = useState();
   const [activeGroup, setActiveGroup] = useState();
+  const [usingUser, setUsingUser] = useState();
+  useEffect(() => {
+    getProfile(user?.accessToken).then((dataCall) => {
+      setUsingUser(dataCall);
+    });
+  }, [user]);
   useEffect(() => {
     if (sizes.width < 992) {
       setShow(-1);
@@ -74,12 +81,10 @@ export default function Chat() {
     });
     return () => unsubscribe;
   }, []);
-  console.log("123", messages);
   const [authors, setAuthors] = useState();
   useEffect(() => {
     getAuthors().then((data) => setAuthors(data));
   }, []);
-  console.log(messages);
   return (
     <main className="w-full h-full fixed left-0 top-0">
       <div
@@ -96,6 +101,8 @@ export default function Chat() {
           setMobile={setMobile}
           messages={messages}
           authors={authors}
+          user={user}
+          usingUser={usingUser}
         />
         <ChatGroupRight
           userRecieved={userRecieved}
@@ -106,6 +113,8 @@ export default function Chat() {
           setMobile={setMobile}
           messages={messages}
           authors={authors}
+          user={user}
+          usingUser={usingUser}
         />
       </div>
       {/* <div className={sizes.width > 411 ? "mb-24" :  "mb-16"} /> */}

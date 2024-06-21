@@ -16,6 +16,7 @@ export const Comments = ({
   setOpenLogin,
 }) => {
   const [qoute, setQoute] = useState([]);
+  const [showChild, setShowChild] = useState(true);
   console.log(comments);
 
   return (
@@ -29,11 +30,15 @@ export const Comments = ({
         onCallback={onCallback}
         setOpenLogin
       />
-      <div className="mt-[10px]">
+      <div className="mt-[20px]">
+        {/* {item?.children && item?.children.length > 0 && (
+        <div className="w-[2px] h-full absolute top-6 sm:top-8 xl:top-10 left-5 bg-black"></div>
+      )} */}
         {comments?.length > 0 &&
           comments.map((comment, index) => {
             return (
               <Comment
+                showChild={showChild}
                 key={comment?.commentId}
                 comment={comment}
                 feed={feed}

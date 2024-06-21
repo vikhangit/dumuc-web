@@ -69,7 +69,7 @@ export default function ModalAddFriend({
           } else if (friendType === 4) {
             typeArr.push({
               author: x?.authorId,
-              type: 3,
+              type: 4,
             });
             setTypeArr([...typeArr]);
           } else {
@@ -225,7 +225,7 @@ export default function ModalAddFriend({
                                   });
                                   setTypeArr([...typeArr]);
                                   message.success("Đã gữi yêu cầu kết bạn.");
-                                  setFriendList(usingUser?.friendList);
+                                  // setFriendList(usingUser?.friendList);
                                 }}
                                 type="button"
                                 class="flex items-center gap-x-1 px-2 py-1 text-xs font-medium text-center text-white bg-[#c80000] rounded-[4px] hover:brightness-110 focus:ring-4 focus:outline-none focus:ring-blue-300"
@@ -276,7 +276,7 @@ export default function ModalAddFriend({
                                   });
                                   setTypeArr([...typeArr]);
                                   message.success("Đã hủy kết bạn.");
-                                  setFriendList(usingUser?.friendList);
+                                  // setFriendList(usingUser?.friendList);
                                 }}
                                 type="button"
                                 class="flex items-center gap-x-1 px-2 py-1 text-xs font-medium text-center text-white bg-[#c80000] rounded-[4px] hover:brightness-110 focus:ring-4 focus:outline-none focus:ring-blue-300"
@@ -301,7 +301,7 @@ export default function ModalAddFriend({
                                     href={``}
                                     onClick={async (e) => {
                                       e.preventDefault();
-                                      deleteAddFriend(
+                                      await deleteAddFriend(
                                         {
                                           authorId: x?.authorId,
                                         },
@@ -313,24 +313,24 @@ export default function ModalAddFriend({
                                             authorUserId: x?.userId,
                                           },
                                           user?.accessToken
-                                        )
-                                          .then((e) => console.log(e))
-                                          .catch((e) => console.log(e));
+                                        );
                                       });
-                                      sendRequestAddFriend(
+                                      await sendRequestAddFriend(
                                         {
                                           authorId: x?.authorId,
                                           status: 2,
                                         },
                                         user?.accessToken
-                                      );
-                                      receiveRequestAddFriend(
-                                        {
-                                          authorUserId: x?.userId,
-                                          status: 2,
-                                        },
-                                        user?.accessToken
-                                      );
+                                      ).then(() => {
+                                        receiveRequestAddFriend(
+                                          {
+                                            authorUserId: x?.userId,
+                                            status: 2,
+                                          },
+                                          user?.accessToken
+                                        );
+                                      });
+
                                       const findIndex = typeArr.findIndex(
                                         (ab) => ab?.author === x?.authorId
                                       );
@@ -342,7 +342,7 @@ export default function ModalAddFriend({
                                       });
                                       setTypeArr([...typeArr]);
                                       message.success("Bạn đã đồng ý kết bạn");
-                                      setFriendList(usingUser?.friendList);
+                                      // setFriendList(usingUser?.friendList);
                                     }}
                                     className="hover:bg-[#c80000] text-black hover:text-white w-full rounded px-1.5 py-0.5 text-left"
                                   >

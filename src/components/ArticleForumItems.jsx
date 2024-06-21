@@ -54,7 +54,7 @@ const ArticleForumItems = ({ data, user, authorId, category, tagId }) => {
           {[...posts]
             ?.sort((a, b) => b.no - a.no)
             .map((item, index) =>
-              user?.email === item?.author?.user?.email ? (
+              user?.uid === item?.userId ? (
                 <ArticeForumChild key={index} item={item} />
               ) : !item?.isPrivate ? (
                 <ArticeForumChild key={index} item={item} />

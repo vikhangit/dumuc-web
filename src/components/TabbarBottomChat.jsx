@@ -29,12 +29,7 @@ export default function TabbarBottomChat({ active = "home" }) {
       <div className="grid h-full mx-auto grid-cols-5 font-medium">
         <div className="w-auto xl:w-[280px] flex justify-center items-center pl-2">
           <div class="cursor-pointer inline-flex flex-col items-center justify-center px-0 sm:px-2 hover:bg-gray-50 dark:hover:bg-gray-800 group">
-            <a
-              onClick={(e) => {
-                e.preventDefault();
-                router.push("/");
-              }}
-            >
+            <Link href={"/"}>
               <Image
                 width={0}
                 height={0}
@@ -43,7 +38,7 @@ export default function TabbarBottomChat({ active = "home" }) {
                 class="w-full h-8 h-8 cursor-pointer"
                 alt="DuMuc"
               />
-            </a>
+            </Link>
             <span class="text-base md:text-lg font-semibold text-gray-500 bottomTabBarHiden1">
               Trang chủ
             </span>

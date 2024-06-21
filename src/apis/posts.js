@@ -236,3 +236,8 @@ export const createPostView = (payload) => {
       return err;
     });
 };
+
+
+export const deletePostByUser = async (postId, token) => {
+  return request(`api/user/post/${postId}`, {}, { method: "DELETE", token })
+};

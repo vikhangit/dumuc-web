@@ -8,6 +8,7 @@ import {
   MdArtTrack,
   MdContactless,
   MdFavorite,
+  MdOutlineArrowRight,
   MdOutlineBookmarks,
   MdOutlineExitToApp,
   MdOutlineFileCopy,
@@ -15,6 +16,7 @@ import {
   MdOutlinePermContactCalendar,
   MdOutlinePhoneInTalk,
   MdOutlinePrivacyTip,
+  MdOutlineSettings,
   MdOutlineSettingsAccessibility,
 } from "react-icons/md";
 
@@ -36,10 +38,8 @@ import dynamic from "next/dynamic";
 const AccountPage = () => {
   const router = useRouter();
   const [profile, setProfile] = useState();
-
   //require login
   const [user, loading] = useAuthState(auth);
-
   // const [setUser, updating] = useUpdateProfile(auth);
   const [signOut, loadingSignout, error] = useSignOut(auth);
   useEffect(() => {
@@ -50,14 +50,9 @@ const AccountPage = () => {
   }, [user, loading]);
 
   useEffect(() => {
-    (async () => {
-      try {
-        if (user) {
-          let profile = await getProfile(user?.accessToken);
-          setProfile(profile);
-        }
-      } catch (e) {}
-    })();
+    getProfile(user?.accessToken).then((profile) => {
+      setProfile(profile);
+    });
   }, [user]);
 
   return (
@@ -79,14 +74,7 @@ const AccountPage = () => {
               <MdArtTrack size={24} />
               Xem trang cá nhân
             </div>
-            <Image
-              alt=""
-              src="/icons/account/MdOutlineArrowRight.png"
-              width={0}
-              height={0}
-              sizes="100vw"
-              className="w-8 h-8"
-            />
+            <MdOutlineArrowRight size={32} />
           </Link>
           <Link
             href={"/account/profile"}
@@ -96,14 +84,7 @@ const AccountPage = () => {
               <MdOutlinePermContactCalendar size={20} />
               Quản lý tài khoản
             </div>
-            <Image
-              alt=""
-              src="/icons/account/MdOutlineArrowRight.png"
-              width={0}
-              height={0}
-              sizes="100vw"
-              className="w-8 h-8"
-            />
+            <MdOutlineArrowRight size={32} />
           </Link>
           <Link
             href={"/account/library/bookmark"}
@@ -113,14 +94,7 @@ const AccountPage = () => {
               <MdOutlineBookmarks size={20} />
               Thông tin đã lưu
             </div>
-            <Image
-              alt=""
-              src="/icons/account/MdOutlineArrowRight.png"
-              width={0}
-              height={0}
-              sizes="100vw"
-              className="w-8 h-8"
-            />
+            <MdOutlineArrowRight size={32} />
           </Link>
           <Link
             href={"/account/library/following"}
@@ -130,14 +104,7 @@ const AccountPage = () => {
               <MdFavorite size={20} />
               Đang theo dõi
             </div>
-            <Image
-              alt=""
-              src="/icons/account/MdOutlineArrowRight.png"
-              width={0}
-              height={0}
-              sizes="100vw"
-              className="w-8 h-8"
-            />
+            <MdOutlineArrowRight size={32} />
           </Link>
         </div>
         <div className="rounded-3xl shadow-md shadow-gray-400 px-4 sm:px-8  py-6 bg-white mb-3">
@@ -149,14 +116,17 @@ const AccountPage = () => {
               <MdOutlineFileCopy size={20} />
               Bài viết đã đăng
             </div>
-            <Image
-              alt=""
-              src="/icons/account/MdOutlineArrowRight.png"
-              width={0}
-              height={0}
-              sizes="100vw"
-              className="w-8 h-8"
-            />
+            <MdOutlineArrowRight size={32} />
+          </Link>
+          <Link
+            href={"/account/setting"}
+            className="relative inline-flex justify-between items-center w-full px-4 py-2 text-sm sm:text-base  text-[#424141B2] font-medium border-b border-[#9C9C9CB2] hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700"
+          >
+            <div className="flex items-center gap-x-4">
+              <MdOutlineSettings size={20} />
+              Cài đặt
+            </div>
+            <MdOutlineArrowRight size={32} />
           </Link>
           {/* <Link
           href={"/account/library/comment"}
@@ -204,14 +174,7 @@ const AccountPage = () => {
               <MdOutlineExitToApp size={20} />
               Đăng xuất
             </div>
-            <Image
-              alt=""
-              src="/icons/account/MdOutlineArrowRight.png"
-              width={0}
-              height={0}
-              sizes="100vw"
-              className="w-8 h-8"
-            />
+            <MdOutlineArrowRight size={32} />
           </button>
           <Link
             href={``}

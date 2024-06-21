@@ -13,6 +13,7 @@ import { Spinner } from "flowbite-react";
 import {
   addDoc,
   arrayRemove,
+  arrayUnion,
   collection,
   doc,
   onSnapshot,
@@ -40,6 +41,7 @@ export default function ModalAbout({
   const userLeader = authors?.find((x) => x?.userId === about?.leader);
   const [avatar, setAvatar] = useState(about?.avatar);
   const [isEditName, setIsEditName] = useState(false);
+  const [memberList, setMemberList] = useState();
   const [name, setName] = useState(about?.name);
   const refImage = useRef(null);
   const [loadingAvatar, setLoadigAvatar] = useState(false);
@@ -86,7 +88,13 @@ export default function ModalAbout({
   return (
     <Modal
       visible={visible}
-      title={type === "about" ? `Thông tin nhóm` : "Thành viên nhóm"}
+      title={
+        type === "about"
+          ? `Thông tin nhóm`
+          : type === "member"
+          ? "Thành viên nhóm"
+          : "Yêu cầu tham gia"
+      }
       onCancel={() => {
         onCancel();
         setIsEditName(false);
@@ -298,10 +306,10 @@ export default function ModalAbout({
                           </Link>
                           {user.uid !== item?.user && (
                             <Link
-                              href={`/author/${author?.slug}/${author?.authorId}`}
+                              href={`/chat?friendId=${author?.authorId}`}
                               className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left text-black`}
                             >
-                              Chat riêng
+                              Nhắn tin riêng
                             </Link>
                           )}
                           {user.uid === about?.leader &&
@@ -587,6 +595,102 @@ export default function ModalAbout({
                           </button>
                         </div>
                       </button>
+                    </div>
+                  </div>
+                );
+              })}
+          </div>
+        )}
+
+        {type === "request" && (
+          <div>
+            {about?.requestList
+              // ?.filter(
+              //   (ele, ind) =>
+              //     ind ===
+              //     about?.member?.findIndex((elem) => elem?.user === ele?.user)
+              // )
+              ?.map((item, index) => {
+                const author = authors?.find((x) => x?.userId === item?.user);
+                return (
+                  <div
+                    key={index}
+                    className={` rounded-md flex items-center gap-x-2 pl-[15px] pr-2 py-[10px] mt-[10px] cursor-pointer`}
+                  >
+                    <div className="flex justify-between w-full items-center">
+                      <div className="flex items-center gap-x-4">
+                        <Image
+                          src={
+                            author?.user?.photo &&
+                            author?.user?.photo?.length > 0
+                              ? author?.user?.photo
+                              : "/dumuc/avatar.png"
+                          }
+                          width={0}
+                          height={0}
+                          sizes="100vw"
+                          className="w-[45px] h-[45px] rounded-full"
+                        />
+                        <div>
+                          <Link href="" className="text-base">
+                            {author?.name}
+                          </Link>
+                          {item?.user === about?.leader && (
+                            <p className="text-[13px] text-[#00000080] mt-1">
+                              Trưởng nhóm
+                            </p>
+                          )}
+                          {item?.user === about?.deputyLeader && (
+                            <p className="text-[13px] text-[#00000080] mt-1">
+                              Phó nhóm
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      <div>
+                        <button
+                          onClick={async () => {
+                            const washingtonRef = doc(
+                              db,
+                              "chat-groups",
+                              search.get("groupId")
+                            );
+                            await updateDoc(washingtonRef, {
+                              member: arrayUnion({
+                                user: item?.user,
+                                createdBy: user?.uid,
+                              }),
+                              requestList: arrayRemove({
+                                user: item?.user,
+                              }),
+                            }).then(() => {
+                              onCancel();
+                            });
+                          }}
+                          className="cursor-pointer bg-indigo-600 text-white px-[10px] font-semibold border border-indigo-600 hover:bg-white hover:text-indigo-600 "
+                        >
+                          Phê duyêt
+                        </button>
+                        <button
+                          onClick={async () => {
+                            const washingtonRef = doc(
+                              db,
+                              "chat-groups",
+                              search.get("groupId")
+                            );
+                            await updateDoc(washingtonRef, {
+                              requestList: arrayRemove({
+                                user: item?.user,
+                              }),
+                            }).then(() => {
+                              onCancel();
+                            });
+                          }}
+                          className="cursor-pointer bg-[#C82027] text-white px-[10px] font-semibold  border border-[#C82027] hover:bg-white hover:text-[#C82027] ml-2 "
+                        >
+                          Hủy bỏ
+                        </button>
+                      </div>
                     </div>
                   </div>
                 );

@@ -181,6 +181,10 @@ export const deleteFeedByUser = async (feedId, token) => {
   return request(`api/user/feed/${feedId}`, {}, { method: "DELETE", token })
 };
 
+export const deleteStoryByUser = async (storyId, token) => {
+  return request(`api/user/story/${storyId}`, {}, { method: "DELETE", token })
+};
+
 export const getFeedsByUser = (token) => {
   return request(`api/user/feeds`, {}, { method: "GET", token })
     .then((result) => {

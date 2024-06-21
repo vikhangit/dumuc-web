@@ -22,8 +22,9 @@ export default function ChatGroupLeft({
   setMobile,
   messages,
   authors,
+  user,
+  usingUser,
 }) {
-  const [user] = useAuthState(auth);
   const sizes = useWindowSize();
   const search = useSearchParams();
   const [groupTo, setGroupTo] = useState();
@@ -32,15 +33,10 @@ export default function ChatGroupLeft({
   const [groupList, setGroupList] = useState([]);
   const [valueSearch, setValueSearch] = useState("");
   const [searchFunction, setSearchFunction] = useState(false);
-  const [usingUser, setUsingUser] = useState();
   const [activeList, setActiveList] = useState();
   const [avatar, setAvatar] = useState([]);
   const [activeMessage, setActiveMessage] = useState([]);
-  useEffect(() => {
-    getProfile(user?.accessToken).then((dataCall) => {
-      setUsingUser(dataCall);
-    });
-  }, [user]);
+
   useEffect(() => {
     setGroupList(messages);
   }, [messages]);
@@ -187,145 +183,15 @@ export default function ChatGroupLeft({
           groupList
             ?.filter((x) => x.isPrivate)
             .map((item, i) => {
-              const findMess = item?.messages?.filter((x) => !x?.notify);
-              const author = authors?.find(
+              const findMess = item?.messages?.filter(
                 (x) =>
-                  x?.authorId ===
-                  findMess[findMess?.length - 1]?.formAuthor?.authorId
+                  !x?.notify && !x?.isDelete?.find((n) => n?.user === user?.uid)
               );
-              if (item.id === search.get("groupId")) {
-                if (item?.member?.find((x) => x?.user === user?.uid)) {
-                  return (
-                    <div
-                      key={i}
-                      onClick={() => {
-                        // setActiveGroup(item);
-                        setMobile(true);
-                        router.push(`/chat/group?groupId=${item?.id}`);
-                      }}
-                      className={`${
-                        groupTo?.id === item?.id
-                          ? "bg-[#0084ff] bg-opacity-30"
-                          : "bg-white"
-                      } rounded-md shadow-md shadow-gray-400 flex items-center gap-x-2 pl-[15px] pr-2 py-[20px] mt-[10px] cursor-pointer`}
-                    >
-                      <div className="w-[45px] h-[45px] rounded-full flex justify-center items-center border border-gray-400">
-                        <Image
-                          src={
-                            item?.avatar?.length > 0
-                              ? item?.avatar
-                              : "/dumuc/avatar.png"
-                          }
-                          width={0}
-                          height={0}
-                          sizes="100vw"
-                          className="w-full h-full rounded-full"
-                        />
-                      </div>
 
-                      <div className="flex justify-between w-full">
-                        <div>
-                          <Link href="" className="text-base">
-                            {item?.name}
-                          </Link>
-                          {author ? (
-                            <p className="text-[13px] text-gray-600 mt-2">
-                              {`${author?.name}: ${
-                                findMess[findMess?.length - 1]?.files?.length >
-                                0
-                                  ? "[File]"
-                                  : findMess[findMess?.length - 1]?.photos
-                                      ?.length > 0
-                                  ? "[Hình ảnh]"
-                                  : findMess[findMess?.length - 1]?.text
-                                      ?.length > 0
-                                  ? findMess[findMess?.length - 1]?.text
-                                  : "Chưa có tin nhắn mới"
-                              }`}
-                            </p>
-                          ) : (
-                            <p className="text-[13px] text-gray-600 mt-2 italic">
-                              Chưa có tin nhắn mới
-                            </p>
-                          )}
-                        </div>
-                        <span className="text-[13px] text-gray-600">
-                          {findMess?.length > 0 &&
-                            getTimeChat(
-                              findMess[findMess?.length - 1]?.createdAt
-                            )}
-                        </span>
-                      </div>
-                    </div>
-                  );
-                }
-              } else {
-                if (item?.member?.find((x) => x?.user === user?.uid)) {
-                  return (
-                    <div
-                      key={i}
-                      onClick={() => {
-                        // setActiveGroup(item);
-                        setMobile(true);
-                        router.push(`/chat/group?groupId=${item?.id}`);
-                      }}
-                      className={`${
-                        groupTo?.id === item?.id
-                          ? "bg-[#0084ff] bg-opacity-30"
-                          : "bg-white"
-                      } rounded-md shadow-md shadow-gray-400 flex items-center gap-x-2 pl-[15px] pr-2 py-[20px] mt-[10px] cursor-pointer`}
-                    >
-                      <div className="w-[45px] h-[45px] rounded-full flex justify-center items-center border border-gray-400">
-                        <Image
-                          src={
-                            item?.avatar?.length > 0
-                              ? item?.avatar
-                              : "/dumuc/avatar.png"
-                          }
-                          width={0}
-                          height={0}
-                          sizes="100vw"
-                          className="w-full h-full rounded-full"
-                        />
-                      </div>
+              const author = authors?.find(
+                (x) => x?.authorId === item?.lastMessage?.formAuthor?.authorId
+              );
 
-                      <div className="flex justify-between w-full">
-                        <div>
-                          <Link href="" className="text-base">
-                            {item?.name}
-                          </Link>
-                          {author ? (
-                            <p className="text-[13px] text-gray-600 mt-2">
-                              {`${author?.name}: ${
-                                findMess[findMess?.length - 1]?.files?.length >
-                                0
-                                  ? "[File]"
-                                  : findMess[findMess?.length - 1]?.photos
-                                      ?.length > 0
-                                  ? "[Hình ảnh]"
-                                  : findMess[findMess?.length - 1]?.text
-                                      ?.length > 0
-                                  ? findMess[findMess?.length - 1]?.text
-                                  : "Chưa có tin nhắn mới"
-                              }`}
-                            </p>
-                          ) : (
-                            <p className="text-[13px] text-gray-600 mt-2 italic">
-                              Chưa có tin nhắn mới
-                            </p>
-                          )}
-                        </div>
-                        <span className="text-[13px] text-gray-600">
-                          {findMess?.length > 0 &&
-                            getTimeChat(
-                              findMess[findMess?.length - 1]?.createdAt
-                            )}
-                        </span>
-                      </div>
-                    </div>
-                  );
-                }
-              }
               if (item?.member?.find((x) => x?.user === user?.uid)) {
                 return (
                   <div
@@ -339,51 +205,63 @@ export default function ChatGroupLeft({
                       groupTo?.id === item?.id
                         ? "bg-[#0084ff] bg-opacity-30"
                         : "bg-white"
-                    } rounded-md shadow-md shadow-gray-400 flex items-center gap-x-2 pl-[15px] pr-2 py-[20px] mt-[10px] cursor-pointer`}
+                    } rounded-md shadow-md shadow-gray-400 flex items-center gap-x-2 pl-[15px] pr-2 py-[12px] mt-[10px] cursor-pointer`}
                   >
                     <div className="w-[45px] h-[45px] rounded-full flex justify-center items-center border border-gray-400">
-                      {item?.avatar?.length > 0 && item?.avatar?.length > 0 && (
-                        <Image
-                          src={
-                            item?.avatar?.length > 0
-                              ? item?.avatar
-                              : "/dumuc/avatar.png"
-                          }
-                          width={0}
-                          height={0}
-                          sizes="100vw"
-                          className="w-full h-full rounded-full"
-                        />
-                      )}
+                      <Image
+                        src={
+                          item?.avatar?.length > 0
+                            ? item?.avatar
+                            : "/dumuc/avatar.png"
+                        }
+                        width={0}
+                        height={0}
+                        sizes="100vw"
+                        className="w-full h-full rounded-full"
+                      />
                     </div>
 
-                    <div className="flex justify-between w-full">
-                      <div>
+                    <div className=" w-full">
+                      <div className="flex justify-between w-full">
                         <Link href="" className="text-base">
                           {item?.name}
                         </Link>
-                        {author && (
-                          <p className="text-[13px] text-gray-600 mt-2">
-                            {`${author?.name}: ${
-                              findMess[findMess?.length - 1]?.files?.length > 0
-                                ? "[File]"
-                                : findMess[findMess?.length - 1]?.photos
-                                    ?.length > 0
-                                ? "[Hình ảnh]"
-                                : findMess[findMess?.length - 1]?.text?.length >
-                                  0
-                                ? findMess[findMess?.length - 1]?.text
-                                : "Chưa có tin nhắn mới"
-                            }`}
-                          </p>
+
+                        {item?.member?.find((x) => x?.user === user?.uid) && (
+                          <span className="text-[13px] text-gray-600">
+                            {item?.lastMessage &&
+                              getTimeChat(
+                                item?.lastMessage?.createdAt?.toDate()
+                              )}
+                          </span>
                         )}
                       </div>
-                      <span className="text-[13px] text-gray-600">
-                        {findMess?.length > 0 &&
-                          getTimeChat(
-                            findMess[item?.messages?.length - 1]?.createdAt
+                      {item?.member?.find((x) => x?.user === user?.uid) && (
+                        <div className="flex justify-between w-full">
+                          {item?.lastMessage ? (
+                            <>
+                              <p className="text-[13px] text-gray-600 mt-0.5">
+                                {item?.lastMessage?.recall ? (
+                                  <span className="italic">
+                                    Tin nhắn đã thu hồi
+                                  </span>
+                                ) : (
+                                  `${author?.name}: ${item?.lastMessage?.text}`
+                                )}
+                              </p>
+                              {item?.new === true &&
+                                item?.lastMessage?.formAuthor?.userId !==
+                                  user?.uid && (
+                                  <div className="rounded-full w-[10px] h-[10px] bg-[#C82027] text-white text-xs flex justify-center items-center"></div>
+                                )}
+                            </>
+                          ) : (
+                            <p className="text-[13px] text-gray-600 mt-0.5 italic">
+                              Chưa có tin nhắn mới
+                            </p>
                           )}
-                      </span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 );

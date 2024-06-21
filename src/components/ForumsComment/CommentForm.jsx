@@ -17,7 +17,6 @@ export default function CommentForm({
   parentId,
   post,
   replyToName,
-  user,
   showReplyBox,
   setShowReplyBox,
   qoute,
@@ -27,6 +26,7 @@ export default function CommentForm({
   onCallback,
   completed,
 }) {
+  const [user] = useAuthState(auth);
   const router = useRouter();
   const [photos, setPhotos] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -78,10 +78,10 @@ export default function CommentForm({
           sizes="100vw"
           src={user?.photoURL || "/dumuc/avatar.png"}
           alt=""
-          className="rounded-full w-8 h-8"
+          className="rounded-full w-10 h-10 overflow-hidden relative z-30"
         />
         <div
-          className={`flex flex-col cursor-text w-[calc(100%-40px)] border border-gray-300 rounded-lg p-2.5 bg-gray-100 ${
+          className={`flex flex-col cursor-text w-[calc(100%-50px)] border border-gray-300 rounded-lg p-2.5 bg-gray-100 ${
             !focusComment && "flex"
           }`}
         >
@@ -168,7 +168,7 @@ export default function CommentForm({
               setBody(e.target.value);
             }}
             id="message"
-            rows={focusComment ? "2" : "1"}
+            rows={2}
             class="block w-full p-0 text-sm text-gray-900 border-0 shadow-none bg-gray-100"
             style={{
               boxShadow: "none",

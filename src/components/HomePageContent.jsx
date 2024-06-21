@@ -79,7 +79,7 @@ const HomePageContent = () => {
                 </div>
               </div>
               <div
-                className={`rounded-lg  shadow-gray-400 w-[280px]${
+                className={`rounded-lg hidden  xl:block shadow-gray-400 w-[280px]${
                   requestFr?.length > 0 ? "shadow bg-white py-2 px-2 mt-4" : ""
                 }`}
               >
@@ -105,7 +105,7 @@ const HomePageContent = () => {
                 </div>
               </div>
               <div>
-                <div className="mt-4 block xl:hidden">
+                <div className={`mt-4 block xl:hidden`}>
                   <div className="">
                     <RequestFriend
                       items={requestFr}
@@ -129,6 +129,7 @@ const HomePageContent = () => {
                     }}
                     myFollow={myFollow}
                     myFriend={myFriend}
+                    authors={authors}
                   />
                 }
               </div>

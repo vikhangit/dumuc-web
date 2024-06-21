@@ -53,7 +53,7 @@ export default function ModalAbout({
   useEffect(() => {
     setAvatar(about?.avatar);
     setName(about?.name);
-  }, []);
+  }, [about]);
   const handleChangeIamge = (e) => {
     setLoadigAvatar(true);
     if (e.target.files[0]) {
@@ -85,6 +85,8 @@ export default function ModalAbout({
       });
     }
   };
+
+  console.log("Groupppppppppppppppppppppp", about);
   return (
     <Modal
       visible={visible}
@@ -303,7 +305,7 @@ export default function ModalAbout({
                               href={`/chat?friendId=${author?.authorId}`}
                               className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left text-black`}
                             >
-                              Chat riêng
+                              Nhắn tin riêng
                             </Link>
                           )}
                           {user.uid === about?.leader &&

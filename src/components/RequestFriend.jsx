@@ -65,36 +65,38 @@ export default function RequestFriend({ items, onCallback, authors, user }) {
                     </div>
                     <div className="w-full flex gap-x-2 mt-2">
                       <button
-                        onClick={(e) => {
+                        onClick={async (e) => {
                           e.preventDefault();
                           friendList.splice(index, 1);
                           setFriendList([...friendList]);
-                          deleteAddFriend(
+                          await deleteAddFriend(
                             {
                               authorId: item?.author?.authorId,
                             },
                             user?.accessToken
-                          );
-                          deleteRecieveFriend(
-                            {
-                              authorUserId: item?.author?.userId,
-                            },
-                            user?.accessToken
-                          );
-                          sendRequestAddFriend(
+                          ).then(() => {
+                            deleteRecieveFriend(
+                              {
+                                authorUserId: item?.author?.userId,
+                              },
+                              user?.accessToken
+                            );
+                          });
+                          await sendRequestAddFriend(
                             {
                               authorId: item?.author?.authorId,
                               status: 2,
                             },
                             user?.accessToken
-                          );
-                          receiveRequestAddFriend(
-                            {
-                              authorUserId: item?.author?.userId,
-                              status: 2,
-                            },
-                            user?.accessToken
-                          );
+                          ).then(() => {
+                            receiveRequestAddFriend(
+                              {
+                                authorUserId: item?.author?.userId,
+                                status: 2,
+                              },
+                              user?.accessToken
+                            );
+                          });
 
                           message.success("Đã chấp nhận yêu cầu kết bạn");
                         }}
