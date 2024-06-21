@@ -88,7 +88,7 @@ export default function ModalAddFriend({
     if (value.trim() === "") {
       setFindAuthor([]);
     } else {
-      const searchAuthor = authors.filter(
+      const searchAuthor = authors?.filter(
         (x) =>
           x?.name
             ?.trim()

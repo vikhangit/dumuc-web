@@ -53,9 +53,9 @@ export default function ChatLeft({
     setFriendList(friendListP?.filter((x) => x.status === 2));
   }, [friendListP]);
   useEffect(() => {
+    setMobile(true);
     if (search.get("friendId")) {
       // setSearchFunction(true);
-      setMobile(true);
       const author = authors?.find(
         (x) => x?.authorId === search.get("friendId")
       );
@@ -156,8 +156,9 @@ export default function ChatLeft({
       item?.member?.find((x) => x?.userId === author?.userId)
     );
     if (!findChat) {
-      const type = checkFriendType(author?.authorId);
-      setTypeFriend(type);
+      // const type = checkFriendType(author?.authorId);
+      // setTypeFriend(type);
+      setMobile(true);
       setUserRecieved(author);
     } else {
       setUserRecieved();
