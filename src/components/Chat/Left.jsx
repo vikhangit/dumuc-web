@@ -53,7 +53,6 @@ export default function ChatLeft({
     setFriendList(friendListP?.filter((x) => x.status === 2));
   }, [friendListP]);
   useEffect(() => {
-    setMobile(true);
     if (search.get("friendId")) {
       // setSearchFunction(true);
       const author = authors?.find(
@@ -65,10 +64,9 @@ export default function ChatLeft({
       const findChat = findChat2?.find((item) =>
         item?.member?.find((x) => x?.userId === author?.userId)
       );
+      setMobile(true);
       if (!findChat) {
         setUserRecieved(author);
-        const type = checkFriendType(author?.authorId);
-        setTypeFriend(type);
       } else {
         setUserRecieved();
         router.push(`/chat?chatId=${findChat?.id}`);
