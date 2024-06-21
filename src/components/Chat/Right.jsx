@@ -452,7 +452,8 @@ export default function ChatRight({
           </>
         )}
       </div>
-      {userRecieved && typeFriend !== 2 && (
+      <div ref={addFriend}></div>
+      {/* {userRecieved && typeFriend !== 2 && (
         <div
           ref={addFriend}
           className="flex justify-between items-center px-[15px]  sm:px-[20px] border-b py-2 border-gray-300"
@@ -573,7 +574,7 @@ export default function ChatRight({
             )}
           </div>
         </div>
-      )}
+      )} */}
       {userRecieved ? (
         <>
           <div
