@@ -13,6 +13,7 @@ import moment from "moment";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import {
   collection,
+  deleteField,
   doc,
   onSnapshot,
   orderBy,
@@ -73,6 +74,12 @@ export default function ChatLeft({
       }
     }
   }, [search, messages, authors]);
+  const updateChat = async () => {
+    const washingtonRef = doc(db, "chat-rooms", search.get("chatId"));
+    await updateDoc(washingtonRef, {
+      isDelete: deleteField(),
+    });
+  };
   useEffect(() => {
     if (search.get("chatId")) {
       const chatDetail = messages?.find((x) => x?.id === search.get("chatId"));
@@ -83,23 +90,11 @@ export default function ChatLeft({
         const author = authors?.find(
           (item) => item?.authorId === userRecieveds?.authorId
         );
-        const newMessage = chatDetail?.messages?.filter(
-          (x) => x?.formAuthor?.userId !== user?.uid
-        );
-        newMessage?.map(async (x) => {
-          const washingtonRef = doc(
-            db,
-            "chat-rooms",
-            chatDetail?.id,
-            "messages",
-            x?.id
-          );
-          await updateDoc(washingtonRef, {
-            read: true,
-          });
-        });
+
         setUserRecieved(author);
         router.push(`/chat?chatId=${chatDetail?.id}`);
+      } else {
+        router.push(`/chat`);
       }
     } else {
       setUserRecieved();
@@ -288,105 +283,95 @@ export default function ChatLeft({
               Không tìm thấy kết quả vui lòng thử từ khóa khác
             </div>
           )
-        ) : messages?.length > 0 ? (
-          messages?.map((item, index) => {
-            const messagesAll = messages?.map((items) =>
-              items?.messages
-                ?.filter(
-                  (ele, ind) =>
-                    ind ===
-                    items?.messages?.findLastIndex((elem) => elem.id === ele.id)
-                )
-                ?.filter((ab) =>
-                  ab?.isDelete
-                    ? ab?.isDelete?.find((x) => x.user !== user?.uid)
-                    : ab
-                )
-            );
-            console.log(item?.messages[item?.messages?.length - 1]);
-            const newMessage = messagesAll?.filter(
-              (x) => x?.formAuthor?.userId !== user?.uid && x?.read === false
-            );
-            return item?.member?.find((x) => x?.userId === user?.uid)
-              ? item?.member?.map((itemChild, indexChild) => {
-                  const author = authors?.find(
-                    (x) => x?.authorId === itemChild?.authorId
-                  );
-                  return (
-                    itemChild?.userId !== user?.uid && (
-                      <div
-                        key={indexChild}
-                        onClick={async () => {
-                          setMobile(true);
-                          router.push(`/chat?chatId=${item.id}`);
-                          const washingtonRef = doc(db, "chat-rooms", item?.id);
-                          await updateDoc(washingtonRef, {
-                            new: false,
-                          });
-                        }}
+        ) : messages?.filter(
+            (item) =>
+              !item?.isDelete?.find((x) => x?.user === user?.uid) &&
+              item?.member?.find((x) => x?.userId === user?.uid)
+          ).length > 0 ? (
+          messages
+            ?.filter(
+              (item) =>
+                !item?.isDelete?.find((x) => x?.user === user?.uid) &&
+                item?.member?.find((x) => x?.userId === user?.uid)
+            )
+            ?.map((item, index) => {
+              return item?.member?.map((itemChild, indexChild) => {
+                const author = authors?.find(
+                  (x) => x?.authorId === itemChild?.authorId
+                );
+                return (
+                  itemChild?.userId !== user?.uid && (
+                    <div
+                      key={indexChild}
+                      onClick={async () => {
+                        setMobile(true);
+                        router.push(`/chat?chatId=${item.id}`);
+                        const washingtonRef = doc(db, "chat-rooms", item?.id);
+                        await updateDoc(washingtonRef, {
+                          new: false,
+                        });
+                      }}
+                      className={`${
+                        userRecieved?.authorId === itemChild?.authorId
+                          ? "bg-[#0084ff] bg-opacity-30"
+                          : "bg-white"
+                      } rounded-md shadow-md shadow-gray-400 flex items-center gap-x-2 pl-[15px] pr-2 py-[12px] mt-[10px] cursor-pointer`}
+                    >
+                      <Image
+                        src={
+                          author?.user?.photo && author?.user?.photo?.length > 0
+                            ? author?.user?.photo
+                            : "/dumuc/avatar.png"
+                        }
+                        width={0}
+                        height={0}
+                        sizes="100vw"
                         className={`${
-                          userRecieved?.authorId === itemChild?.authorId
-                            ? "bg-[#0084ff] bg-opacity-30"
-                            : "bg-white"
-                        } rounded-md shadow-md shadow-gray-400 flex items-center gap-x-2 pl-[15px] pr-2 py-[12px] mt-[10px] cursor-pointer`}
-                      >
-                        <Image
-                          src={
-                            author?.user?.photo &&
-                            author?.user?.photo?.length > 0
-                              ? author?.user?.photo
-                              : "/dumuc/avatar.png"
-                          }
-                          width={0}
-                          height={0}
-                          sizes="100vw"
-                          className={`${
-                            sizes.width > 400
-                              ? "w-[45px] h-[45px]"
-                              : "w-[40px] h-[40px]"
-                          }  rounded-full cursor-pointer`}
-                        />
-                        <div className="w-full">
-                          <div className="flex justify-between">
-                            <Link href="" className="text-base">
-                              {author?.name}
-                            </Link>
-                            <span className="text-[13px] text-gray-600">
-                              {getTimeChat(
-                                item?.lastMessage?.createdAt?.toDate()
-                              )}
-                            </span>
-                          </div>
-                          <div className="flex justify-between mt-0.5">
-                            <p className="text-[13px] text-gray-600  line-clamp-1">
-                              {item?.lastMessage ? (
-                                item?.lastMessage?.recall ? (
-                                  <span className="italic">
-                                    Tin nhắn đã thu hồi
-                                  </span>
-                                ) : (
-                                  item?.lastMessage?.text
-                                )
-                              ) : (
+                          sizes.width > 400
+                            ? "w-[45px] h-[45px]"
+                            : "w-[40px] h-[40px]"
+                        }  rounded-full cursor-pointer`}
+                      />
+                      <div className="w-full">
+                        <div className="flex justify-between">
+                          <Link href="" className="text-base">
+                            {author?.name}
+                          </Link>
+                          <span className="text-[13px] text-gray-600">
+                            {getTimeChat(
+                              item?.lastMessage?.createdAt?.toDate()
+                            )}
+                          </span>
+                        </div>
+                        <div className="flex justify-between mt-0.5">
+                          <p className="text-[13px] text-gray-600  line-clamp-1">
+                            {item?.lastMessage ? (
+                              item?.lastMessage?.recall ? (
                                 <span className="italic">
-                                  Chưa có tin nhắn mới
+                                  Tin nhắn đã thu hồi
                                 </span>
-                              )}
-                            </p>
+                              ) : (
+                                item?.lastMessage?.text
+                              )
+                            ) : (
+                              <span className="italic">
+                                Chưa có tin nhắn mới
+                              </span>
+                            )}
+                          </p>
 
-                            {item?.new === true &&
-                              item?.lastMessage?.formAuthor?.userId !==
-                                user?.uid && (
-                                <div className="rounded-full w-[10px] h-[10px] bg-[#C82027] text-white text-xs flex justify-center items-center"></div>
-                              )}
-                          </div>
+                          {item?.new === true &&
+                            item?.lastMessage?.formAuthor?.userId !==
+                              user?.uid && (
+                              <div className="rounded-full w-[10px] h-[10px] bg-[#C82027] text-white text-xs flex justify-center items-center"></div>
+                            )}
                         </div>
                       </div>
-                    )
-                  );
-                })
-              : null;
-          })
+                    </div>
+                  )
+                );
+              });
+            })
         ) : (
           <div className="h-full w-full flex justify-center items-center text-base">
             Danh người nhắn đang trống

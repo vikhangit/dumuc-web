@@ -181,17 +181,17 @@ const ProfilePage = () => {
     //   return;
     // }
 
-    if (address === undefined || address === "") {
-      setAddressError("Vui lòng nhập Địa chỉ!");
-      setLoadingSubmit(false);
-      return;
-    }
+    // if (address === undefined || address === "") {
+    //   setAddressError("Vui lòng nhập Địa chỉ!");
+    //   setLoadingSubmit(false);
+    //   return;
+    // }
 
-    if (numberPlate === undefined || numberPlate === "") {
-      setNumberPlateError("Vui lòng nhập Biển số xe!");
-      setLoadingSubmit(false);
-      return;
-    }
+    // if (numberPlate === undefined || numberPlate === "") {
+    //   setNumberPlateError("Vui lòng nhập Biển số xe!");
+    //   setLoadingSubmit(false);
+    //   return;
+    // }
 
     //post data
     let item = {
@@ -199,6 +199,7 @@ const ProfilePage = () => {
       nickName,
       address,
       sex,
+      activeNickName: false,
       numberPlate:
         numberPlate2 != undefined && numberPlate2 != ""
           ? `${numberPlate?.replace(/\s/g, "")},${numberPlate2?.replace(
@@ -216,14 +217,15 @@ const ProfilePage = () => {
             displayName: name,
             photoURL: profile.photo,
           });
+          setLoadingSubmit(false);
+          message.success("Cập nhật thành công");
         });
-        setLoadingSubmit(false);
-        message.success("Cập nhật thành công");
       } else {
         message.error("Đã xãy ra lỗi");
       }
     });
   };
+  console.log(usingUser);
 
   return (
     <main className="w-full">
@@ -479,11 +481,11 @@ const ProfilePage = () => {
                     }
                     onChange={(e) => {
                       setAddress(e.target.value);
-                      if (e.target.value === "") {
-                        setAddressError("Vui lòng nhập Địa chỉ!");
-                      } else {
-                        setAddressError("");
-                      }
+                      // if (e.target.value === "") {
+                      //   setAddressError("Vui lòng nhập Địa chỉ!");
+                      // } else {
+                      //   setAddressError("");
+                      // }
                     }}
                     value={address}
                   />
@@ -512,11 +514,11 @@ const ProfilePage = () => {
                     }
                     onChange={(e) => {
                       setNumberPlate(e.target.value?.replace(/\s/g, ""));
-                      if (e.target.value === "") {
-                        setNumberPlateError("Vui lòng nhập Biển số xe!");
-                      } else {
-                        setNumberPlateError("");
-                      }
+                      // if (e.target.value === "") {
+                      //   setNumberPlateError("Vui lòng nhập Biển số xe!");
+                      // } else {
+                      //   setNumberPlateError("");
+                      // }
                     }}
                     value={numberPlate?.replace(/\s/g, "")}
                   />

@@ -108,7 +108,7 @@ export default function ChatRight({
   }, [activeMessage]);
   const read = async () => {
     if (
-      messages?.find((x) => x?.id === search.get("chatId")).lastMessage
+      messages?.find((x) => x?.id === search.get("chatId"))?.lastMessage
         ?.formAuthor?.userId !== user?.uid
     ) {
       const washingtonRef = doc(db, "chat-rooms", search.get("chatId"));
@@ -188,6 +188,7 @@ export default function ChatRight({
                       text: "[Hình ảnh]",
                     },
                     new: true,
+                    isDelete: deleteField(),
                   });
                 });
               } else {
@@ -207,6 +208,7 @@ export default function ChatRight({
                         text: "[Hình ảnh]",
                       },
                       new: true,
+                      isDelete: deleteField(),
                     });
                   });
                   router.push(`/chat?chatId=${data.id}`);
@@ -273,6 +275,7 @@ export default function ChatRight({
                         ...dataItem,
                         messageId: data?.id,
                         text: "[File]",
+                        isDelete: deleteField(),
                       },
                       new: true,
                     });
@@ -309,6 +312,7 @@ export default function ChatRight({
                           text: "[File]",
                         },
                         new: true,
+                        isDelete: deleteField(),
                       });
                     });
                     router.push(`/chat?chatId=${data.id}`);
@@ -409,7 +413,7 @@ export default function ChatRight({
                     placement="topLeft"
                     title="Xóa tin nhắn"
                     description="Toàn bộ tin nhắn sẽ bị xóa vĩnh viễn. Bạn có chắc chắn xóa"
-                    onConfirm={() => {
+                    onConfirm={async () => {
                       myMessage?.map(async (x) => {
                         const washingtonRef = doc(
                           db,
@@ -424,7 +428,18 @@ export default function ChatRight({
                           }),
                         });
                       });
+                      const chatRef = doc(
+                        db,
+                        "chat-rooms",
+                        search.get("chatId")
+                      );
+                      await updateDoc(chatRef, {
+                        isDelete: arrayUnion({
+                          user: user?.uid,
+                        }),
+                      });
                       message.success("Đã xóa tin nhắn thành công!!");
+                      router.push("/chat");
                     }}
                     onCancel={() => {}}
                     okText="Đồng ý"
@@ -1724,6 +1739,7 @@ export default function ChatRight({
                               ...dataItem,
                             },
                             new: true,
+                            isDelete: deleteField(),
                           });
                         });
 
@@ -1753,6 +1769,7 @@ export default function ChatRight({
                                 ...dataItem,
                               },
                               new: true,
+                              isDelete: deleteField(),
                             });
                           });
                           router.push(`/chat?chatId=${data?.id}`);

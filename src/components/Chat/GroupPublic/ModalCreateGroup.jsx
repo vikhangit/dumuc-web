@@ -36,7 +36,7 @@ export default function ModalCreateGroup({
   const [name, setName] = useState("");
   const [error, setError] = useState("");
   const myAuthor = authors?.find((x) => x?.userId === user?.uid);
-  const [active, setActive] = useState(0);
+  const [active, setActive] = useState(1);
   useEffect(() => {
     getProfile(user?.accessToken).then((dataCall) => setUsingUser(dataCall));
   }, [user]);
@@ -58,7 +58,7 @@ export default function ModalCreateGroup({
         ? JSON.parse(localStorage.getItem("groupPrivate")) === "0"
           ? true
           : false
-        : true,
+        : false,
     });
     const memberRef = doc(db, "chat-groups", docRef.id);
     await updateDoc(memberRef, {
@@ -76,7 +76,7 @@ export default function ModalCreateGroup({
       ? JSON.parse(localStorage.getItem("groupPrivate")) === "0"
         ? router.push(`/chat/group?groupId=${docRef?.id}`)
         : router.push(`/chat/group-public?groupId=${docRef?.id}`)
-      : router.push(`/chat/group?groupId=${docRef?.id}`);
+      : router.push(`/chat/group-public?groupId=${docRef?.id}`);
     localStorage.removeItem("groupPrivate");
   };
   const handleChangeIamge = (e) => {

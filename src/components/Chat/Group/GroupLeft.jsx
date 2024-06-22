@@ -38,7 +38,11 @@ export default function ChatGroupLeft({
   const [activeMessage, setActiveMessage] = useState([]);
 
   useEffect(() => {
-    setGroupList(messages);
+    setGroupList(
+      messages?.filter(
+        (item) => !item?.isDelete?.find((x) => x?.user === user?.uid)
+      )
+    );
   }, [messages]);
   useEffect(() => {
     if (search.get("groupId")) {
@@ -97,7 +101,11 @@ export default function ChatGroupLeft({
   const searchField = (value) => {
     setValueSearch(value);
     if (value.trim() === "") {
-      setGroupList(messages);
+      setGroupList(
+        messages?.filter(
+          (item) => !item?.isDelete?.find((x) => x?.user === user?.uid)
+        )
+      );
     } else {
       const searchList = messages?.filter((x) =>
         x?.name?.toLowerCase()?.includes(value?.toLowerCase())

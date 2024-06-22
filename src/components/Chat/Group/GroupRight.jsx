@@ -205,6 +205,7 @@ export default function ChatGroupRight({
                     text: "[Hình ảnh]",
                   },
                   new: true,
+                  isDelete: deleteField(),
                 });
               });
               setNewMessage("");
@@ -268,6 +269,7 @@ export default function ChatGroupRight({
                       text: "[File]",
                     },
                     new: true,
+                    isDelete: deleteField(),
                   });
                 });
               });
@@ -365,7 +367,7 @@ export default function ChatGroupRight({
                     placement="topLeft"
                     title="Xóa tin nhắn"
                     description="Toàn bộ tin nhắn sẽ bị xóa vĩnh viễn. Bạn có chắc chắn xóa?"
-                    onConfirm={() => {
+                    onConfirm={async () => {
                       myMessage?.map(async (x) => {
                         const washingtonRef = doc(
                           db,
@@ -380,7 +382,14 @@ export default function ChatGroupRight({
                           }),
                         });
                       });
+                      const groupRef = doc(db, "chat-groups", groupTo?.id);
+                      await updateDoc(groupRef, {
+                        isDelete: arrayUnion({
+                          user: user?.uid,
+                        }),
+                      });
                       message.success("Đã xóa tin nhắn thành công!!");
+                      router.push("/chat/group");
                     }}
                     onCancel={() => {}}
                     okText="Đồng ý"
@@ -1710,6 +1719,7 @@ export default function ChatGroupRight({
                             ...dataItem,
                           },
                           new: true,
+                          isDelete: deleteField(),
                         });
                       });
                       setChooseQuote();

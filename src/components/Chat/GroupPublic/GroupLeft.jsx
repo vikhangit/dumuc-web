@@ -37,8 +37,13 @@ export default function ChatGroupLeft({
   const [avatar, setAvatar] = useState([]);
   const [activeMessage, setActiveMessage] = useState([]);
   useEffect(() => {
-    setGroupList(messages);
+    setGroupList(
+      messages?.filter(
+        (item) => !item?.isDelete?.find((x) => x?.user === user?.uid)
+      )
+    );
   }, [messages]);
+  console.log(groupList);
   useEffect(() => {
     if (search.get("groupId")) {
       const q = query(
@@ -83,7 +88,6 @@ export default function ChatGroupLeft({
       setActiveList([]);
     }
   }, [search]);
-  console.log(activeMessage);
   useEffect(() => {
     if (search.get("groupId")) {
       const chatDetail = messages?.find((x) => x?.id === search.get("groupId"));
@@ -96,7 +100,11 @@ export default function ChatGroupLeft({
   const searchField = (value) => {
     setValueSearch(value);
     if (value.trim() === "") {
-      setGroupList(messages);
+      setGroupList(
+        messages?.filter(
+          (item) => !item?.isDelete?.find((x) => x?.user === user?.uid)
+        )
+      );
     } else {
       const searchList = messages?.filter((x) =>
         x?.name?.toLowerCase()?.includes(value?.toLowerCase())
@@ -129,6 +137,7 @@ export default function ChatGroupLeft({
       .replace("ago", "")
       .replace("few", "");
   };
+  console.log(user);
   return (
     <div
       className={`h-full ${
@@ -178,25 +187,28 @@ export default function ChatGroupLeft({
       <div className="h-[calc(100%-150px)] overflow-auto scroll-chat px-2">
         {user &&
         groupList?.length > 0 &&
-        groupList?.filter((x) => !x.isPrivate)?.length > 0 ? (
+        groupList?.filter(
+          (x) => x?.isPrivate === false
+          // &&
+          //   !x?.isDelete?.find((ab) => ab?.user === user?.uid)
+        )?.length > 0 ? (
           groupList
-            ?.filter((x) => !x.isPrivate)
-            .map((item, i) => {
-              const findMess = item?.messages?.filter(
-                (x) =>
-                  !x?.notify && !x?.isDelete?.find((n) => n?.user === user?.uid)
-              );
+            ?.filter(
+              (x) => x?.isPrivate === false
+              // &&
+              //   !x?.isDelete?.find((ab) => ab?.user === user?.uid)
+            )
+            ?.map((item, i) => {
               const author = authors?.find(
                 (x) => x?.authorId === item?.lastMessage?.formAuthor?.authorId
               );
-
               return (
                 <div
                   key={i}
                   onClick={() => {
                     // setActiveGroup(item);
                     setMobile(true);
-                    router.push(`/chat//group-public?groupId=${item?.id}`);
+                    router.push(`/chat/group-public?groupId=${item?.id}`);
                   }}
                   className={`${
                     groupTo?.id === item?.id
@@ -224,38 +236,50 @@ export default function ChatGroupLeft({
                         {item?.name}
                       </Link>
 
-                      {item?.member?.find((x) => x?.user === user?.uid) && (
-                        <span className="text-[13px] text-gray-600">
-                          {item?.lastMessage &&
-                            getTimeChat(item?.lastMessage?.createdAt?.toDate())}
-                        </span>
+                      {item?.isDelete?.find((ab) => ab?.user === user?.uid) ? (
+                        <div></div>
+                      ) : (
+                        item?.member?.find((x) => x?.user === user?.uid) && (
+                          <span className="text-[13px] text-gray-600">
+                            {item?.lastMessage &&
+                              getTimeChat(
+                                item?.lastMessage?.createdAt?.toDate()
+                              )}
+                          </span>
+                        )
                       )}
                     </div>
-                    {item?.member?.find((x) => x?.user === user?.uid) && (
-                      <div className="flex justify-between w-full">
-                        {item?.lastMessage ? (
-                          <>
-                            <p className="text-[13px] text-gray-600 mt-0.5">
-                              {item?.lastMessage?.recall ? (
-                                <span className="italic">
-                                  Tin nhắn đã thu hồi
-                                </span>
-                              ) : (
-                                `${author?.name}: ${item?.lastMessage?.text}`
-                              )}
+                    {item?.isDelete?.find((ab) => ab?.user === user?.uid) ? (
+                      <p className="text-[13px] text-gray-600 mt-0.5 italic">
+                        Chưa có tin nhắn mới
+                      </p>
+                    ) : (
+                      item?.member?.find((x) => x?.user === user?.uid) && (
+                        <div className="flex justify-between w-full">
+                          {item?.lastMessage ? (
+                            <>
+                              <p className="text-[13px] text-gray-600 mt-0.5">
+                                {item?.lastMessage?.recall ? (
+                                  <span className="italic">
+                                    Tin nhắn đã thu hồi
+                                  </span>
+                                ) : (
+                                  `${author?.name}: ${item?.lastMessage?.text}`
+                                )}
+                              </p>
+                              {item?.new === true &&
+                                item?.lastMessage?.formAuthor?.userId !==
+                                  user?.uid && (
+                                  <div className="rounded-full w-[10px] h-[10px] bg-[#C82027] text-white text-xs flex justify-center items-center"></div>
+                                )}
+                            </>
+                          ) : (
+                            <p className="text-[13px] text-gray-600 mt-0.5 italic">
+                              Chưa có tin nhắn mới
                             </p>
-                            {item?.new === true &&
-                              item?.lastMessage?.formAuthor?.userId !==
-                                user?.uid && (
-                                <div className="rounded-full w-[10px] h-[10px] bg-[#C82027] text-white text-xs flex justify-center items-center"></div>
-                              )}
-                          </>
-                        ) : (
-                          <p className="text-[13px] text-gray-600 mt-0.5 italic">
-                            Chưa có tin nhắn mới
-                          </p>
-                        )}
-                      </div>
+                          )}
+                        </div>
+                      )
                     )}
                   </div>
                 </div>

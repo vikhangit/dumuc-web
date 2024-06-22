@@ -491,7 +491,7 @@ export default function ModalAbout({
                                         "Bạn đã rời khỏi nhóm thành công"
                                       );
                                       onCancel();
-                                      router.push("/chat/group");
+                                      router.push("/chat/group-public");
                                     })
                                     .catch((err) => {
                                       message.error(
@@ -575,7 +575,7 @@ export default function ModalAbout({
                                     );
                                     if (user.uid === item?.user) {
                                       onCancel();
-                                      router.push("/chat/group");
+                                      router.push("/chat/group-public");
                                     }
                                   })
                                   .catch((err) => {

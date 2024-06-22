@@ -86,7 +86,7 @@ export default function ModalAddLeader({
         setLoading(false);
         onCancel();
         onCloseParent();
-        router.push("/chat/group");
+        router.push("/chat/group-public");
       })
       .catch((err) => {
         message.error("Bạn đã rời khỏi nhóm thất bại");

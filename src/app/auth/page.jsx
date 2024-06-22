@@ -204,28 +204,18 @@ https://flagcdn.com/48x36/vn.png 3x`}
 
   const loginWithPasswordless = () => {
     setLoadingAction(true);
-    //signin with email (passwordless)
     const actionCodeSettings = {
-      // URL you want to redirect back to. The domain (www.example.com) for this
-      // URL must be in the authorized domains list in the Firebase Console.
-      //url: `https://appfunnel.page.link/fxwk?email=${values.email}`,
       url: `${process.env.NEXT_PUBLIC_HOMEPAGE_URL}/auth?email=${email}&url_return=${query?.url_return}`,
-      // This must be true.
       handleCodeInApp: true,
     };
-
     setEmailForSignIn(email);
 
     auth.languageCode = "vi";
     sendSignInLinkToEmail(auth, email, actionCodeSettings)
       .then((result) => {
-        // The link was successfully sent. Inform the user.
-        // Save the email locally so you don't need to ask the user for it again
-        // if they open the link on the same device.
         localStorage.setItem("emailForSignIn", email);
         setIsModalOpen(true);
         setLoadingAction(false);
-        // ...
       })
       .catch((error) => {
         var errorCode = error.code;
@@ -265,11 +255,8 @@ https://flagcdn.com/48x36/vn.png 3x`}
             .catch((error) => {});
         })
         .catch((error) => {
-          // console.log('error', error)
           setErrorCode(error.code);
           setLoadingAction(false);
-          // Some error occurred, you can inspect the code: error.code
-          // Common errors could be invalid email and invalid or expired OTPs.
         });
     } else {
       setLoadingAction(false);
@@ -277,7 +264,6 @@ https://flagcdn.com/48x36/vn.png 3x`}
 
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        //redirect
         if (
           query?.url_return !== undefined &&
           query?.url_return !== "undefined"
@@ -307,7 +293,7 @@ https://flagcdn.com/48x36/vn.png 3x`}
               const url_return = query?.url_return;
               router.push(url_return);
             } else {
-              router.push("/account");
+              router.push("/");
             }
             setLoadingAction(false);
           })
