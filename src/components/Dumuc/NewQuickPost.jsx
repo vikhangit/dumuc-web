@@ -19,6 +19,7 @@ const NewQuickPost = ({ onCallback, user, usingUser }) => {
   const [showPostEmotion, setShowPostEmotion] = useState(false);
   const [emotion, setEmotion] = useState("");
   const [showImage, setShowImage] = useState(false);
+  console.log(user);
   return (
     <>
       <div className="bg-white rounded-lg shadow my-4 border border-gray-300">
@@ -29,8 +30,8 @@ const NewQuickPost = ({ onCallback, user, usingUser }) => {
               height={0}
               sizes="100vw"
               src={
-                user?.photoURL?.length > 0
-                  ? user?.photoURL
+                usingUser?.photo?.length > 0
+                  ? usingUser?.photo
                   : "/dumuc/avatar.png"
               }
               alt=""
@@ -48,7 +49,7 @@ const NewQuickPost = ({ onCallback, user, usingUser }) => {
               }
             }}
           >
-            {user?.displayName || "Bạn"} ơi bạn muốn chia sẻ gì?
+            {usingUser?.name || "Bạn"} ơi bạn muốn chia sẻ gì?
           </a>
         </div>
       </div>

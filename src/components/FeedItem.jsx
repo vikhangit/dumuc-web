@@ -264,11 +264,11 @@ const FeedItem = ({ data, index, user, usingUser }) => {
         {item?.tags?.length > 0 && (
           <div className="mt-4">
             {item?.tags.map((tag, index) => (
-              <a key={index} href={`/search?q=${tag}`}>
+              <Link key={index} href={`/search?q=${tag}`}>
                 <span class="mr bg-slate-100 text-gray-500 hover:bg-red-500 hover:text-white text-sm mr-2 px-2.5 py-0.5 rounded">
-                  #{tag}
+                  {tag}
                 </span>
-              </a>
+              </Link>
             ))}
           </div>
         )}

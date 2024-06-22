@@ -224,6 +224,7 @@ export default function QuickPostModal({
     }
     localStorage.removeItem("isPrivate");
   };
+  console.log(user);
   return (
     <>
       <Modal
@@ -319,15 +320,15 @@ export default function QuickPostModal({
                 sizes="100vw"
                 class="w-10 h-10 rounded-full"
                 src={
-                  user?.photoURL?.length > 0
-                    ? user?.photoURL
+                  usingUser?.photo?.length > 0
+                    ? usingUser?.photo
                     : "/dumuc/avatar.png"
                 }
                 alt={"avatars"}
               />
               <div className="flex flex-col">
                 <p className="text-sm font-medium">
-                  {user?.displayName}{" "}
+                  {usingUser?.name}{" "}
                   {emotion && emotion.length > 0 ? emotion : ""}
                 </p>
                 <div className="relative rounded-[6px] mt-1 w-fit">
@@ -388,7 +389,7 @@ export default function QuickPostModal({
           <CustomEditor
             initialData={description}
             setData={setDescription}
-            placeholder={`${user?.displayName} ơi bạn đang nghĩ gì?`}
+            placeholder={`${usingUser?.name} ơi bạn đang nghĩ gì?`}
           />
           {descriptionError !== "" && (
             <p class="mt-1.5 text-sm text-[#c80000] font-semibold">
