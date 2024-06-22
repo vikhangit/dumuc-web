@@ -91,8 +91,10 @@ export default function ChatGroupLeft({
   useEffect(() => {
     if (search.get("groupId")) {
       const chatDetail = messages?.find((x) => x?.id === search.get("groupId"));
+      setMobile(true);
       setGroupTo(chatDetail);
     } else {
+      setMobile(false);
       setGroupTo();
     }
   }, [messages, search]);

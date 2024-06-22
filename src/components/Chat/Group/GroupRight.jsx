@@ -389,6 +389,7 @@ export default function ChatGroupRight({
                         }),
                       });
                       message.success("Đã xóa tin nhắn thành công!!");
+                      setGroupTo();
                       router.push("/chat/group");
                     }}
                     onCancel={() => {}}

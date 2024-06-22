@@ -72,6 +72,9 @@ export default function ChatLeft({
         setUserRecieved();
         router.push(`/chat?chatId=${findChat?.id}`);
       }
+    } else {
+      setUserRecieved();
+      setMobile(false);
     }
   }, [search, messages, authors]);
   const updateChat = async () => {
@@ -90,14 +93,16 @@ export default function ChatLeft({
         const author = authors?.find(
           (item) => item?.authorId === userRecieveds?.authorId
         );
-
+        setMobile(true);
         setUserRecieved(author);
         router.push(`/chat?chatId=${chatDetail?.id}`);
       } else {
+        setMobile(false);
         router.push(`/chat`);
       }
     } else {
       setUserRecieved();
+      setMobile(false);
     }
   }, [search, messages]);
   const searchField = (value) => {
