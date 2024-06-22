@@ -307,22 +307,21 @@ https://flagcdn.com/48x36/vn.png 3x`}
     });
   }, []);
 
-  //redirect already login
-  // useEffect(() => {
-  //   const saved_email = localStorage.getItem("emailForSignIn");
-  //   if (user && loading === false && saved_email === null) {
-  //     //redirect
-  //     if (
-  //       query?.url_return !== undefined &&
-  //       query?.url_return !== "undefined"
-  //     ) {
-  //       const url_return = query?.url_return;
-  //       router.push(url_return);
-  //     } else {
-  //       router.push("/account");
-  //     }
-  //   }
-  // }, [user, loading]);
+  useEffect(() => {
+    const saved_email = localStorage.getItem("emailForSignIn");
+    if (user && loading === false && saved_email === null) {
+      //redirect
+      if (
+        query?.url_return !== undefined &&
+        query?.url_return !== "undefined"
+      ) {
+        const url_return = query?.url_return;
+        router.push(url_return);
+      } else {
+        router.push("/");
+      }
+    }
+  }, [user, loading]);
 
   return (
     <main className="w-full">
