@@ -234,8 +234,8 @@ https://flagcdn.com/48x36/vn.png 3x`}
     setLoadingAction(true);
     const saved_email = localStorage.getItem("emailForSignIn");
     const link = `${process.env.NEXT_PUBLIC_HOMEPAGE_URL}/auth?email=${searchParams?.email}&url_return=${searchParams?.url_return}&apiKey=${searchParams?.apiKey}&oobCode=${searchParams?.oobCode}&mode=${searchParams?.mode}&lang=${searchParams?.lang}`;
-    if (isSignInWithEmailLink(auth, link) && !!saved_email) {
-      signInWithEmailLink(auth, saved_email, link)
+    if (isSignInWithEmailLink(auth, window.location.href) && !!saved_email) {
+      signInWithEmailLink(auth, saved_email, window.location.href)
         .then(async (result) => {
           let userCreate = result.user;
           // Clear email from storage.
