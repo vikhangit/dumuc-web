@@ -305,14 +305,14 @@ export default function ChatGroupLeft({
           </div>
         )}
       </div>
-      <ModalCreateGroup
+      {/* <ModalCreateGroup
         visible={showModalCreate}
         onCancel={() => setShowModalCreate(false)}
         authors={authors}
         onCallback={() => {
           return;
         }}
-      />
+      /> */}
     </div>
   );
 }
