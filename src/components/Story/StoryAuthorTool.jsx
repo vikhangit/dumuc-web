@@ -85,7 +85,6 @@ export default function StoryAuthorTool({
       setItem(data);
     });
   };
-  console.log(item);
   return (
     <>
       <div className="">
@@ -286,9 +285,7 @@ export default function StoryAuthorTool({
                             authorUserId: item?.author?.userId,
                           },
                           user?.accessToken
-                        )
-                          .then((e) => console.log(e))
-                          .catch((e) => console.log(e));
+                        );
                       });
                       setFollowing(false);
                       message.success("Hủy theo dõi thành công");
@@ -315,9 +312,7 @@ export default function StoryAuthorTool({
                               authorUserId: item?.author?.userId,
                             },
                             user?.accessToken
-                          )
-                            .then((e) => console.log(e))
-                            .catch((e) => console.log(e));
+                          );
                         });
                         setFollowing(true);
                         message.success("Theo dõi thành công");

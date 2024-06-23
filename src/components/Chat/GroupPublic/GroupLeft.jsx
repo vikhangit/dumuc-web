@@ -25,10 +25,23 @@ export default function ChatGroupLeft({
   // user,
   // usingUser,
 }) {
+  // useEffect(() => {
+  //   const handleBeforeUnload = (event) => {
+  //     event.preventDefault();
+  //     // Custom logic to handle the refresh
+  //     // Display a confirmation message or perform necessary actions
+  //   };
+  //   window.addEventListener("beforeunload", handleBeforeUnload);
+  //   return () => {
+  //     window.removeEventListener("beforeunload", handleBeforeUnload);
+  //   };
+  // }, []);
   const user = JSON.parse(localStorage.getItem("userLogin"));
+  const userId = JSON.parse(localStorage.getItem("userId"));
+  const userToken = JSON.parse(localStorage.getItem("userToken"));
   const [usingUser, setUsingUser] = useState();
   useEffect(() => {
-    getProfile(user?.accessToken).then((dataCall) => {
+    getProfile(userToken).then((dataCall) => {
       setUsingUser(dataCall);
     });
   }, [user]);
@@ -50,7 +63,6 @@ export default function ChatGroupLeft({
       )
     );
   }, [messages]);
-  console.log(groupList);
   useEffect(() => {
     if (search.get("groupId")) {
       const q = query(
@@ -146,7 +158,6 @@ export default function ChatGroupLeft({
       .replace("ago", "")
       .replace("few", "");
   };
-  console.log(user);
   return (
     <div
       className={`h-full ${

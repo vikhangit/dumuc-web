@@ -166,10 +166,8 @@ export const updateStoryByUser = (payload, token) => {
 };
 
 export const updateFeedByUser = (payload, token) => {
-  console.log("Payload", payload)
   return request("api/user/feed", payload, { method: "PUT", token })
     .then((data) => {
-      console.log(data)
       return data;
     })
     .catch((err) => {

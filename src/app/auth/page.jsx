@@ -84,6 +84,11 @@ https://flagcdn.com/48x36/vn.png 3x`}
               if (user) {
                 //redirect
                 localStorage.setItem("userLogin", JSON.stringify(user));
+                localStorage.setItem("userId", JSON.stringify(user?.uid));
+                localStorage.setItem(
+                  "userToken",
+                  JSON.stringify(user?.accessToken)
+                );
                 if (
                   query?.url_return !== undefined &&
                   query?.url_return !== "undefined"
@@ -143,9 +148,7 @@ https://flagcdn.com/48x36/vn.png 3x`}
       setSendOtp(true);
       setLoadingAction(false);
       message.success("Mã xác thực OTP đã được gửi");
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   };
   const handleOtpSubmit = async () => {
     setLoadingAction(true);
@@ -177,6 +180,8 @@ https://flagcdn.com/48x36/vn.png 3x`}
             }
           });
           localStorage.setItem("userLogin", JSON.stringify(user));
+          localStorage.setItem("userId", JSON.stringify(user?.uid));
+          localStorage.setItem("userToken", JSON.stringify(user?.accessToken));
         }
       });
     } catch (error) {
@@ -191,7 +196,6 @@ https://flagcdn.com/48x36/vn.png 3x`}
     const handleOutSideClick = (event) => {
       if (!ref.current?.contains(event.target)) {
         setShowDropdown(false);
-        console.log("Outside Clicked. ");
       }
     };
 
@@ -253,7 +257,6 @@ https://flagcdn.com/48x36/vn.png 3x`}
             photo: userCreate.photoURL,
           })
             .then((result) => {
-              console.log("Create User", result);
               setLoadingAction(true);
             })
             .catch((error) => {});
@@ -269,6 +272,8 @@ https://flagcdn.com/48x36/vn.png 3x`}
     onAuthStateChanged(auth, (user) => {
       if (user) {
         localStorage.setItem("userLogin", JSON.stringify(user));
+        localStorage.setItem("userId", JSON.stringify(user?.uid));
+        localStorage.setItem("userToken", JSON.stringify(user?.accessToken));
         if (
           query?.url_return !== undefined &&
           query?.url_return !== "undefined"
@@ -287,6 +292,8 @@ https://flagcdn.com/48x36/vn.png 3x`}
     onAuthStateChanged(auth, (user) => {
       if (user) {
         localStorage.setItem("userLogin", JSON.stringify(user));
+        localStorage.setItem("userId", JSON.stringify(user?.uid));
+        localStorage.setItem("userToken", JSON.stringify(user?.accessToken));
         user
           .getIdToken(true)
           .then(async (token) => {
@@ -303,7 +310,6 @@ https://flagcdn.com/48x36/vn.png 3x`}
             setLoadingAction(false);
           })
           .catch((err) => {
-            console.log(err);
             setLoadingAction(false);
           });
       } else {
@@ -317,6 +323,8 @@ https://flagcdn.com/48x36/vn.png 3x`}
     if (user && loading === false && saved_email === null) {
       //redirect
       localStorage.setItem("userLogin", JSON.stringify(user));
+      localStorage.setItem("userId", JSON.stringify(user?.uid));
+      localStorage.setItem("userToken", JSON.stringify(user?.accessToken));
       if (
         query?.url_return !== undefined &&
         query?.url_return !== "undefined"

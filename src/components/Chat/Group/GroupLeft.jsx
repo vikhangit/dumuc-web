@@ -26,9 +26,11 @@ export default function ChatGroupLeft({
   // usingUser,
 }) {
   const user = JSON.parse(localStorage.getItem("userLogin"));
+  const userId = JSON.parse(localStorage.getItem("userId"));
+  const userToken = JSON.parse(localStorage.getItem("userToken"));
   const [usingUser, setUsingUser] = useState();
   useEffect(() => {
-    getProfile(user?.accessToken).then((dataCall) => {
+    getProfile(userToken).then((dataCall) => {
       setUsingUser(dataCall);
     });
   }, [user]);
@@ -47,7 +49,7 @@ export default function ChatGroupLeft({
   useEffect(() => {
     setGroupList(
       messages?.filter(
-        (item) => !item?.isDelete?.find((x) => x?.user === user?.uid)
+        (item) => !item?.isDelete?.find((x) => x?.user === userId)
       )
     );
   }, [messages]);
@@ -95,7 +97,6 @@ export default function ChatGroupLeft({
       setActiveList([]);
     }
   }, [search]);
-  console.log(activeMessage);
   useEffect(() => {
     if (search.get("groupId")) {
       const chatDetail = messages?.find((x) => x?.id === search.get("groupId"));
@@ -112,7 +113,7 @@ export default function ChatGroupLeft({
     if (value.trim() === "") {
       setGroupList(
         messages?.filter(
-          (item) => !item?.isDelete?.find((x) => x?.user === user?.uid)
+          (item) => !item?.isDelete?.find((x) => x?.user === userId)
         )
       );
     } else {
@@ -147,7 +148,6 @@ export default function ChatGroupLeft({
       .replace("ago", "")
       .replace("few", "");
   };
-  console.log(user);
   return (
     <div
       className={`h-full ${
@@ -203,14 +203,14 @@ export default function ChatGroupLeft({
             .map((item, i) => {
               const findMess = item?.messages?.filter(
                 (x) =>
-                  !x?.notify && !x?.isDelete?.find((n) => n?.user === user?.uid)
+                  !x?.notify && !x?.isDelete?.find((n) => n?.user === userId)
               );
 
               const author = authors?.find(
                 (x) => x?.authorId === item?.lastMessage?.formAuthor?.authorId
               );
 
-              if (item?.member?.find((x) => x?.user === user?.uid)) {
+              if (item?.member?.find((x) => x?.user === userId)) {
                 return (
                   <div
                     key={i}
@@ -245,7 +245,7 @@ export default function ChatGroupLeft({
                           {item?.name}
                         </Link>
 
-                        {item?.member?.find((x) => x?.user === user?.uid) && (
+                        {item?.member?.find((x) => x?.user === userId) && (
                           <span className="text-[13px] text-gray-600">
                             {item?.lastMessage &&
                               getTimeChat(
@@ -254,7 +254,7 @@ export default function ChatGroupLeft({
                           </span>
                         )}
                       </div>
-                      {item?.member?.find((x) => x?.user === user?.uid) && (
+                      {item?.member?.find((x) => x?.user === userId) && (
                         <div className="flex justify-between w-full">
                           {item?.lastMessage ? (
                             <>
@@ -269,7 +269,7 @@ export default function ChatGroupLeft({
                               </p>
                               {item?.new === true &&
                                 item?.lastMessage?.formAuthor?.userId !==
-                                  user?.uid && (
+                                  userId && (
                                   <div className="rounded-full w-[10px] h-[10px] bg-[#C82027] text-white text-xs flex justify-center items-center"></div>
                                 )}
                             </>

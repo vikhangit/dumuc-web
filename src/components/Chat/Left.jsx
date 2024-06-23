@@ -163,8 +163,6 @@ export default function ChatLeft({
       router.push(`/chat?chatId=${findChat?.id}`);
     }
   };
-  console.log("Cghaaaaa", messages);
-  console.log("con", me);
 
   return (
     <div

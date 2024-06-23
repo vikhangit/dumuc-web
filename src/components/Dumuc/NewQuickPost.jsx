@@ -19,7 +19,7 @@ const NewQuickPost = ({ onCallback, user, usingUser }) => {
   const [showPostEmotion, setShowPostEmotion] = useState(false);
   const [emotion, setEmotion] = useState("");
   const [showImage, setShowImage] = useState(false);
-  console.log(user);
+
   return (
     <>
       <div className="bg-white rounded-lg shadow my-4 border border-gray-300">

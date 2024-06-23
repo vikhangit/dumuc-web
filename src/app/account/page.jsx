@@ -165,6 +165,8 @@ const AccountPage = () => {
               const success = await signOut().then((res) => {
                 router.push("/");
                 localStorage.removeItem("userLogin");
+                localStorage.removeItem("userId");
+                localStorage.removeItem("userToken");
               });
               if (success) {
                 message.success("Đăng xuất thành công!");

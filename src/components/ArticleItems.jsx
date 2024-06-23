@@ -25,7 +25,6 @@ const ArticleItems = ({
 }) => {
   const [loading, setLoading] = useState(false);
   const [items, setItems] = useState(data);
-  console.log("ITems", data);
   useEffect(() => {
     setItems(data);
   }, [data]);

@@ -181,16 +181,13 @@ const FeaturedMember = ({ items, limit }) => {
                                 },
                                 user?.accessToken
                               ).then(async (result) => {
-                                console.log(result);
                                 //update recoil
                                 deleteUserInFollowerList(
                                   {
                                     authorUserId: item?.userId,
                                   },
                                   user?.accessToken
-                                )
-                                  .then((e) => console.log(e))
-                                  .catch((e) => console.log(e));
+                                );
                                 const dataCall = await getProfile(
                                   user?.accessToken
                                 );
@@ -212,15 +209,12 @@ const FeaturedMember = ({ items, limit }) => {
                                 },
                                 user?.accessToken
                               ).then(async (result) => {
-                                console.log(result);
                                 await createUserToFollowerList(
                                   {
                                     authorUserId: item?.userId,
                                   },
                                   user?.accessToken
-                                )
-                                  .then((e) => console.log(e))
-                                  .catch((e) => console.log(e));
+                                );
                                 const dataCall = await getProfile(
                                   user?.accessToken
                                 );

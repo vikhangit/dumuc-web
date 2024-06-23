@@ -88,9 +88,7 @@ export default function ModalChangePhone({ visible, onCancel }) {
       setSendOtp(true);
       setLoadingAction(false);
       message.success("Mã xác thực OTP đã được gửi");
-    } catch (error) {
-      console.log(error);
-    }
+    } catch (error) {}
   };
   const handleOtpSubmit = async () => {
     setLoadingAction(true);
@@ -125,7 +123,6 @@ export default function ModalChangePhone({ visible, onCancel }) {
     const handleOutSideClick = (event) => {
       if (!ref.current?.contains(event.target)) {
         setShowDropdown(false);
-        console.log("Outside Clicked. ");
       }
     };
 

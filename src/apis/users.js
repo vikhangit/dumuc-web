@@ -94,7 +94,6 @@ export const createUserLike = (payload, token) => {
 
 export const deleteUserLike = (payload, token) => {
   const { likeType, likeValue} = payload;
-  console.log("Call function", likeValue)
   return request(`api/user/like/${likeType}/${likeValue}`, {}, { method: "DELETE", token })
     .then((data) => {
       return data;

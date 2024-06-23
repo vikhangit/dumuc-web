@@ -12,7 +12,6 @@ export default function CategoryItem({ sub, user }) {
     getPostsByCategory({
       category: sub?.categoryId,
     }).then((x) => {
-      console.log(x);
       const myPost = x?.filter((a) => a?.userId === user?.uid);
       if (myPost && myPost?.length > 0) {
         setPosts(x);

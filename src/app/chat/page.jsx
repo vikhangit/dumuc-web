@@ -150,7 +150,6 @@ export default function ChatGroup() {
       setTypeFriend(type);
     }
   }, [userRecieved]);
-  console.log("12312312312", activeMessage);
   return (
     <main className="w-full h-full fixed left-0 top-0 overflow-x-hidden">
       <div

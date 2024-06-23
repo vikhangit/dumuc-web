@@ -17,7 +17,6 @@ export const Comments = ({
 }) => {
   const [qoute, setQoute] = useState([]);
   const [showChild, setShowChild] = useState(true);
-  console.log(comments);
 
   return (
     <div>

@@ -65,6 +65,8 @@ export default function ChatGroupRight({
   usingUser,
 }) {
   const user = JSON.parse(localStorage.getItem("userLogin"));
+  const userId = JSON.parse(localStorage.getItem("userId"));
+  const userToken = JSON.parse(localStorage.getItem("userToken"));
   const router = useRouter();
   const search = useSearchParams();
   const refImg = useRef();
@@ -119,7 +121,7 @@ export default function ChatGroupRight({
     };
   }, [ref]);
   const read = async () => {
-    if (groupTo?.lastMessage?.formAuthor?.userId !== user?.uid) {
+    if (groupTo?.lastMessage?.formAuthor?.userId !== userId) {
       const washingtonRef = doc(db, "chat-groups", groupTo?.id);
       await updateDoc(washingtonRef, {
         new: false,
@@ -159,7 +161,7 @@ export default function ChatGroupRight({
   useEffect(() => {
     if (search.get("groupId")) {
       const chatDetail = messages?.find((x) => x?.id === search.get("groupId"));
-      // const myGroup = chatDetail?.member?.find((x) => x?.user === user?.uid);
+      // const myGroup = chatDetail?.member?.find((x) => x?.user === userId);
       setGroupTo(chatDetail);
     }
   }, [messages, search]);
@@ -172,11 +174,11 @@ export default function ChatGroupRight({
       }
       let newPhoto = [];
       array.map((x) => {
-        uploadImage(x, user?.accessToken)
+        uploadImage(x, userToken)
           .then(async (data) => {
             newPhoto.push(data?.url);
             if (newPhoto.length === array.length) {
-              const myAuthor = authors?.find((x) => x?.userId === user?.uid);
+              const myAuthor = authors?.find((x) => x?.userId === userId);
               let dataItem = {
                 text: newMessage,
                 photos: newPhoto,
@@ -231,7 +233,7 @@ export default function ChatGroupRight({
       }
       let newPhoto = [];
       array.map((x) => {
-        uploadImage(x, user?.accessToken)
+        uploadImage(x, userToken)
           .then(async (data) => {
             newPhoto.push({
               url: data?.url,
@@ -239,7 +241,7 @@ export default function ChatGroupRight({
               type: x?.type,
             });
             if (newPhoto.length === array.length) {
-              const myAuthor = authors?.find((x) => x?.userId === user?.uid);
+              const myAuthor = authors?.find((x) => x?.userId === userId);
               newPhoto?.map(async (x) => {
                 let dataItem = {
                   text: newMessage,
@@ -295,7 +297,6 @@ export default function ChatGroupRight({
   const [openAbout, setOpenAbout] = useState(false);
   const [typeAbout, setTypeAbout] = useState("about");
   const [activeAbout, setActiveAbout] = useState();
-  console.log(user);
 
   return (
     <div
@@ -304,7 +305,7 @@ export default function ChatGroupRight({
       }`}
     >
       <div className="h-[75px] flex justify-between items-center px-[15px] pl-[0px] sm:px-[20px] shadow-md shadow-gray-400">
-        {user && groupTo && (
+        {groupTo && (
           <>
             <div className="flex items-center gap-x-2 sm:gap-x-4">
               <button
@@ -380,14 +381,14 @@ export default function ChatGroupRight({
                         );
                         await updateDoc(washingtonRef, {
                           isDelete: arrayUnion({
-                            user: user?.uid,
+                            user: userId,
                           }),
                         });
                       });
                       const groupRef = doc(db, "chat-groups", groupTo?.id);
                       await updateDoc(groupRef, {
                         isDelete: arrayUnion({
-                          user: user?.uid,
+                          user: userId,
                         }),
                       });
                       message.success("Đã xóa tin nhắn thành công!!");
@@ -405,7 +406,7 @@ export default function ChatGroupRight({
                       Xóa tin nhắn
                     </button>
                   </Popconfirm>
-                  {groupTo?.leader === user?.uid && (
+                  {groupTo?.leader === userId && (
                     <Popconfirm
                       placement="topLeft"
                       title="Xóa nhóm"
@@ -439,7 +440,7 @@ export default function ChatGroupRight({
           </>
         )}
       </div>
-      {user && groupTo ? (
+      {groupTo ? (
         <>
           <div
             className={`overflow-auto scroll-chat px-3 py-5  bg-gray-200`}
@@ -467,14 +468,14 @@ export default function ChatGroupRight({
                   const authorReply =
                     item?.reply &&
                     authors?.find((item) => item?.authorId === abc);
-                  if (item?.isDelete?.find((x) => x?.user === user?.uid)) {
+                  if (item?.isDelete?.find((x) => x?.user === userId)) {
                   } else {
                     if (!item?.notify) {
                       return (
                         <div
                           key={index}
                           className={`flex gap-x-2 cursor-pointer sm:gap-x-4 ${
-                            item?.formAuthor?.userId === user?.uid
+                            item?.formAuthor?.userId === userId
                               ? "flex-row-reverse"
                               : "flex-row"
                           } ${index !== 0 && "mt-3"}`}
@@ -502,7 +503,7 @@ export default function ChatGroupRight({
                           />
                           <div
                             className={`w-2/3 sm-w-1/2 flex items-center gap-x-2 ${
-                              item?.formAuthor?.userId === user?.uid
+                              item?.formAuthor?.userId === userId
                                 ? "flex-row-reverse"
                                 : "flex-row"
                             }`}
@@ -512,14 +513,14 @@ export default function ChatGroupRight({
                                 <div
                                   id={item?.id}
                                   className={`w-fit text-sm ${
-                                    item?.formAuthor?.userId === user?.uid
+                                    item?.formAuthor?.userId === userId
                                       ? "ml-auto"
                                       : ""
                                   }`}
                                 >
                                   <div
                                     className={`w-full text-sm ${
-                                      item?.formAuthor?.userId === user?.uid
+                                      item?.formAuthor?.userId === userId
                                         ? "bg-[#e5efff]"
                                         : "bg-white"
                                     }  rounded-[10px] px-[10px] py-[20px] ${
@@ -535,32 +536,30 @@ export default function ChatGroupRight({
                                 <div
                                   id={item?.id}
                                   className={`w-full sm:w-3/4 ${
-                                    author?.userId === user?.uid
-                                      ? "ml-auto"
-                                      : ""
+                                    author?.userId === userId ? "ml-auto" : ""
                                   }`}
                                 >
                                   <div
                                     className={`w-full flex items-center gap-x-2 flex-wrap ${
-                                      item?.formAuthor?.userId === user?.uid
+                                      item?.formAuthor?.userId === userId
                                         ? "justify-end"
                                         : ""
                                     } `}
                                   >
-                                    {item?.formAuthor?.userId === user?.uid &&
+                                    {item?.formAuthor?.userId === userId &&
                                       !item?.recall && (
                                         <button className="relative group w-fit mr-1">
                                           <HiOutlineDotsHorizontal />
                                           <div
                                             className={`absolute z-[9999] hidden group-hover:flex flex-col justify-start items-start top-full ${
                                               item?.formAuthor?.userId ===
-                                              user?.uid
+                                              userId
                                                 ? "left-0"
                                                 : "right-0"
                                             } bg-white shadow-sm shadow-gray-500 text-[10px] sm:text-xs font-medium w-[120px] rounded p-1`}
                                           >
                                             {item?.formAuthor?.userId ===
-                                              user?.uid && (
+                                              userId && (
                                               <Link
                                                 href={``}
                                                 onClick={async (e) => {
@@ -660,20 +659,20 @@ export default function ChatGroupRight({
                                         </div>
                                       );
                                     })}
-                                    {item?.formAuthor?.userId !== user?.uid &&
+                                    {item?.formAuthor?.userId !== userId &&
                                       !item?.recall && (
                                         <button className="relative group w-fit mr-1">
                                           <HiOutlineDotsHorizontal />
                                           <div
                                             className={`absolute z-[9999] hidden group-hover:flex flex-col justify-start items-start top-full ${
                                               item?.formAuthor?.userId ===
-                                              user?.uid
+                                              userId
                                                 ? "left-0"
                                                 : "right-0"
                                             } bg-white shadow-sm shadow-gray-500 text-[10px] sm:text-xs font-medium w-[120px] rounded p-1`}
                                           >
                                             {item?.formAuthor?.userId ===
-                                              user?.uid && (
+                                              userId && (
                                               <Link
                                                 href={``}
                                                 onClick={async (e) => {
@@ -742,7 +741,7 @@ export default function ChatGroupRight({
                                   </div>
                                   <div
                                     className={`w-fit ${
-                                      author?.userId === user?.uid && "ml-auto"
+                                      author?.userId === userId && "ml-auto"
                                     } text-[10px] text-white px-[8px] pt-[3px] pb-[2px]  rounded-full font-normal mt-[4px] bg-black bg-opacity-40`}
                                   >
                                     {moment(item?.createdAt).isBefore(
@@ -763,14 +762,14 @@ export default function ChatGroupRight({
                                 <div
                                   id={item?.id}
                                   className={`w-fit  text-sm ${
-                                    item?.formAuthor?.userId === user?.uid
+                                    item?.formAuthor?.userId === userId
                                       ? "ml-auto"
                                       : ""
                                   }`}
                                 >
                                   <div
                                     className={`w-full text-sm ${
-                                      item?.formAuthor?.userId === user?.uid
+                                      item?.formAuthor?.userId === userId
                                         ? "bg-[#e5efff]"
                                         : "bg-white"
                                     }  rounded-[10px] px-[10px] py-[20px] ${
@@ -786,7 +785,7 @@ export default function ChatGroupRight({
                                 <div
                                   id={item?.id}
                                   className={`flex items-start gap-x-2 w-full ${
-                                    item?.formAuthor?.userId === user?.uid
+                                    item?.formAuthor?.userId === userId
                                       ? "flex-row-reverse"
                                       : "flex-row"
                                   } sm:w-3/4 lg:w-2/3 xl:w-7/12 2xl:w-1/2`}
@@ -798,7 +797,7 @@ export default function ChatGroupRight({
                                           <div
                                             className={`w-full flex gap-x-2 items-center ${
                                               item?.formAuthor?.userId ===
-                                              user?.uid
+                                              userId
                                                 ? "flex-row"
                                                 : "flex-row-reverse"
                                             }`}
@@ -811,7 +810,7 @@ export default function ChatGroupRight({
                                               <div
                                                 className={`cursor-pointer w-full text-sm  sm:text-base font-medium cursor-pointer ${
                                                   item?.formAuthor?.userId ===
-                                                  user?.uid
+                                                  userId
                                                     ? "bg-[#e5efff] ml-auto"
                                                     : "bg-white"
                                                 }  rounded-[10px] px-[10px] py-[20px] mb-2`}
@@ -965,7 +964,7 @@ export default function ChatGroupRight({
                                           </div>
                                           <div
                                             className={`w-fit ${
-                                              author?.userId === user?.uid &&
+                                              author?.userId === userId &&
                                               "ml-auto"
                                             } text-[10px] text-white px-[8px] pt-[3px] pb-[2px]  rounded-full font-normal mt-[4px] bg-black bg-opacity-40`}
                                           >
@@ -989,13 +988,13 @@ export default function ChatGroupRight({
                                       <HiOutlineDotsHorizontal />
                                       <div
                                         className={`absolute z-[9999] hidden group-hover:flex flex-col justify-start items-start top-full ${
-                                          item?.formAuthor?.userId === user?.uid
+                                          item?.formAuthor?.userId === userId
                                             ? "left-0"
                                             : "right-0"
                                         } bg-white shadow-sm shadow-gray-500 text-[10px] sm:text-xs font-medium w-[120px] rounded p-1`}
                                       >
                                         {item?.formAuthor?.userId ===
-                                          user?.uid && (
+                                          userId && (
                                           <Link
                                             href={``}
                                             onClick={async (e) => {
@@ -1072,14 +1071,14 @@ export default function ChatGroupRight({
                                       }`
                                     : "w-fit"
                                 } text-sm ${
-                                  item?.formAuthor?.userId === user?.uid
+                                  item?.formAuthor?.userId === userId
                                     ? "ml-auto"
                                     : ""
                                 }`}
                               >
                                 <div
                                   className={`flex gap-x-2 items-center ${
-                                    item?.formAuthor?.userId === user?.uid
+                                    item?.formAuthor?.userId === userId
                                       ? "flex-row"
                                       : "flex-row-reverse"
                                   }`}
@@ -1089,13 +1088,13 @@ export default function ChatGroupRight({
                                       <HiOutlineDotsHorizontal />
                                       <div
                                         className={`absolute z-[9999] hidden group-hover:flex flex-col justify-start items-start top-full ${
-                                          item?.formAuthor?.userId === user?.uid
+                                          item?.formAuthor?.userId === userId
                                             ? "left-0"
                                             : "right-0"
                                         } bg-white shadow-sm shadow-gray-500 text-[10px] sm:text-xs font-medium w-[120px] rounded p-1`}
                                       >
                                         {item?.formAuthor?.userId ===
-                                          user?.uid && (
+                                          userId && (
                                           <Link
                                             href={``}
                                             onClick={async (e) => {
@@ -1161,7 +1160,7 @@ export default function ChatGroupRight({
 
                                   <div
                                     className={`w-full text-sm ${
-                                      item?.formAuthor?.userId === user?.uid
+                                      item?.formAuthor?.userId === userId
                                         ? "bg-[#e5efff]"
                                         : "bg-white"
                                     }  rounded-[10px] px-[10px] py-[20px] ${
@@ -1350,7 +1349,7 @@ export default function ChatGroupRight({
                                 </div>
                                 <div
                                   className={`w-fit ${
-                                    author?.userId === user?.uid && "ml-auto"
+                                    author?.userId === userId && "ml-auto"
                                   } text-[10px] text-white px-[8px] py-[0px]  rounded-full font-normal mt-[4px] bg-black bg-opacity-40`}
                                 >
                                   {moment(item?.createdAt).isBefore(
@@ -1691,7 +1690,7 @@ export default function ChatGroupRight({
                       //   return;
                       // }
                       const myAuthor = authors?.find(
-                        (x) => x?.userId === user?.uid
+                        (x) => x?.userId === userId
                       );
                       let dataItem = {
                         text: newMessage,

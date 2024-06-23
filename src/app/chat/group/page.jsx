@@ -81,12 +81,10 @@ export default function Chat() {
     });
     return () => unsubscribe;
   }, []);
-  console.log("123", messages);
   const [authors, setAuthors] = useState();
   useEffect(() => {
     getAuthors().then((data) => setAuthors(data));
   }, []);
-  console.log(messages);
   return (
     <main className="w-full h-full fixed left-0 top-0">
       <div

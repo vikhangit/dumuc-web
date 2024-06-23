@@ -87,7 +87,6 @@ export default function FeedSearch({ searchParams }) {
     setLoading(false);
   }, [user]);
   const router = useRouter();
-  console.log(posts);
   return (
     <div>
       <main className="w-full">

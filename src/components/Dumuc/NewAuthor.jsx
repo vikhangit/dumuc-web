@@ -89,8 +89,7 @@ const NewAuthorUI = ({ currentUrl = "/", params, searchParams }) => {
       setFriendType(1);
     }
   }, [usingUser, authorData]);
-  console.log(user);
-  console.log(usingUser);
+
   return loading ? (
     <Loading />
   ) : (
@@ -430,7 +429,6 @@ const NewAuthorUI = ({ currentUrl = "/", params, searchParams }) => {
                               },
                               user?.accessToken
                             ).then(async (result) => {
-                              console.log(result);
                               //update recoil
                               deleteRecieveFriend(
                                 {
@@ -446,7 +444,6 @@ const NewAuthorUI = ({ currentUrl = "/", params, searchParams }) => {
                               },
                               user?.accessToken
                             ).then(async (result) => {
-                              console.log(result);
                               receiveRequestAddFriend(
                                 {
                                   authorUserId: authorData?.userId,

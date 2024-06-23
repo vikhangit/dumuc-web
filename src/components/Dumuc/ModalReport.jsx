@@ -69,7 +69,6 @@ export default function ModalReport({
       );
     });
   };
-  console.log(activeList);
   return (
     <Modal
       visible={visible}

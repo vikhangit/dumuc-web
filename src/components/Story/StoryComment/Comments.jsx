@@ -10,7 +10,6 @@ const CommentForm = dynamic(
 
 export const Comments = ({ comments, setComments, feed, onCallback }) => {
   const [qoute, setQoute] = useState([]);
-  console.log(comments);
 
   return (
     <div>

@@ -224,7 +224,6 @@ export default function QuickPostModal({
     }
     localStorage.removeItem("isPrivate");
   };
-  console.log(user);
   return (
     <>
       <Modal

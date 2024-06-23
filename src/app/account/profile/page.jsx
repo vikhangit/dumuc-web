@@ -228,7 +228,6 @@ const ProfilePage = () => {
       }
     });
   };
-  console.log(usingUser);
 
   return (
     <main className="w-full">

@@ -61,8 +61,6 @@ const Story = ({
     }
   }, [data]);
 
-  console.log("2222222", stories);
-
   const handleChange = (e) => {
     setLoading(true);
     if (e?.target?.files) {
@@ -91,7 +89,6 @@ const Story = ({
     videoEl.current.seekTo(timeToStart, "seconds");
   }, [videoEl.current]);
 
-  console.log(indexImage);
   return (
     <>
       <div className="bg-white rounded-lg shadow my-4 border border-gray-300 px-[30px] py-[10px] relative">

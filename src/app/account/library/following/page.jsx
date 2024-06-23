@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React, { useState, useEffect } from "react";
 
 import { getProfile } from "@apis/users";
@@ -13,41 +13,47 @@ import Loading from "./loading";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@utils/firebase";
 
-const LibraryPage = ({searchParams}) => {
-    const [loadingSkeleton, setLoadingSkeleton] = useState(true);
-    const [followings, setFollowings] = useState([]);
-    const [user, loading, error] = useAuthState(auth);
-    const [usingUser, setUsingUser] = useState()
-    useEffect(() =>{
-      getProfile(user?.accessToken).then((dataCall) => setUsingUser(dataCall)) 
-    },[user])
-    useEffect(() => {
-      if (user && usingUser) {
-        let arr = []  
-        usingUser?.follows?.map(async (item, index) =>
+const LibraryPage = ({ searchParams }) => {
+  const [loadingSkeleton, setLoadingSkeleton] = useState(true);
+  const [followings, setFollowings] = useState([]);
+  const [user, loading, error] = useAuthState(auth);
+  const [usingUser, setUsingUser] = useState();
+  useEffect(() => {
+    getProfile(user?.accessToken).then((dataCall) => setUsingUser(dataCall));
+  }, [user]);
+  useEffect(() => {
+    if (user && usingUser) {
+      let arr = [];
+      usingUser?.follows?.map(
+        async (item, index) =>
           await getAuthor({
             authorId: item?.authorId,
           }).then((data) => {
-            arr.push(data)
-            setFollowings(arr)
+            arr.push(data);
+            setFollowings(arr);
           })
-        )
-        setLoadingSkeleton(false);
-      }
-    }, [user, usingUser, searchParams?.tab])
-    console.log(followings)
+      );
+      setLoadingSkeleton(false);
+    }
+  }, [user, usingUser, searchParams?.tab]);
 
-    return (
-      loadingSkeleton ? <Loading /> :
-      <main className="w-full">
-        <Header isBack={true} />
-        <AccountLibraryTabs active="following" />
-        <div className="px-2" style={{backgroundImage: "linear-gradient(to bottom, white, #F7F7F7)"}}>
-          <AuthorLibraryItems items={followings} />
-        </div>
-        <BannerRight isAppInstall={true} />
-      </main>
-    );
+  return loadingSkeleton ? (
+    <Loading />
+  ) : (
+    <main className="w-full">
+      <Header isBack={true} />
+      <AccountLibraryTabs active="following" />
+      <div
+        className="px-2"
+        style={{
+          backgroundImage: "linear-gradient(to bottom, white, #F7F7F7)",
+        }}
+      >
+        <AuthorLibraryItems items={followings} />
+      </div>
+      <BannerRight isAppInstall={true} />
+    </main>
+  );
 };
 
 export default LibraryPage;

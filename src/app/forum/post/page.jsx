@@ -158,7 +158,7 @@ const PostWritePage = ({ searchParams }) => {
                         }
                       );
                     })
-                    .catch((err) => console.log("err", err));
+                    .catch((err) => {});
                 },
               },
             },

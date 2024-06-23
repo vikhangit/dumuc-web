@@ -69,7 +69,6 @@ export default function ModalAddFriend({
       }
     }
   };
-  console.log(authors);
   return (
     <Modal
       visible={visible}
@@ -164,16 +163,13 @@ export default function ModalAddFriend({
                                         },
                                         user?.accessToken
                                       ).then(async (result) => {
-                                        console.log(result);
                                         //update recoil
                                         await deleteRecieveFriend(
                                           {
                                             authorUserId: x?.userId,
                                           },
                                           user?.accessToken
-                                        )
-                                          .then((e) => console.log(e))
-                                          .catch((e) => console.log(e));
+                                        );
                                         const dataCall = await getProfile(
                                           user?.accessToken
                                         );
@@ -237,16 +233,12 @@ export default function ModalAddFriend({
                                               },
                                               user?.accessToken
                                             ).then(async (result) => {
-                                              console.log(result);
-                                              //update recoil
                                               await deleteRecieveFriend(
                                                 {
                                                   authorUserId: x?.userId,
                                                 },
                                                 user?.accessToken
-                                              )
-                                                .then((e) => console.log(e))
-                                                .catch((e) => console.log(e));
+                                              );
                                             });
                                             await sendRequestAddFriend(
                                               {
@@ -255,16 +247,13 @@ export default function ModalAddFriend({
                                               },
                                               user?.accessToken
                                             ).then(async (result) => {
-                                              console.log(result);
                                               await receiveRequestAddFriend(
                                                 {
                                                   authorUserId: x?.userId,
                                                   status: 2,
                                                 },
                                                 user?.accessToken
-                                              )
-                                                .then((e) => console.log(e))
-                                                .catch((e) => console.log(e));
+                                              );
                                             });
 
                                             await getProfile(
@@ -307,16 +296,13 @@ export default function ModalAddFriend({
                                               },
                                               user?.accessToken
                                             ).then(async (result) => {
-                                              console.log(result);
                                               //update recoil
                                               await deleteRecieveFriend(
                                                 {
                                                   authorUserId: x?.userId,
                                                 },
                                                 user?.accessToken
-                                              )
-                                                .then((e) => console.log(e))
-                                                .catch((e) => console.log(e));
+                                              );
                                               const dataCall = await getProfile(
                                                 user?.accessToken
                                               );
@@ -387,16 +373,13 @@ export default function ModalAddFriend({
                                                 },
                                                 user?.accessToken
                                               ).then(async (result) => {
-                                                console.log(result);
-                                                //update recoil
                                                 await deleteUserInFollowerList(
                                                   {
                                                     authorUserId: x?.userId,
                                                   },
                                                   user?.accessToken
-                                                )
-                                                  .then((e) => console.log(e))
-                                                  .catch((e) => console.log(e));
+                                                );
+
                                                 message.success(
                                                   "Hủy theo dõi thành công"
                                                 );
@@ -441,15 +424,12 @@ export default function ModalAddFriend({
                                               },
                                               user?.accessToken
                                             ).then(async (result) => {
-                                              console.log(result);
                                               await createUserToFollowerList(
                                                 {
                                                   authorUserId: x?.userId,
                                                 },
                                                 user?.accessToken
-                                              )
-                                                .then((e) => console.log(e))
-                                                .catch((e) => console.log(e));
+                                              );
                                             });
                                             await getProfile(
                                               user?.accessToken
@@ -494,16 +474,12 @@ export default function ModalAddFriend({
                                               },
                                               user?.accessToken
                                             ).then(async (result) => {
-                                              console.log(result);
-                                              //update recoil
                                               await deleteRecieveFriend(
                                                 {
                                                   authorUserId: x?.userId,
                                                 },
                                                 user?.accessToken
-                                              )
-                                                .then((e) => console.log(e))
-                                                .catch((e) => console.log(e));
+                                              );
                                             });
 
                                             await getProfile(
@@ -557,15 +533,12 @@ export default function ModalAddFriend({
                                       },
                                       user?.accessToken
                                     ).then(async (result) => {
-                                      console.log(result);
                                       await receiveRequestAddFriend(
                                         {
                                           authorUserId: x?.userId,
                                         },
                                         user?.accessToken
-                                      )
-                                        .then((e) => console.log(e))
-                                        .catch((e) => console.log(e));
+                                      );
                                     });
 
                                     await getProfile(user?.accessToken).then(
@@ -623,15 +596,12 @@ export default function ModalAddFriend({
                                       },
                                       user?.accessToken
                                     ).then(async (result) => {
-                                      console.log(result);
                                       await receiveRequestAddFriend(
                                         {
                                           authorUserId: x?.userId,
                                         },
                                         user?.accessToken
-                                      )
-                                        .then((e) => console.log(e))
-                                        .catch((e) => console.log(e));
+                                      );
                                     });
 
                                     await getProfile(user?.accessToken).then(

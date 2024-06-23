@@ -259,7 +259,6 @@ export default function ModalAbout({
               // )
               ?.map((item, index) => {
                 const author = authors?.find((x) => x?.userId === item?.user);
-                console.log(item);
                 return (
                   <div
                     key={index}

@@ -27,7 +27,7 @@ const ChatGroupRight = dynamic(
   { ssr: false }
 );
 
-export default function Chat() {
+export default function Chat({ error }) {
   const [user] = useAuthState(auth);
   const sizes = useWindowSize();
   const search = useSearchParams();
