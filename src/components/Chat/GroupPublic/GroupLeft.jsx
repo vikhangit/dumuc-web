@@ -59,7 +59,7 @@ export default function ChatGroupLeft({
   useEffect(() => {
     setGroupList(
       messages?.filter(
-        (item) => !item?.isDelete?.find((x) => x?.user === user?.uid)
+        (item) => !item?.isDelete?.find((x) => x?.user === userId)
       )
     );
   }, [messages]);
@@ -123,7 +123,7 @@ export default function ChatGroupLeft({
     if (value.trim() === "") {
       setGroupList(
         messages?.filter(
-          (item) => !item?.isDelete?.find((x) => x?.user === user?.uid)
+          (item) => !item?.isDelete?.find((x) => x?.user === userId)
         )
       );
     } else {
@@ -210,13 +210,13 @@ export default function ChatGroupLeft({
         groupList?.filter(
           (x) => x?.isPrivate === false
           // &&
-          //   !x?.isDelete?.find((ab) => ab?.user === user?.uid)
+          //   !x?.isDelete?.find((ab) => ab?.user === userId)
         )?.length > 0 ? (
           groupList
             ?.filter(
               (x) => x?.isPrivate === false
               // &&
-              //   !x?.isDelete?.find((ab) => ab?.user === user?.uid)
+              //   !x?.isDelete?.find((ab) => ab?.user === userId)
             )
             ?.map((item, i) => {
               const author = authors?.find(
@@ -256,10 +256,10 @@ export default function ChatGroupLeft({
                         {item?.name}
                       </Link>
 
-                      {item?.isDelete?.find((ab) => ab?.user === user?.uid) ? (
+                      {item?.isDelete?.find((ab) => ab?.user === userId) ? (
                         <div></div>
                       ) : (
-                        item?.member?.find((x) => x?.user === user?.uid) && (
+                        item?.member?.find((x) => x?.user === userId) && (
                           <span className="text-[13px] text-gray-600">
                             {item?.lastMessage &&
                               getTimeChat(
@@ -269,12 +269,12 @@ export default function ChatGroupLeft({
                         )
                       )}
                     </div>
-                    {item?.isDelete?.find((ab) => ab?.user === user?.uid) ? (
+                    {item?.isDelete?.find((ab) => ab?.user === userId) ? (
                       <p className="text-[13px] text-gray-600 mt-0.5 italic">
                         Chưa có tin nhắn mới
                       </p>
                     ) : (
-                      item?.member?.find((x) => x?.user === user?.uid) && (
+                      item?.member?.find((x) => x?.user === userId) && (
                         <div className="flex justify-between w-full">
                           {item?.lastMessage ? (
                             <>
@@ -289,7 +289,7 @@ export default function ChatGroupLeft({
                               </p>
                               {item?.new === true &&
                                 item?.lastMessage?.formAuthor?.userId !==
-                                  user?.uid && (
+                                  userId && (
                                   <div className="rounded-full w-[10px] h-[10px] bg-[#C82027] text-white text-xs flex justify-center items-center"></div>
                                 )}
                             </>

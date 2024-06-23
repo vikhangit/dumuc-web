@@ -62,7 +62,7 @@ export default function ChatGroupRight({
   activeGroup,
   setActiveGroup,
   // user,
-  usingUser,
+  // usingUser,
 }) {
   const user = JSON.parse(localStorage.getItem("userLogin"));
   const userId = JSON.parse(localStorage.getItem("userId"));

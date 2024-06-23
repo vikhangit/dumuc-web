@@ -28,7 +28,7 @@ const ChatGroupRight = dynamic(
 );
 
 export default function Chat() {
-  const [user] = useAuthState(auth);
+  // const [user] = useAuthState(auth);
   const sizes = useWindowSize();
   const search = useSearchParams();
   const [show, setShow] = useState(0);
@@ -37,11 +37,11 @@ export default function Chat() {
   const [userRecieved, setUserRecieved] = useState();
   const [activeGroup, setActiveGroup] = useState();
   const [usingUser, setUsingUser] = useState();
-  useEffect(() => {
-    getProfile(user?.accessToken).then((dataCall) => {
-      setUsingUser(dataCall);
-    });
-  }, [user]);
+  // useEffect(() => {
+  //   getProfile(user?.accessToken).then((dataCall) => {
+  //     setUsingUser(dataCall);
+  //   });
+  // }, [user]);
   useEffect(() => {
     if (sizes.width < 992) {
       setShow(-1);
