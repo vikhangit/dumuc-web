@@ -27,7 +27,9 @@ export default function ModalAddMember({
   activeGroup,
   member,
 }) {
-  const [user] = useAuthState(auth);
+  const user = JSON.parse(localStorage.getItem("userLogin"));
+  const userId = JSON.parse(localStorage.getItem("userId"));
+  const userToken = JSON.parse(localStorage.getItem("userToken"));
   const router = useRouter();
   const search = useSearchParams();
   const [loading, setLoading] = useState(false);
@@ -37,9 +39,9 @@ export default function ModalAddMember({
   const [friendList, setFriendList] = useState([]);
   const [memberList, setMemberList] = useState([]);
   useEffect(() => {
-    getProfile(user?.accessToken).then((dataCall) => {
+    getProfile(userToken).then((dataCall) => {
       setUsingUser(dataCall);
-      setFriendList(dataCall?.friendList?.filter((x) => x.status === 2));
+      setFriendList(dataCall?.friendList?.filter((x) => x?.status === 2));
     });
   }, [user]);
 
@@ -52,7 +54,7 @@ export default function ModalAddMember({
       await updateDoc(washingtonRef, {
         member: arrayUnion({
           user: x?.userId,
-          createdBy: user?.uid,
+          createdBy: userId,
         }),
       }).then((result) => {
         message.success("Thêm thành viên vào nhóm thành công");

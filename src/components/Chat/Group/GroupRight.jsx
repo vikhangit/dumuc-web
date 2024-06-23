@@ -1762,14 +1762,14 @@ export default function ChatGroupRight({
         setOpenImage={setOpenImage}
         type={type}
       />
-      {/* <ModalAddMember
+      <ModalAddMember
         authors={authors}
         onCallback={() => {}}
         visible={showModalAddMember}
         onCancel={() => setShowModalAddMember(false)}
         activeGroup={activeGroup}
         member={groupTo?.member}
-      /> */}
+      />
       <ModalAbout
         visible={openAbout}
         onCancel={() => setOpenAbout(false)}

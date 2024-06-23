@@ -38,7 +38,9 @@ export default function ModalAddLeader({
   member,
   onCloseParent,
 }) {
-  const [user] = useAuthState(auth);
+  const user = JSON.parse(localStorage.getItem("userLogin"));
+  const userId = JSON.parse(localStorage.getItem("userId"));
+  const userToken = JSON.parse(localStorage.getItem("userToken"));
   const router = useRouter();
   const search = useSearchParams();
   const [loading, setLoading] = useState(false);
@@ -48,7 +50,7 @@ export default function ModalAddLeader({
   const [friendList, setFriendList] = useState([]);
   const [memberList, setMemberList] = useState();
   useEffect(() => {
-    getProfile(user?.accessToken).then((dataCall) => {
+    getProfile(userToken).then((dataCall) => {
       setUsingUser(dataCall);
       setFriendList(dataCall?.friendList?.filter((x) => x.status === 2));
     });
@@ -56,7 +58,7 @@ export default function ModalAddLeader({
   const save = async () => {
     const washingtonRef = doc(db, "chat-groups", search.get("groupId"));
     setLoading(true);
-    const find = member?.find((x) => x.user === user?.uid);
+    const find = member?.find((x) => x?.user === userId);
     await updateDoc(washingtonRef, {
       member: arrayRemove(find),
     })
@@ -69,7 +71,7 @@ export default function ModalAddLeader({
           {
             type: "exit",
             notify: true,
-            user: user?.uid,
+            user: userId,
             createdAt: serverTimestamp(),
           }
         );
@@ -172,7 +174,7 @@ export default function ModalAddLeader({
               {member?.map((item, index) => {
                 const author = authors?.find((x) => x?.userId === item?.user);
                 return (
-                  item?.user !== user.uid && (
+                  item?.user !== userId && (
                     <div
                       key={index}
                       onClick={() => {

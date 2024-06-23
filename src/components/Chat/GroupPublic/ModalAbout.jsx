@@ -34,7 +34,9 @@ export default function ModalAbout({
   member,
   avatarGroup,
 }) {
-  const [user] = useAuthState(auth);
+  const user = JSON.parse(localStorage.getItem("userLogin"));
+  const userId = JSON.parse(localStorage.getItem("userId"));
+  const userToken = JSON.parse(localStorage.getItem("userToken"));
   const search = useSearchParams();
   const router = useRouter();
   const userCreated = authors?.find((x) => x?.userId === about?.createdBy);
@@ -57,7 +59,7 @@ export default function ModalAbout({
   const handleChangeIamge = (e) => {
     setLoadigAvatar(true);
     if (e.target.files[0]) {
-      uploadImage(e.target.files[0], user?.accessToken).then(async (data) => {
+      uploadImage(e.target.files[0], userToken).then(async (data) => {
         const washingtonRef = doc(db, "chat-groups", about?.id);
 
         await updateDoc(washingtonRef, {
@@ -70,7 +72,7 @@ export default function ModalAbout({
                 notify: true,
                 type: "avatar",
                 text: `Ảnh đại diện nhóm đã được thay đổi`,
-                user: user.uid,
+                user: userId,
                 createdAt: serverTimestamp(),
               }
             );
@@ -124,7 +126,7 @@ export default function ModalAbout({
                 )}
               </div>
             </div>
-            {user.uid === userLeader?.userId && (
+            {userId === userLeader?.userId && (
               <div className="flex justify-center">
                 <Button
                   onClick={() => refImage.current.click()}
@@ -184,7 +186,7 @@ export default function ModalAbout({
                                 type: "name",
                                 notify: true,
                                 text: name,
-                                user: user.uid,
+                                user: userId,
                                 createdAt: serverTimestamp(),
                               }
                             );
@@ -204,7 +206,7 @@ export default function ModalAbout({
               ) : (
                 <div className="flex items-center gap-x-2">
                   {about?.name}
-                  {user.uid === userLeader?.userId && (
+                  {userId === userLeader?.userId && (
                     <HiPencil size={16} onClick={() => setIsEditName(true)} />
                   )}
                 </div>
@@ -303,7 +305,7 @@ export default function ModalAbout({
                           >
                             Xem trang cá nhân
                           </Link>
-                          {user.uid !== item?.user && (
+                          {userId !== item?.user && (
                             <Link
                               href={`/chat?friendId=${author?.authorId}`}
                               className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left text-black`}
@@ -311,7 +313,7 @@ export default function ModalAbout({
                               Nhắn tin riêng
                             </Link>
                           )}
-                          {user.uid === about?.leader &&
+                          {userId === about?.leader &&
                             about?.leader !== item?.user && (
                               <>
                                 {about?.deputyLeader !== item?.user ? (
@@ -519,7 +521,7 @@ export default function ModalAbout({
                                   //       ),
                                   //       {
                                   //         type:
-                                  //           user.uid === author?.userId
+                                  //           userId === author?.userId
                                   //             ? "exit"
                                   //             : "remove",
                                   //         notify: true,
@@ -558,7 +560,7 @@ export default function ModalAbout({
                                       ),
                                       {
                                         type:
-                                          user.uid === item?.user
+                                          userId === item?.user
                                             ? "exit"
                                             : "remove",
                                         notify: true,
@@ -568,18 +570,18 @@ export default function ModalAbout({
                                     );
 
                                     message.success(
-                                      user.uid === item?.user
+                                      userId === item?.user
                                         ? "Rời khỏi nhóm thành công"
                                         : "Xóa thành viên nhóm thành công"
                                     );
-                                    if (user.uid === item?.user) {
+                                    if (userId === item?.user) {
                                       onCancel();
                                       router.push("/chat/group-public");
                                     }
                                   })
                                   .catch((err) => {
                                     message.error(
-                                      user.uid === item?.user
+                                      userId === item?.user
                                         ? "Rời khỏi nhóm thất bại"
                                         : "Xóa thành viên nhóm thất bại"
                                     );
@@ -588,7 +590,7 @@ export default function ModalAbout({
                             }}
                             className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left text-black`}
                           >
-                            {user.uid === author?.userId
+                            {userId === author?.userId
                               ? "Rời nhóm"
                               : "Xóa khỏi nhóm"}
                           </button>
@@ -657,7 +659,7 @@ export default function ModalAbout({
                             await updateDoc(washingtonRef, {
                               member: arrayUnion({
                                 user: item?.user,
-                                createdBy: user?.uid,
+                                createdBy: userId,
                               }),
                               requestList: arrayRemove({
                                 user: item?.user,

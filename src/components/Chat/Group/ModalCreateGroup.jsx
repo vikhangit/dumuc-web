@@ -26,20 +26,17 @@ export default function ModalCreateGroup({
   onCallback,
   authors,
 }) {
-  const [user] = useAuthState(auth);
+  const user = JSON.parse(localStorage.getItem("userLogin"));
+  const userId = JSON.parse(localStorage.getItem("userId"));
+  const userToken = JSON.parse(localStorage.getItem("userToken"));
   const [loading, setLoading] = useState(false);
-  const [usingUser, setUsingUser] = useState();
   const router = useRouter();
   const [avatar, setAvatar] = useState("");
   const refAvatar = useRef(null);
   const [loadingAvatar, setLoadingAvatar] = useState(false);
   const [name, setName] = useState("");
   const [error, setError] = useState("");
-  const myAuthor = authors?.find((x) => x?.userId === user?.uid);
   const [active, setActive] = useState(0);
-  useEffect(() => {
-    getProfile(user?.accessToken).then((dataCall) => setUsingUser(dataCall));
-  }, [user]);
   const save = async () => {
     setLoading(true);
     if (name === undefined || name === "") {
@@ -50,8 +47,8 @@ export default function ModalCreateGroup({
     const docRef = await addDoc(collection(db, "chat-groups"), {
       name,
       avatar,
-      createdBy: user?.uid,
-      leader: user?.uid,
+      createdBy: userId,
+      leader: userId,
       deputyLeader: "",
       createdAt: serverTimestamp(),
       isPrivate: JSON.parse(localStorage.getItem("groupPrivate"))
@@ -63,8 +60,8 @@ export default function ModalCreateGroup({
     const memberRef = doc(db, "chat-groups", docRef.id);
     await updateDoc(memberRef, {
       member: arrayUnion({
-        user: user?.uid,
-        createdBy: user?.uid,
+        user: userId,
+        createdBy: userId,
       }),
     });
     setLoading(false);
@@ -82,7 +79,7 @@ export default function ModalCreateGroup({
   const handleChangeIamge = (e) => {
     setLoadingAvatar(true);
     if (e?.target?.files) {
-      uploadImage(e?.target?.files[0], user?.accessToken).then((data) => {
+      uploadImage(e?.target?.files[0], userToken).then((data) => {
         setAvatar(data?.url);
         setLoadingAvatar(false);
       });
