@@ -152,6 +152,7 @@ export default function ChatGroupLeft({
       .replace("ago", "")
       .replace("few", "");
   };
+  console.log(user?.uid);
   return (
     <div
       className={`h-full ${

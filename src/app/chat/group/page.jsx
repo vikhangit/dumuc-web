@@ -102,7 +102,7 @@ export default function Chat() {
           messages={messages}
           authors={authors}
           // user={user}
-          usingUser={usingUser}
+          // usingUser={usingUser}
         />
         <ChatGroupRight
           userRecieved={userRecieved}
@@ -114,7 +114,7 @@ export default function Chat() {
           messages={messages}
           authors={authors}
           // user={user}
-          usingUser={usingUser}
+          // usingUser={usingUser}
         />
       </div>
       {/* <div className={sizes.width > 411 ? "mb-24" :  "mb-16"} /> */}

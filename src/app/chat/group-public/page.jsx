@@ -103,7 +103,6 @@ export default function Chat({ error, reset }) {
           authors={authors}
           // user={user}
           // usingUser={usingUser}
-          reset={reset}
         />
         <ChatGroupRight
           userRecieved={userRecieved}
