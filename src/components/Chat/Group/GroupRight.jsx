@@ -1779,13 +1779,13 @@ export default function ChatGroupRight({
         type={typeAbout}
         setShowModalLeader={setShowModalLeader}
       />
-      {/* <ModalAddLeader
+      <ModalAddLeader
         authors={authors}
         member={groupTo?.member}
         onCancel={() => setShowModalLeader(false)}
         onCloseParent={() => setOpenAbout(false)}
         visible={showModalLeader}
-      /> */}
+      />
       {/* <ModalForwardMessage
         authors={authors}
         onCallback={() => {}}

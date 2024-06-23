@@ -194,17 +194,10 @@ export default function ChatGroupLeft({
         </button>
       </div>
       <div className="h-[calc(100%-150px)] overflow-auto scroll-chat px-2">
-        {user &&
-        groupList?.length > 0 &&
-        groupList?.filter((x) => x.isPrivate)?.length > 0 ? (
+        {groupList?.filter((x) => x?.isPrivate)?.length > 0 ? (
           groupList
-            ?.filter((x) => x.isPrivate)
+            ?.filter((x) => x?.isPrivate)
             .map((item, i) => {
-              const findMess = item?.messages?.filter(
-                (x) =>
-                  !x?.notify && !x?.isDelete?.find((n) => n?.user === userId)
-              );
-
               const author = authors?.find(
                 (x) => x?.authorId === item?.lastMessage?.formAuthor?.authorId
               );

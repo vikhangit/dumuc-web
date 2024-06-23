@@ -47,6 +47,8 @@ export default function ModalAbout({
   const refImage = useRef(null);
   const [loadingAvatar, setLoadigAvatar] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
+
+  const [confirmLoadingLeader, setConfirmLoadingLeader] = useState(false);
   const [openAlertDeputy, setOpenAlertDeputy] = useState(false);
   const [openAlertLeader, setOpenAlertLeader] = useState(false);
   const [openAlertRemove, setOpenAlertRemove] = useState(false);
@@ -429,17 +431,86 @@ export default function ModalAbout({
                                     </button>
                                   </Popconfirm>
                                 )}
-                                <button
-                                  className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left text-black`}
-                                  onClick={async () => {
+                                <Popconfirm
+                                  title="Để cử trưởng nhóm"
+                                  description={`Bạn có chắc chắn đề cử ${author?.name} trở thành trưởng nhóm không?`}
+                                  open={openAlertLeader}
+                                  onConfirm={async () => {
+                                    setConfirmLoadingLeader(true);
                                     const washingtonRef = doc(
                                       db,
                                       "chat-groups",
                                       about?.id
                                     );
-                                    await updateDoc(washingtonRef, {
-                                      leader: item?.user,
-                                    }).then(async (result) => {
+                                    if (about?.deputyLeader === item?.user) {
+                                      await updateDoc(washingtonRef, {
+                                        leader: item?.user,
+                                        deputyLeader: "",
+                                      });
+                                    } else {
+                                      await updateDoc(washingtonRef, {
+                                        leader: item?.user,
+                                      });
+                                    }
+                                    await addDoc(
+                                      collection(
+                                        db,
+                                        "chat-groups",
+                                        search.get("groupId"),
+                                        "messages"
+                                      ),
+                                      {
+                                        type: "leader",
+                                        notify: true,
+                                        user: item?.user,
+                                        createdAt: serverTimestamp(),
+                                      }
+                                    );
+                                    message.success(
+                                      "Để cử trưởng nhóm thành công"
+                                    );
+                                    setConfirmLoadingLeader(false);
+                                  }}
+                                  okButtonProps={{
+                                    loading: confirmLoadingLeader,
+                                  }}
+                                  onCancel={() => {
+                                    setOpenAlertLeader(false);
+                                  }}
+                                  okText="Xác nhận"
+                                  cancelText="Hủy"
+                                >
+                                  <button
+                                    className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left text-black`}
+                                    type="primary"
+                                    onClick={() => setOpenAlertLeader(true)}
+                                  >
+                                    Đề cử trưởng nhóm
+                                  </button>
+                                </Popconfirm>
+                              </>
+                            )}
+
+                          {about?.leader === userId &&
+                            item?.user !== about?.leader && (
+                              <button
+                                onClick={async () => {
+                                  const washingtonRef = doc(
+                                    db,
+                                    "chat-groups",
+                                    about?.id
+                                  );
+                                  await updateDoc(washingtonRef, {
+                                    member: arrayRemove(item),
+                                  })
+                                    .then(async (result) => {
+                                      if (
+                                        author?.userId === about?.deputyLeader
+                                      ) {
+                                        await updateDoc(washingtonRef, {
+                                          deputyLeader: "",
+                                        });
+                                      }
                                       await addDoc(
                                         collection(
                                           db,
@@ -448,42 +519,101 @@ export default function ModalAbout({
                                           "messages"
                                         ),
                                         {
-                                          type: "leader",
+                                          type: "remove",
                                           notify: true,
                                           user: item?.user,
                                           createdAt: serverTimestamp(),
                                         }
                                       );
+
                                       message.success(
-                                        `Bạn đã đề cử ${author?.name} thành nhóm trưởng thành công`
+                                        "Xóa thành viên nhóm thành công"
+                                      );
+                                    })
+                                    .catch((err) => {
+                                      message.error(
+                                        "Xóa thành viên nhóm thất bại"
                                       );
                                     });
-                                  }}
-                                >
-                                  Đề cử trưởng nhóm
-                                </button>
-                              </>
+                                }}
+                                className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left text-black`}
+                              >
+                                Xóa khỏi nhóm
+                              </button>
                             )}
-                          <button
-                            onClick={async () => {
-                              const washingtonRef = doc(
-                                db,
-                                "chat-groups",
-                                about?.id
-                              );
-                              if (item?.user === about?.leader) {
-                                if (
-                                  about?.deputyLeader !== "" &&
-                                  about?.deputyLeader?.length > 0
-                                ) {
+                          {item?.user === userId && (
+                            <button
+                              onClick={async () => {
+                                const washingtonRef = doc(
+                                  db,
+                                  "chat-groups",
+                                  about?.id
+                                );
+                                if (item?.user === about?.leader) {
+                                  if (
+                                    about?.deputyLeader !== "" &&
+                                    about?.deputyLeader?.length > 0
+                                  ) {
+                                    await updateDoc(washingtonRef, {
+                                      member: arrayRemove(item),
+                                    })
+                                      .then(async (result) => {
+                                        await updateDoc(washingtonRef, {
+                                          leader: about?.deputyLeader,
+                                          deputyLeader: "",
+                                        });
+                                        await addDoc(
+                                          collection(
+                                            db,
+                                            "chat-groups",
+                                            search.get("groupId"),
+                                            "messages"
+                                          ),
+                                          {
+                                            type: "exit",
+                                            notify: true,
+                                            user: item?.user,
+                                            createdAt: serverTimestamp(),
+                                          }
+                                        );
+                                        await addDoc(
+                                          collection(
+                                            db,
+                                            "chat-groups",
+                                            search.get("groupId"),
+                                            "messages"
+                                          ),
+                                          {
+                                            type: "leader",
+                                            notify: true,
+                                            user: about?.deputyLeader,
+                                            createdAt: serverTimestamp(),
+                                          }
+                                        );
+                                        message.success(
+                                          "Bạn đã rời khỏi nhóm thành công"
+                                        );
+                                        onCancel();
+                                        router.push("/chat/group");
+                                      })
+                                      .catch((err) => {
+                                        message.error(
+                                          "Bạn đã rời khỏi nhóm thất bại"
+                                        );
+                                      });
+                                  } else {
+                                    setShowModalLeader(true);
+                                  }
+                                } else {
                                   await updateDoc(washingtonRef, {
                                     member: arrayRemove(item),
                                   })
                                     .then(async (result) => {
-                                      await updateDoc(washingtonRef, {
-                                        leader: about?.deputyLeader,
-                                        deputyLeader: "",
-                                      });
+                                      if (item?.user === about?.deputyLeader) {
+                                        await updateDoc(washingtonRef, {
+                                          deputyLeader: "",
+                                        });
+                                      }
                                       await addDoc(
                                         collection(
                                           db,
@@ -498,126 +628,22 @@ export default function ModalAbout({
                                           createdAt: serverTimestamp(),
                                         }
                                       );
-                                      await addDoc(
-                                        collection(
-                                          db,
-                                          "chat-groups",
-                                          search.get("groupId"),
-                                          "messages"
-                                        ),
-                                        {
-                                          type: "leader",
-                                          notify: true,
-                                          user: about?.deputyLeader,
-                                          createdAt: serverTimestamp(),
-                                        }
-                                      );
                                       message.success(
-                                        "Bạn đã rời khỏi nhóm thành công"
+                                        "Rời khỏi nhóm thành công"
                                       );
                                       onCancel();
                                       router.push("/chat/group");
                                     })
                                     .catch((err) => {
-                                      message.error(
-                                        "Bạn đã rời khỏi nhóm thất bại"
-                                      );
+                                      message.error("Rời khỏi nhóm thất bại");
                                     });
-                                } else {
-                                  setShowModalLeader(true);
-                                  // await updateDoc(washingtonRef, {
-                                  //   member: arrayRemove(item),
-                                  // })
-                                  //   .then(async (result) => {
-                                  //     if (
-                                  //       author?.userId === about?.deputyLeader
-                                  //     ) {
-                                  //       await updateDoc(washingtonRef, {
-                                  //         deputyLeader: "",
-                                  //       });
-                                  //     }
-                                  //     await addDoc(
-                                  //       collection(
-                                  //         db,
-                                  //         "chat-groups",
-                                  //         search.get("groupId"),
-                                  //         "messages"
-                                  //       ),
-                                  //       {
-                                  //         type:
-                                  //           userId === author?.userId
-                                  //             ? "exit"
-                                  //             : "remove",
-                                  //         notify: true,
-                                  //         user: item?.user,
-                                  //         createdAt: serverTimestamp(),
-                                  //       }
-                                  //     );
-                                  //     message.success(
-                                  //       "Xóa thành viên nhóm thành công"
-                                  //     );
-                                  //   })
-                                  //   .catch((err) => {
-                                  //     message.error(
-                                  //       "Xóa thành viên nhóm thất bại"
-                                  //     );
-                                  //   });
                                 }
-                              } else {
-                                await updateDoc(washingtonRef, {
-                                  member: arrayRemove(item),
-                                })
-                                  .then(async (result) => {
-                                    if (
-                                      author?.userId === about?.deputyLeader
-                                    ) {
-                                      await updateDoc(washingtonRef, {
-                                        deputyLeader: "",
-                                      });
-                                    }
-                                    await addDoc(
-                                      collection(
-                                        db,
-                                        "chat-groups",
-                                        search.get("groupId"),
-                                        "messages"
-                                      ),
-                                      {
-                                        type:
-                                          userId === item?.user
-                                            ? "exit"
-                                            : "remove",
-                                        notify: true,
-                                        user: item?.user,
-                                        createdAt: serverTimestamp(),
-                                      }
-                                    );
-
-                                    message.success(
-                                      userId === item?.user
-                                        ? "Rời khỏi nhóm thành công"
-                                        : "Xóa thành viên nhóm thành công"
-                                    );
-                                    if (userId === item?.user) {
-                                      onCancel();
-                                      router.push("/chat/group");
-                                    }
-                                  })
-                                  .catch((err) => {
-                                    message.error(
-                                      userId === item?.user
-                                        ? "Rời khỏi nhóm thất bại"
-                                        : "Xóa thành viên nhóm thất bại"
-                                    );
-                                  });
-                              }
-                            }}
-                            className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left text-black`}
-                          >
-                            {userId === author?.userId
-                              ? "Rời nhóm"
-                              : "Xóa khỏi nhóm"}
-                          </button>
+                              }}
+                              className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left text-black`}
+                            >
+                              Rời nhóm
+                            </button>
+                          )}
                         </div>
                       </button>
                     </div>

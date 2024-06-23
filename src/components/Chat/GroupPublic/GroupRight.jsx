@@ -1874,6 +1874,7 @@ export default function ChatGroupRight({
         authors={authors}
         member={groupTo?.member}
         type={typeAbout}
+        setShowModalLeader={setShowModalLeader}
       />
       <ModalAddLeader
         authors={authors}
