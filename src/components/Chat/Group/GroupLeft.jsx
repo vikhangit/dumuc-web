@@ -174,7 +174,6 @@ export default function ChatGroupLeft({
             <button
               onClick={() => {
                 setValueSearch("");
-                setFriendList(usingUser?.friendList);
               }}
               className="absolute right-0"
             >

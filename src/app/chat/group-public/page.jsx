@@ -27,7 +27,7 @@ const ChatGroupRight = dynamic(
   { ssr: false }
 );
 
-export default function Chat({ error }) {
+export default function Chat({ error, reset }) {
   // const [user] = useAuthState(auth);
   const sizes = useWindowSize();
   const search = useSearchParams();
@@ -103,6 +103,7 @@ export default function Chat({ error }) {
           authors={authors}
           // user={user}
           // usingUser={usingUser}
+          reset={reset}
         />
         <ChatGroupRight
           userRecieved={userRecieved}

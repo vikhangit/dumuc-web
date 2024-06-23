@@ -24,12 +24,12 @@ export default function ChatGroupLeft({
   authors,
   // user,
   // usingUser,
+  reset,
 }) {
   // useEffect(() => {
   //   const handleBeforeUnload = (event) => {
   //     event.preventDefault();
-  //     // Custom logic to handle the refresh
-  //     // Display a confirmation message or perform necessary actions
+  //     reset();
   //   };
   //   window.addEventListener("beforeunload", handleBeforeUnload);
   //   return () => {
@@ -39,12 +39,6 @@ export default function ChatGroupLeft({
   const user = JSON.parse(localStorage.getItem("userLogin"));
   const userId = JSON.parse(localStorage.getItem("userId"));
   const userToken = JSON.parse(localStorage.getItem("userToken"));
-  const [usingUser, setUsingUser] = useState();
-  useEffect(() => {
-    getProfile(userToken).then((dataCall) => {
-      setUsingUser(dataCall);
-    });
-  }, [user]);
   const sizes = useWindowSize();
   const search = useSearchParams();
   const [groupTo, setGroupTo] = useState();
@@ -184,7 +178,6 @@ export default function ChatGroupLeft({
             <button
               onClick={() => {
                 setValueSearch("");
-                setFriendList(usingUser?.friendList);
               }}
               className="absolute right-0"
             >
