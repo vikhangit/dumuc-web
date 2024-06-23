@@ -13,7 +13,7 @@ export default function FeedCommentReplyItems() {
           height={0}
           sizes="100vw"
           className="w-10 h-10 rounded-full"
-          src={reply?.user?.photo ? reply?.user?.photo : "/dumuc/avatar.png"}
+          src={reply?.user?.photo ? reply?.user?.photo : "/dumuc/avatar.jpg"}
           alt={reply?.user?.name}
         />
         <div className="mx-2">

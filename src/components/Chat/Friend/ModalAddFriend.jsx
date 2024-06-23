@@ -122,7 +122,7 @@ export default function ModalAddFriend({
                           src={
                             x?.user?.photo && x?.user?.photo?.length > 0
                               ? x?.user?.photo
-                              : "/dumuc/avatar.png"
+                              : "/dumuc/avatar.jpg"
                           }
                           width={0}
                           height={0}

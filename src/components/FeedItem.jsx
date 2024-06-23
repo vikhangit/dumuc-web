@@ -82,7 +82,7 @@ const FeedItem = ({ data, index, user, usingUser }) => {
                   ? item?.author?.photo
                   : item?.author?.user?.photo
                   ? item?.author?.user?.photo
-                  : "/dumuc/avatar.png"
+                  : "/dumuc/avatar.jpg"
               }
               alt={item?.author?.name}
             />

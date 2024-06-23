@@ -32,7 +32,7 @@ const NewQuickPost = ({ onCallback, user, usingUser }) => {
               src={
                 usingUser?.photo?.length > 0
                   ? usingUser?.photo
-                  : "/dumuc/avatar.png"
+                  : "/dumuc/avatar.jpg"
               }
               alt=""
               className="rounded-full w-12 h-12"

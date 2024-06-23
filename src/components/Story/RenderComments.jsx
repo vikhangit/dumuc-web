@@ -12,7 +12,7 @@ export default function RenderComments({
     setComments(items);
   }, [items]);
   return (
-    <div className=" fixed w-full h-full left-0 top-0 z-[99999] bg-white  pb-10 pl-6 pr-2 pt-2">
+    <div className=" fixed w-full h-full left-0 top-0 z-[99999] bg-white  pb-2 pl-2 pr-2 pt-2">
       <div className="flex text-indigo-500 font-medium hover:underline">
         <button onClick={() => setShowComment(false)}>Đóng</button>
       </div>

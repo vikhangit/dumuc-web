@@ -214,7 +214,7 @@ export default function AuthorLibrary({
                               ? author?.photo
                               : author?.user?.photo
                               ? author?.user?.photo
-                              : "/dumuc/avatar.png"
+                              : "/dumuc/avatar.jpg"
                           }
                           alt={author?.name}
                           onClick={() =>
@@ -256,7 +256,7 @@ export default function AuthorLibrary({
                             ? author?.photo
                             : author?.user?.photo
                             ? author?.user?.photo
-                            : "/dumuc/avatar.png"
+                            : "/dumuc/avatar.jpg"
                         }
                         alt={item?.author?.name}
                         onClick={() =>
@@ -298,7 +298,7 @@ export default function AuthorLibrary({
                             ? author?.photo
                             : author?.user?.photo
                             ? author?.user?.photo
-                            : "/dumuc/avatar.png"
+                            : "/dumuc/avatar.jpg"
                         }
                         alt={item?.author?.name}
                         onClick={() =>

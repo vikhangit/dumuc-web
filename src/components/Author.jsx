@@ -30,7 +30,7 @@ const Author = ({ author, currentUrl = "/" }) => {
           height={0}
           sizes="100vw"
           class="w-16 h-16 rounded-full"
-          src={author?.photo ? author?.photo : "/dumuc/avatar.png"}
+          src={author?.photo ? author?.photo : "/dumuc/avatar.jpg"}
           alt={author?.name}
         />
 

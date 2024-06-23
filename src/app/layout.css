@@ -347,6 +347,9 @@ button[data-testid="flowbite-dropdown-target"] span{
  border-radius: 99999px;
  background-color: rgb(229 231 235);
 }
+.modal-quick-story{
+  width: calc(100/3);
+}
 
 #sos-header .swiper {
   position: unset;

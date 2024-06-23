@@ -197,7 +197,7 @@ export default function ChatLeft({
                     src={
                       author?.user?.photo && author?.user?.photo?.length > 0
                         ? author?.user?.photo
-                        : "/dumuc/avatar.png"
+                        : "/dumuc/avatar.jpg"
                     }
                     width={0}
                     height={0}
@@ -251,7 +251,7 @@ export default function ChatLeft({
                             author?.user?.photo &&
                             author?.user?.photo?.length > 0
                               ? author?.user?.photo
-                              : "/dumuc/avatar.png"
+                              : "/dumuc/avatar.jpg"
                           }
                           width={0}
                           height={0}

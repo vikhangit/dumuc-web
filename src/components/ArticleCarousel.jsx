@@ -140,7 +140,7 @@ const ArticleCarousel = ({ items, title, moreAction, width = 200 }) => {
                         src={
                           item?.author?.photo
                             ? item?.author?.photo
-                            : "/dumuc/avatar.png"
+                            : "/dumuc/avatar.jpg"
                         }
                         size={20}
                       />

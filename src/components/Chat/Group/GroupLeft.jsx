@@ -22,9 +22,16 @@ export default function ChatGroupLeft({
   setMobile,
   messages,
   authors,
-  user,
-  usingUser,
+  // user,
+  // usingUser,
 }) {
+  const user = JSON.parse(localStorage.getItem("userLogin"));
+  const [usingUser, setUsingUser] = useState();
+  useEffect(() => {
+    getProfile(user?.accessToken).then((dataCall) => {
+      setUsingUser(dataCall);
+    });
+  }, [user]);
   const sizes = useWindowSize();
   const search = useSearchParams();
   const [groupTo, setGroupTo] = useState();
@@ -140,6 +147,7 @@ export default function ChatGroupLeft({
       .replace("ago", "")
       .replace("few", "");
   };
+  console.log(user);
   return (
     <div
       className={`h-full ${
@@ -222,7 +230,7 @@ export default function ChatGroupLeft({
                         src={
                           item?.avatar?.length > 0
                             ? item?.avatar
-                            : "/dumuc/avatar.png"
+                            : "/dumuc/avatar.jpg"
                         }
                         width={0}
                         height={0}

@@ -55,7 +55,7 @@ export default function RequestFriend({ items, onCallback, authors, user }) {
                             ? author?.photo
                             : author?.user?.photo
                             ? author?.user?.photo
-                            : "/dumuc/avatar.png"
+                            : "/dumuc/avatar.jpg"
                         }
                         alt={author?.name}
                       />

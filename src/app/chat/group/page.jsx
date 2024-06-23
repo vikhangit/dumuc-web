@@ -103,7 +103,7 @@ export default function Chat() {
           setMobile={setMobile}
           messages={messages}
           authors={authors}
-          user={user}
+          // user={user}
           usingUser={usingUser}
         />
         <ChatGroupRight
@@ -115,7 +115,7 @@ export default function Chat() {
           setMobile={setMobile}
           messages={messages}
           authors={authors}
-          user={user}
+          // user={user}
           usingUser={usingUser}
         />
       </div>

@@ -162,7 +162,10 @@ const AccountPage = () => {
         <div className="rounded-3xl shadow-md shadow-gray-400 px-4 sm:px-8  py-6 bg-white mb-3">
           <button
             onClick={async () => {
-              const success = await signOut().then((res) => router.push("/"));
+              const success = await signOut().then((res) => {
+                router.push("/");
+                localStorage.removeItem("userLogin");
+              });
               if (success) {
                 message.success("Đăng xuất thành công!");
               }

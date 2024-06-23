@@ -32,7 +32,7 @@ export default function QucickPost({ onCallback }) {
               src={
                 user?.photoURL?.length > 0
                   ? user?.photoURL
-                  : "/dumuc/avatar.png"
+                  : "/dumuc/avatar.jpg"
               }
               alt=""
               className="rounded-full w-12 h-12 quick-post-avatar"

@@ -1,8 +1,8 @@
-"use client"
-import Link from 'next/link';
+"use client";
+import Link from "next/link";
 import moment from "moment";
-import Image from 'next/image';
-import { CiShare2 } from 'react-icons/ci';
+import Image from "next/image";
+import { CiShare2 } from "react-icons/ci";
 
 const ArticleForumPopularItems = ({ items, title, category }) => {
   return (
@@ -11,11 +11,12 @@ const ArticleForumPopularItems = ({ items, title, category }) => {
         <h2 class="pt-2 px-4 text-2xl font-bold text-gray-900">{title}</h2>
       )}
       {items &&
-        items?.map(async item => {
+        items?.map(async (item) => {
           const url = `/forum/post/${item?.slug}/${item?.postId}`;
-          let comments = item?.comments
-          const expert = item?.body?.blocks?.filter(x => x.type ===
-            "paragraph")[0]?.data?.text;
+          let comments = item?.comments;
+          const expert = item?.body?.blocks?.filter(
+            (x) => x.type === "paragraph"
+          )[0]?.data?.text;
           return (
             <div
               key={item?.postId}
@@ -28,22 +29,32 @@ const ArticleForumPopularItems = ({ items, title, category }) => {
                         src={
                           item?.author?.photo
                             ? item?.author?.photo
-                            : "/dumuc/avatar.png"
+                            : "/dumuc/avatar.jpg"
                         }
                         alt=""
                       /> */}
                   <div class="font-medium dark:text-white">
-                      <div className='flex xl:items-center flex-col xl:flex-row justify-start'>
-                      <div className='flex items-center'>
-                      <span class="bg-yellow-100 text-yellow-800 text-sm font-medium mr-2 px-2.5 py-0.5 rounded flex justify-center items-center">
-                            Nổi bật
-                      </span>
-                      {item?.label?.length && <span class="bg-indigo-100 text-indigo-800 text-sm font-medium mr-2 px-2.5 py-0.5 rounded flex justify-center items-center">[{item?.label}]</span>}
+                    <div className="flex xl:items-center flex-col xl:flex-row justify-start">
+                      <div className="flex items-center">
+                        <span class="bg-yellow-100 text-yellow-800 text-sm font-medium mr-2 px-2.5 py-0.5 rounded flex justify-center items-center">
+                          Nổi bật
+                        </span>
+                        {item?.label?.length && (
+                          <span class="bg-indigo-100 text-indigo-800 text-sm font-medium mr-2 px-2.5 py-0.5 rounded flex justify-center items-center">
+                            [{item?.label}]
+                          </span>
+                        )}
                       </div>
-                    <Link href={url} className="font-bold font-bold text-xl hover:underline text-[#605F5F]">
-                      {item?.title?.charAt(0).toUpperCase()}{item?.title?.slice(1, item?.title?.length).toLowerCase()}
-                    </Link>
-                      </div>
+                      <Link
+                        href={url}
+                        className="font-bold font-bold text-xl hover:underline text-[#605F5F]"
+                      >
+                        {item?.title?.charAt(0).toUpperCase()}
+                        {item?.title
+                          ?.slice(1, item?.title?.length)
+                          .toLowerCase()}
+                      </Link>
+                    </div>
                     <div className="text-sm text-[#747272] mt-1">
                       {"Người đăng: "}
                       <Link
@@ -55,12 +66,17 @@ const ArticleForumPopularItems = ({ items, title, category }) => {
                       {" - Ngày: "}
                       {moment(item?.publishDate).format("DD/MM/YYYY")}
                       {item?.comments.length > 0 && " - Last comment: "}
-                      {item?.comments.length > 0 && moment(item?.comments[item?.comments.length - 1]["createdAt"]).format("DD/MM/YYYY")}
+                      {item?.comments.length > 0 &&
+                        moment(
+                          item?.comments[item?.comments.length - 1]["createdAt"]
+                        ).format("DD/MM/YYYY")}
                     </div>
-                    <div className="font-normal text-xl mt-3 text-justify line-clamp-2 text-[#747272]" dangerouslySetInnerHTML={{
-                      __html: expert
-                    }}>
-
+                    <div
+                      className="font-normal text-xl mt-3 text-justify line-clamp-2 text-[#747272]"
+                      dangerouslySetInnerHTML={{
+                        __html: expert,
+                      }}
+                    >
                       {/* {" "}<Link
                 className="font-semibold text-xs sm:text-sm cursor-pointer hover:underline"
               href={url}
@@ -77,15 +93,33 @@ const ArticleForumPopularItems = ({ items, title, category }) => {
                     href={url}
                     class="gap-1 article-tool flex items-center text-sm font-medium text-gray-500 hover:underline hover:text-gray-900"
                   >
-                    <Image alt="" src="/icons/MdFlare.png" width={0} height={0} sizes="100vw" className="w-4 h-4" />
+                    <Image
+                      alt=""
+                      src="/icons/MdFlare.png"
+                      width={0}
+                      height={0}
+                      sizes="100vw"
+                      className="w-4 h-4"
+                    />
                     Đọc thêm
                   </a>
                   <a
                     href="#"
                     class="gap-1 article-tool flex items-center text-sm font-medium text-gray-500 hover:underline hover:text-gray-900"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 text-gray-500">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      strokeWidth={1.5}
+                      stroke="currentColor"
+                      className="w-4 h-4 text-gray-500"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"
+                      />
                     </svg>
                     {item?.likesCount || "0"} Lượt thích
                   </a>
@@ -93,7 +127,14 @@ const ArticleForumPopularItems = ({ items, title, category }) => {
                     href={`${url}#comments`}
                     class="gap-1 article-tool flex items-center text-sm font-medium text-gray-500 hover:underline hover:text-gray-900"
                   >
-                    <Image width={0} height={0} sizes="100vw" src="/icons/comment-1.jpg" alt="" className='w-[16px] h-[16px]' />
+                    <Image
+                      width={0}
+                      height={0}
+                      sizes="100vw"
+                      src="/icons/comment-1.jpg"
+                      alt=""
+                      className="w-[16px] h-[16px]"
+                    />
                     {item?.commentsCount} Bình luận
                   </a>
                   <a
@@ -135,8 +176,7 @@ const ArticleForumPopularItems = ({ items, title, category }) => {
               </div>
             </div>
           );
-        })
-      }
+        })}
     </>
   );
 };

@@ -218,7 +218,7 @@ export default function ModalAbout({
                     userCreated?.user?.photo &&
                     userCreated?.user?.photo?.length > 0
                       ? userCreated?.user?.photo
-                      : "/dumuc/avatar.png"
+                      : "/dumuc/avatar.jpg"
                   }
                   width={0}
                   height={0}
@@ -237,7 +237,7 @@ export default function ModalAbout({
                     userLeader?.user?.photo &&
                     userLeader?.user?.photo?.length > 0
                       ? userLeader?.user?.photo
-                      : "/dumuc/avatar.png"
+                      : "/dumuc/avatar.jpg"
                   }
                   width={0}
                   height={0}
@@ -272,7 +272,7 @@ export default function ModalAbout({
                             author?.user?.photo &&
                             author?.user?.photo?.length > 0
                               ? author?.user?.photo
-                              : "/dumuc/avatar.png"
+                              : "/dumuc/avatar.jpg"
                           }
                           width={0}
                           height={0}
@@ -624,7 +624,7 @@ export default function ModalAbout({
                             author?.user?.photo &&
                             author?.user?.photo?.length > 0
                               ? author?.user?.photo
-                              : "/dumuc/avatar.png"
+                              : "/dumuc/avatar.jpg"
                           }
                           width={0}
                           height={0}

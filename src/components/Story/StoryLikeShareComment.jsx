@@ -24,18 +24,19 @@ export default function StoryLikeShareComment({ item, url, user, usingUser }) {
   const [showLike, setShowLike] = useState(false);
   const [showComment, setShowComment] = useState(false);
   const [comments, setComments] = useState(nestedComment(item?.comments));
+  const [commentsCount, setCommentsCount] = useState(item?.commentsCount || 0);
   useEffect(() => {
     setComments(nestedComment(item?.comments));
   }, [item]);
   const onCallback = (storyId) => {
     getStory({ storyId }).then((data) => {
       setComments(nestedComment(data?.comments));
-      console.log(data);
+      setCommentsCount(data?.commentsCount);
     });
   };
   return (
     <div>
-      <div class="flex space-x-6 justify-between">
+      <div class="flex justify-between">
         {/* <span className="text-gray-500 text-base sm:text-lg cursor-pointer hover:underline" onClick={() => setShowLike(true)}>
         {
           sizes.width > 440 ? renderCountComment() : `${item?.likesCount || "0"} Lượt thích`
@@ -71,7 +72,7 @@ export default function StoryLikeShareComment({ item, url, user, usingUser }) {
                               sizes="100vw"
                               class="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-full"
                               src={
-                                item?.photo ? item?.photo : "/dumuc/avatar.png"
+                                item?.photo ? item?.photo : "/dumuc/avatar.jpg"
                               }
                               alt={item?.name}
                             />
@@ -179,13 +180,12 @@ export default function StoryLikeShareComment({ item, url, user, usingUser }) {
      {item?.commentsCount || "0"} Bình luận
         </span> */}
       </div>
-      <div class="flex space-x-6 justify-between">
+      <div class="flex justify-between">
         <StoryComment
-          item={item}
           setShowComment={() => {
             setShowComment(!showComment);
           }}
-          count={item?.commentsCount}
+          count={commentsCount}
         />
         <StoryLike
           currentUrl={url}

@@ -367,7 +367,7 @@ export default function ChatRight({
                   userRecieved?.user?.photo &&
                   userRecieved?.user?.photo?.length > 0
                     ? userRecieved?.user?.photo
-                    : "/dumuc/avatar.png"
+                    : "/dumuc/avatar.jpg"
                 }
                 onClick={() => {
                   router.push(
@@ -639,7 +639,7 @@ export default function ChatRight({
                         src={
                           author?.user?.photo && author?.user?.photo?.length > 0
                             ? author?.user?.photo
-                            : "/dumuc/avatar.png"
+                            : "/dumuc/avatar.jpg"
                         }
                         width={0}
                         height={0}

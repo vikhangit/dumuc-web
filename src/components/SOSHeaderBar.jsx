@@ -248,7 +248,7 @@ export default function SOSHeaderBar() {
                                     src={
                                       item?.author?.photo
                                         ? item?.author?.photo
-                                        : "/dumuc/avatar.png"
+                                        : "/dumuc/avatar.jpg"
                                     }
                                     alt={item?.author?.name}
                                   />
@@ -359,7 +359,7 @@ export default function SOSHeaderBar() {
                                     src={
                                       item?.author?.photo
                                         ? item?.author?.photo
-                                        : "/dumuc/avatar.png"
+                                        : "/dumuc/avatar.jpg"
                                     }
                                     alt={item?.author?.name}
                                   />
@@ -480,7 +480,7 @@ export default function SOSHeaderBar() {
                               src={
                                 helper?.user?.photo
                                   ? helper?.user?.photo
-                                  : "/dumuc/avatar.png"
+                                  : "/dumuc/avatar.jpg"
                               }
                               alt={helper?.user?.name}
                             />
@@ -664,7 +664,7 @@ export default function SOSHeaderBar() {
                           src={
                             sos?.user?.photo
                               ? sos?.user?.photo
-                              : "/dumuc/avatar.png"
+                              : "/dumuc/avatar.jpg"
                           }
                           alt={sos?.user?.name}
                         />

@@ -81,7 +81,7 @@ const Header = () => {
                     width={0}
                     height={0}
                     sizes="100vw"
-                    src="/dumuc/avatar.png"
+                    src="/dumuc/avatar.jpg"
                     className="w-full h-full"
                     alt="Avatar"
                   />

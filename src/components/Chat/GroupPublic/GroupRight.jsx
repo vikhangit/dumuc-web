@@ -61,9 +61,10 @@ export default function ChatGroupRight({
   authors,
   activeGroup,
   setActiveGroup,
-  user,
+  // user,
   usingUser,
 }) {
+  const user = JSON.parse(localStorage.getItem("userLogin"));
   const router = useRouter();
   const search = useSearchParams();
   const refImg = useRef();
@@ -316,7 +317,7 @@ export default function ChatGroupRight({
                 src={
                   groupTo?.avatar?.length > 0 && groupTo?.avatar?.length > 0
                     ? groupTo?.avatar
-                    : "/dumuc/avatar.png"
+                    : "/dumuc/avatar.jpg"
                 }
                 width={0}
                 height={0}
@@ -510,7 +511,7 @@ export default function ChatGroupRight({
                                 author?.user?.photo &&
                                 author?.user?.photo?.length > 0
                                   ? author?.user?.photo
-                                  : "/dumuc/avatar.png"
+                                  : "/dumuc/avatar.jpg"
                               }
                               width={0}
                               height={0}
@@ -1430,7 +1431,7 @@ export default function ChatGroupRight({
                                       author?.user?.photo &&
                                       author?.user?.photo?.length > 0
                                         ? author?.user?.photo
-                                        : "/dumuc/avatar.png"
+                                        : "/dumuc/avatar.jpg"
                                     }
                                     width={0}
                                     height={0}
@@ -1450,7 +1451,7 @@ export default function ChatGroupRight({
                                       author?.user?.photo &&
                                       author?.user?.photo?.length > 0
                                         ? author?.user?.photo
-                                        : "/dumuc/avatar.png"
+                                        : "/dumuc/avatar.jpg"
                                     }
                                     width={0}
                                     height={0}
@@ -1470,7 +1471,7 @@ export default function ChatGroupRight({
                                       author?.user?.photo &&
                                       author?.user?.photo?.length > 0
                                         ? author?.user?.photo
-                                        : "/dumuc/avatar.png"
+                                        : "/dumuc/avatar.jpg"
                                     }
                                     width={0}
                                     height={0}
@@ -1492,7 +1493,7 @@ export default function ChatGroupRight({
                                       author?.user?.photo &&
                                       author?.user?.photo?.length > 0
                                         ? author?.user?.photo
-                                        : "/dumuc/avatar.png"
+                                        : "/dumuc/avatar.jpg"
                                     }
                                     width={0}
                                     height={0}

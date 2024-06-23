@@ -64,7 +64,6 @@ https://flagcdn.com/48x36/vn.png 3x`}
   );
 
   const loginGoogle = () => {
-    setLoadingAction(true);
     signInWithPopup(auth, providerGoogle)
       .then((result) => {
         // This gives you a Google Access Token. You can use it to access the Google API.
@@ -84,6 +83,7 @@ https://flagcdn.com/48x36/vn.png 3x`}
             onAuthStateChanged(auth, (user) => {
               if (user) {
                 //redirect
+                localStorage.setItem("userLogin", JSON.stringify(user));
                 if (
                   query?.url_return !== undefined &&
                   query?.url_return !== "undefined"
@@ -176,6 +176,7 @@ https://flagcdn.com/48x36/vn.png 3x`}
               router.push("/");
             }
           });
+          localStorage.setItem("userLogin", JSON.stringify(user));
         }
       });
     } catch (error) {
@@ -226,8 +227,11 @@ https://flagcdn.com/48x36/vn.png 3x`}
       });
   };
   const subEmail = (str) => {
-    const findIndex = str?.indexOf("@");
-    return str.substring(0, findIndex);
+    let ca = `${str?.charAt(0).toUpperCase()}${str
+      ?.slice(1, str?.length)
+      .toLowerCase()}`;
+    const findIndex = ca?.indexOf("@");
+    return ca?.substring(0, findIndex);
   };
 
   useEffect(() => {
@@ -264,6 +268,7 @@ https://flagcdn.com/48x36/vn.png 3x`}
 
     onAuthStateChanged(auth, (user) => {
       if (user) {
+        localStorage.setItem("userLogin", JSON.stringify(user));
         if (
           query?.url_return !== undefined &&
           query?.url_return !== "undefined"
@@ -281,7 +286,7 @@ https://flagcdn.com/48x36/vn.png 3x`}
     setLoadingAction(true);
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        //userAtom
+        localStorage.setItem("userLogin", JSON.stringify(user));
         user
           .getIdToken(true)
           .then(async (token) => {
@@ -311,6 +316,7 @@ https://flagcdn.com/48x36/vn.png 3x`}
     const saved_email = localStorage.getItem("emailForSignIn");
     if (user && loading === false && saved_email === null) {
       //redirect
+      localStorage.setItem("userLogin", JSON.stringify(user));
       if (
         query?.url_return !== undefined &&
         query?.url_return !== "undefined"
@@ -421,9 +427,11 @@ https://flagcdn.com/48x36/vn.png 3x`}
             )}
             {errorCode === "auth/invalid-action-code" && (
               <div className="mx-8 lg:mx-20 text-[#c80000] font-bold mt-2">
-                {
+                {/* {
                   "The action code is invalid. This can happen if the code is malformed, expired, or has already been used."
-                }
+                } */}
+                Mã hành động không hợp lệ. Điều này có thể xảy ra nếu mã không
+                đúng định dạng, hết hạn hoặc đã được sử dụng.
               </div>
             )}
             {errorMsg && (
@@ -434,15 +442,19 @@ https://flagcdn.com/48x36/vn.png 3x`}
             {isModalOpen && (
               <div className="mx-8 lg:mx-20">
                 <div className="text-[#c80000] text-sm font-bold mt-2">
-                  Check your inbox
+                  {/* Check your inbox */}
+                  Kiểm tra hộp thư của bạn
                 </div>
                 <p className="text-sm">
-                  We have sent a password link to{" "}
+                  Chúng tôi đã gửi một liên kết mật khẩu đến{" "}
                   <span style={{ color: "#357FF7", fontWeight: "bold" }}>
                     {emailForSignIn}
                   </span>
                   .{" "}
-                  {`Please follow the link in the email we sent you. Kindly remember to check your spam folder if you cannot find it in your inbox.`}
+                  {
+                    // `Please follow the link in the email we sent you. Kindly remember to check your spam folder if you cannot find it in your inbox.`
+                    "Vui lòng nhấn vào liên kết trong email mà Dumuc đã gửi cho bạn. Vui lòng nhớ kiểm tra thư mục thư rác nếu bạn không thể tìm thấy nó trong hộp thư đến của mình."
+                  }
                 </p>
               </div>
             )}

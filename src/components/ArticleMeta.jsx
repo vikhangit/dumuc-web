@@ -53,7 +53,7 @@ const ArticleMeta = ({ item, user, usingUser, onCallback, commentsCount }) => {
                   ? postItem?.author?.photo
                   : postItem?.author?.user?.photo
                   ? postItem?.author?.user?.photo
-                  : "/dumuc/avatar.png"
+                  : "/dumuc/avatar.jpg"
               }
             />
           </div>

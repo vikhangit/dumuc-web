@@ -32,6 +32,7 @@ const RequestFriend = dynamic(
 import { getProfile } from "@apis/users";
 import dynamic from "next/dynamic";
 import { getAuthors } from "@apis/posts";
+import StoryWrapper from "./Dumuc/StoryWrapper";
 const HomePageContent = () => {
   const [user] = useAuthState(auth);
   const [feedData, setFeedData] = useState({});
@@ -57,9 +58,9 @@ const HomePageContent = () => {
       setMyFollow(data?.follows);
       setMyFriend(data?.friendList);
     });
-    getFeedsLoadMore({ limit: 100 }).then((result) => setFeedData(result));
+    getFeedsLoadMore({ limit: 5 }).then((result) => setFeedData(result));
     getTags().then((result) => setTags(result));
-    getStoriesLoadMore({ limit: 100 }).then((data) => {
+    getStoriesLoadMore({ limit: 5 }).then((data) => {
       setStories(data);
     });
     setLoading(false);
@@ -118,12 +119,12 @@ const HomePageContent = () => {
               </div>
               <div>
                 {
-                  <Story
+                  <StoryWrapper
                     data={stories}
                     user={user}
                     usingUser={usingUser}
                     onCallback={() => {
-                      getStoriesLoadMore({ limit: 100 }).then((data) => {
+                      getStoriesLoadMore({ limit: 5 }).then((data) => {
                         setStories(data);
                       });
                     }}
@@ -141,7 +142,7 @@ const HomePageContent = () => {
                 loading={loading}
                 authors={authors}
                 onCallback={() =>
-                  getFeedsLoadMore({ limit: 100 }).then((result) =>
+                  getFeedsLoadMore({ limit: 5 }).then((result) =>
                     setFeedData(result)
                   )
                 }

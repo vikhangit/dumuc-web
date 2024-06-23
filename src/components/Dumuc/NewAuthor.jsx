@@ -124,7 +124,7 @@ const NewAuthorUI = ({ currentUrl = "/", params, searchParams }) => {
                           ? authorData?.photo
                           : authorData?.user?.photo
                           ? authorData?.user?.photo
-                          : "/dumuc/avatar.png"
+                          : "/dumuc/avatar.jpg"
                       }
                       alt={authorData?.name}
                     />

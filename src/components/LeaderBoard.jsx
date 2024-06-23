@@ -67,7 +67,7 @@ const LeaderBoard = ({ title = "TOP HIỆP SĨ", usersRanking }) => {
                       height={0}
                       sizes="100vw"
                       class="w-full h-full rounded-full"
-                      src={item?.photo ? item?.photo : "/dumuc/avatar.png"}
+                      src={item?.photo ? item?.photo : "/dumuc/avatar.jpg"}
                       alt={item?.name}
                     />
                   </div>

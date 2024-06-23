@@ -108,7 +108,7 @@ export default function SingleComment({
             height={0}
             sizes="100vw"
             className="w-10 h-10 rounded-full overflow-hidden relative z-30"
-            src={item?.user?.photo ? item?.user?.photo : "/dumuc/avatar.png"}
+            src={item?.user?.photo ? item?.user?.photo : "/dumuc/avatar.jpg"}
             alt={item?.user?.name}
           />
           <div className="mx-2 w-[calc(100%-45px)]">

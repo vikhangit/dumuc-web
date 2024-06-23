@@ -14,6 +14,7 @@ import { IoMdCloseCircle } from "react-icons/io";
 import { MdOutlineAdd } from "react-icons/md";
 import { Swiper, SwiperSlide } from "swiper/react";
 import ModalWating from "./ModalWating";
+import StoryItem from "./StoryItem";
 const QuickAddStory = dynamic(
   () => {
     return import("@components/QuickAddStory");
@@ -171,7 +172,7 @@ const Story = ({
                       src={
                         user && user?.photoURL && user?.photoURL.length > 0
                           ? user?.photoURL
-                          : "/dumuc/avatar.png"
+                          : "/dumuc/avatar.jpg"
                       }
                       alt=""
                       className="w-full h-2/3 rounded-t-[10px]"
@@ -208,45 +209,20 @@ const Story = ({
                   style={{
                     height: 250,
                     cursor: "pointer",
+                    position: "unset",
                   }}
                 >
-                  <div
-                    onClick={() => {
-                      setShowImage(true);
-                      setIndexImage(index);
-                    }}
-                    className="border border-gray-400 rounded-[10px] w-full h-full relative flex flex-col"
-                  >
-                    <Image
-                      width={0}
-                      height={0}
-                      sizes="100vw"
-                      src={item?.author?.user?.photo || "/dumuc/avatar.png"}
-                      alt=""
-                      className="absolute z-20 top-2 left-2 w-10 h-10 rounded-full border border-sky-700 p-0.5"
-                    />
-                    {item?.type === "file" ? (
-                      <video
-                        className={`w-full h-full rounded-t-[10px] relative z-10 h-[210px]`}
-                      >
-                        <source src={item?.photos} type="video/mp4" />
-                      </video>
-                    ) : (
-                      <div
-                        className="w-full h-full story"
-                        dangerouslySetInnerHTML={{
-                          __html: item?.description,
-                        }}
-                      ></div>
-                    )}
-                    <span
-                      className={`absolute bottom-2 left-2 text-sm font-medium z-20`}
-                    >
-                      {item?.author?.activeNickName
-                        ? item?.author?.nickName
-                        : item?.author?.name}
-                    </span>
-                  </div>
+                  <StoryItem
+                    authors={authors}
+                    data={stories}
+                    myFollow={myFollow}
+                    myFriend={myFriend}
+                    onCallback={onCallback}
+                    user={user}
+                    usingUser={usingUser}
+                    element={item}
+                    index={index}
+                  />
                 </SwiperSlide>
               );
             })}
@@ -268,7 +244,7 @@ const Story = ({
           </button>
         )}
       </div>
-      <ModalPlayVideos
+      {/* <ModalPlayVideos
         openImage={showImage}
         setOpenImage={setShowImage}
         imageList={stories}
@@ -279,7 +255,7 @@ const Story = ({
         myFollow={myFollow}
         myFriend={myFriend}
         authors={authors}
-      />
+      /> */}
       <QuickAddStory
         onCallback={() => {
           setVideo("");

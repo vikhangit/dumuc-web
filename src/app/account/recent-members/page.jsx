@@ -145,7 +145,7 @@ const RecentMembers = () => {
                       <div class="flex items-center gap-x-2">
                         <div class="flex-shrink-0">
                           <Image
-                            src="/dumuc/avatar.png"
+                            src="/dumuc/avatar.jpg"
                             width={0}
                             height={0}
                             sizes="100vw"

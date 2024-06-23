@@ -266,7 +266,7 @@ const SOSListByUser = ({ items, onCallback }) => {
                             src={
                               helper?.user?.photo
                                 ? helper?.user?.photo
-                                : "/dumuc/avatar.png"
+                                : "/dumuc/avatar.jpg"
                             }
                             alt={helper?.user?.name}
                           />

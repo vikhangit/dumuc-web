@@ -153,7 +153,7 @@ const FeaturedMember = ({ items, limit }) => {
                         height={0}
                         sizes="100vw"
                         class="w-12 h-12 sm:w-14 sm:h-14 rounded-full"
-                        src={item?.photo ? item?.photo : "/dumuc/avatar.png"}
+                        src={item?.photo ? item?.photo : "/dumuc/avatar.jpg"}
                         alt={item?.name}
                       />
                     </div>

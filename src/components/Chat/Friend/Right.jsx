@@ -251,7 +251,7 @@ export default function ChatRight({
                   userTo?.user?.photo &&
                   userTo?.user?.photo?.length > 0
                     ? userTo?.user?.photo
-                    : "/dumuc/avatar.png"
+                    : "/dumuc/avatar.jpg"
                 }
                 width={0}
                 height={0}
@@ -307,7 +307,7 @@ export default function ChatRight({
                         src={
                           author?.user?.photo && author?.user?.photo?.length > 0
                             ? author?.user?.photo
-                            : "/dumuc/avatar.png"
+                            : "/dumuc/avatar.jpg"
                         }
                         width={0}
                         height={0}

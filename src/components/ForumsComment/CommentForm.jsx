@@ -76,7 +76,7 @@ export default function CommentForm({
           width={0}
           height={0}
           sizes="100vw"
-          src={user?.photoURL || "/dumuc/avatar.png"}
+          src={user?.photoURL || "/dumuc/avatar.jpg"}
           alt=""
           className="rounded-full w-10 h-10 overflow-hidden relative z-30"
         />
