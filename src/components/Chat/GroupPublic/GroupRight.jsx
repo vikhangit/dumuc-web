@@ -1867,14 +1867,14 @@ export default function ChatGroupRight({
         activeGroup={activeGroup}
         member={groupTo?.member}
       /> */}
-      <ModalAbout
+      {/* <ModalAbout
         visible={openAbout}
         onCancel={() => setOpenAbout(false)}
         about={groupTo}
         authors={authors}
         member={groupTo?.member}
         type={typeAbout}
-      />
+      /> */}
       {/* <ModalAddLeader
         authors={authors}
         member={groupTo?.member}
