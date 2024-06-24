@@ -167,7 +167,7 @@ export default function ChatLeft({
   return (
     <div
       className={`h-full ${
-        sizes.width > 992 ? "basis-1/4" : `${!mobile ? "basis-full" : "hidden"}`
+        sizes.width > 992 ? "basis-1/3" : `${!mobile ? "basis-full" : "hidden"}`
       }`}
     >
       <div className="flex items-center bg-[#C82027] shadow-md shadow-gray-400 w-full justify-between px-[5px] h-[65px] gap-x-3">
@@ -234,7 +234,11 @@ export default function ChatLeft({
           </button>
         )}
       </div>
-      <div className="h-[calc(100%-150px)] overflow-auto scroll-chat px-2 pb-3">
+      <div
+        className={`${
+          sizes.width > 800 ? "h-[calc(100%-135px)]" : " h-[calc(100%-120px)]"
+        } overflow-auto scroll-chat px-2 pb-4`}
+      >
         {searchFunction ? (
           friendList?.length > 0 ? (
             friendList?.map((item, index) => {
@@ -252,7 +256,7 @@ export default function ChatLeft({
                     userRecieved?.authorId === author?.authorId
                       ? "bg-[#0084ff] bg-opacity-30"
                       : "bg-white"
-                  } rounded-md shadow-md shadow-gray-400 flex items-center gap-x-2 pl-[15px] pr-2 py-[20px] mt-[10px] cursor-pointer`}
+                  } rounded-md shadow shadow-gray-400 flex items-center gap-x-2 pl-[15px] pr-2 py-[20px] mt-[10px] cursor-pointer`}
                 >
                   <Image
                     src={
@@ -297,6 +301,7 @@ export default function ChatLeft({
                 !item?.isDelete?.find((x) => x?.user === user?.uid) &&
                 item?.member?.find((x) => x?.userId === user?.uid)
             )
+            ?.sort((a, b) => b?.createdAt - a?.createdAt)
             ?.map((item, index) => {
               return item?.member?.map((itemChild, indexChild) => {
                 const author = authors?.find(

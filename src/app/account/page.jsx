@@ -164,12 +164,12 @@ const AccountPage = () => {
             onClick={async () => {
               const success = await signOut().then((res) => {
                 router.push("/");
-                localStorage.removeItem("userLogin");
-                localStorage.removeItem("userId");
-                localStorage.removeItem("userToken");
               });
               if (success) {
                 message.success("Đăng xuất thành công!");
+                localStorage.removeItem("userLogin");
+                localStorage.removeItem("userId");
+                localStorage.removeItem("userToken");
               }
             }}
             type="button"

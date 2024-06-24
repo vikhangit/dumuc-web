@@ -38,12 +38,9 @@ export default function ModalAddFriend({
   setFriendList,
 }) {
   const router = useRouter();
-  const [name, setName] = useState("");
   const [valueSearch, setValueSearch] = useState("");
   const [findAuthor, setFindAuthor] = useState([]);
   const [loadingAdd, setLoadingAdd] = useState(-1);
-  const [loadingFeedback, setLoadingFeedback] = useState(-1);
-  const [loadingRemove, setLoadingRemove] = useState(-1);
   const [typeArr, setTypeArr] = useState([]);
   useEffect(() => {
     setTypeArr([]);
@@ -342,7 +339,6 @@ export default function ModalAddFriend({
                                       });
                                       setTypeArr([...typeArr]);
                                       message.success("Bạn đã đồng ý kết bạn");
-                                      // setFriendList(usingUser?.friendList);
                                     }}
                                     className="hover:bg-[#c80000] text-black hover:text-white w-full rounded px-1.5 py-0.5 text-left"
                                   >

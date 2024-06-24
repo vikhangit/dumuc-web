@@ -19,9 +19,10 @@ export default function RequestFriend({ items, onCallback, authors, user }) {
   const [loadingRemove, setLoadingRemove] = useState(-1);
   const sizes = useWindowSize();
   const [friendList, setFriendList] = useState(items);
-  // useEffect(() => {
-  //   setFriendList(items);
-  // }, [items]);
+  useEffect(() => {
+    setFriendList(items);
+  }, [items]);
+  console.log("123", friendList);
   return (
     <div>
       {friendList?.length > 0 && (
@@ -65,8 +66,7 @@ export default function RequestFriend({ items, onCallback, authors, user }) {
                     </div>
                     <div className="w-full flex gap-x-2 mt-2">
                       <button
-                        onClick={async (e) => {
-                          e.preventDefault();
+                        onClick={async () => {
                           friendList.splice(index, 1);
                           setFriendList([...friendList]);
                           await deleteAddFriend(

@@ -102,26 +102,9 @@ export default function ChatFriend() {
           sizes.width > 992 ? "flex-row" : "flex-col"
         }`}
       >
-        <ChatLeft
-          setUserRecieved={setUserRecieved}
-          userRecieved={userRecieved}
-          mobile={mobile}
-          setMobile={setMobile}
-          messages={messages}
-          authors={authors}
-          rooms={rooms}
-        />
-        <ChatRight
-          userRecieved={userRecieved}
-          setUserRecieved={setUserRecieved}
-          mobile={mobile}
-          setMobile={setMobile}
-          messages={messages}
-          authors={authors}
-          rooms={rooms}
-        />
+        <ChatLeft mobile={mobile} setMobile={setMobile} authors={authors} />
+        <ChatRight />
       </div>
-      {/* <div className={sizes.width > 411 ? "mb-24" :  "mb-16"} /> */}
       {sizes.width > 992 ? (
         <TabbarBottomChat active="friend" />
       ) : (

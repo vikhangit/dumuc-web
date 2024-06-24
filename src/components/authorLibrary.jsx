@@ -27,6 +27,8 @@ export default function AuthorLibrary({
   onCallback,
   authorData,
   authors,
+  myFollow,
+  myFriend,
 }) {
   const [user] = useAuthState(auth);
   const [loading, setLoading] = useState(false);
@@ -67,6 +69,7 @@ export default function AuthorLibrary({
       userId: authorData?.userId,
     }).then((data) => setUserAuthor(data));
   }, [authorData]);
+  console.log(authorData);
   return (
     <div>
       <div className="px-3">
@@ -76,10 +79,14 @@ export default function AuthorLibrary({
               data={feedsData}
               authorId={id}
               onCallback={async () => {
-                await getFeedsLoadMore({ limit: 100, author: id }).then(
-                  (feeds) => setFeedsData(feeds)
+                getFeedsLoadMore({ limit: 100, author: id }).then((feeds) =>
+                  setFeedsData(feeds)
                 );
               }}
+              authors={authors}
+              loading={loading}
+              user={user}
+              usingUser={usingUser}
             />
           </div>
         )}
@@ -88,10 +95,15 @@ export default function AuthorLibrary({
             <Story
               data={stories}
               onCallback={async () => {
-                await getStoriesLoadMore({ limit: 100 }).then((data) => {
+                getStoriesLoadMore({ limit: 100 }).then((data) => {
                   setStories(data);
                 });
               }}
+              authors={authors}
+              myFollow={myFollow}
+              usingUser={usingUser}
+              user={user}
+              myFriend={myFriend}
             />
           </div>
         )}
@@ -116,6 +128,8 @@ export default function AuthorLibrary({
                   }
                 });
               }}
+              user={user}
+              usingUser={usingUser}
             />
           </div>
         )}
@@ -134,17 +148,25 @@ export default function AuthorLibrary({
                 )}
               </div>
               <div className="flex flex-col gap-1 text-sm font-normal text-[#000000]">
-                <p>
-                  <strong>ID:</strong> dumuc{authorData?.user?.username}
-                </p>
-                {authorData?.user?.phone && (
+                {authorData?.user?.activeId && (
+                  <p>
+                    <strong>ID:</strong> dumuc{authorData?.user?.username}
+                  </p>
+                )}
+                {authorData?.user?.phone && authorData?.user?.activePhone && (
                   <p>
                     <strong>Phone:</strong> {authorData?.user?.phone}
                   </p>
                 )}
-                {authorData?.user?.email && (
+                {authorData?.user?.email && authorData?.user?.activeEmail && (
                   <p>
                     <strong>Email:</strong> {authorData?.user?.email}
+                  </p>
+                )}
+                {authorData?.user?.phone && authorData?.user?.activePhone && (
+                  <p>
+                    <strong>Số điện thoại:</strong>
+                    {authorData?.user?.phone}
                   </p>
                 )}
                 {authorData?.user?.numberPlate && (

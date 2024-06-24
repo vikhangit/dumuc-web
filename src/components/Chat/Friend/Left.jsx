@@ -1,87 +1,43 @@
 "use client";
+import { getProfile } from "@apis/users";
 import { useWindowSize } from "@hooks/useWindowSize";
+import { auth } from "@utils/firebase";
 import Image from "next/image";
 import Link from "next/link";
-import React, { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useAuthState } from "react-firebase-hooks/auth";
 import { IoMdSearch } from "react-icons/io";
 import { IoCloseCircle } from "react-icons/io5";
-import { MdOutlinePersonAddAlt } from "react-icons/md";
-import { useAuthState } from "react-firebase-hooks/auth";
-import { auth, db } from "@utils/firebase";
-import { getProfile } from "@apis/users";
-import moment from "moment";
-import {
-  useParams,
-  usePathname,
-  useRouter,
-  useSearchParams,
-} from "next/navigation";
-import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
-import ModalAddFriend from "./ModalAddFriend";
-export default function ChatLeft({
-  setUserRecieved,
-  userRecieved,
-  mobile,
-  setMobile,
-  messages,
-  authors,
-}) {
+export default function ChatLeft({ mobile, setMobile, authors }) {
   const [user] = useAuthState(auth);
   const sizes = useWindowSize();
   const router = useRouter();
-  const search = useSearchParams();
-  const path = usePathname();
   const [friendList, setFriendList] = useState([]);
   const [valueSearch, setValueSearch] = useState("");
   const [searchFunction, setSearchFunction] = useState(true);
   const [usingUser, setUsingUser] = useState();
-  const [userTo, setUserTo] = useState();
-  const [activeMessage, setActiveMessage] = useState([]);
-  const [showAddFriend, setShowAddFriend] = useState(false);
   useEffect(() => {
     getProfile(user?.accessToken).then((dataCall) => {
       setUsingUser(dataCall);
-      setFriendList(dataCall?.friendList?.filter((x) => x.status === 2));
-    });
-  }, [user]);
-  useEffect(() => {
-    if (search.get("chatId")) {
-      const q = query(
-        collection(db, "chat-rooms", search.get("chatId"), "messages"),
-        orderBy("createdAt", "asc")
-      );
-      const unsubscribe = onSnapshot(q, (querySnapshot) => {
-        let allMess = [];
-        querySnapshot.forEach((doc) =>
-          allMess.push({
-            id: doc.id,
-            ...doc.data(),
-            createdAt: doc.data()?.createdAt?.toDate(),
+      setFriendList(
+        dataCall?.friendList
+          ?.map((item) => {
+            if (item?.status === 2) {
+              let obj = {
+                ...item,
+                author: authors?.find(
+                  (x) => x?.authorId === item?.author?.authorId
+                ),
+              };
+              return obj;
+            }
           })
-        );
-        setActiveMessage(allMess);
-      });
-      return () => unsubscribe;
-    } else {
-      setActiveMessage([]);
-    }
-  }, [search]);
-  useEffect(() => {
-    if (search.get("chatId")) {
-      const chatDetail = messages?.find((x) => x?.id === search.get("chatId"));
-      const userRecieveds = chatDetail?.member?.find(
-        (x) => x?.userId !== user.uid
+
+          .filter((x) => x !== undefined)
       );
-      const author = authors?.find(
-        (item) => item?.authorId === userRecieveds?.authorId
-      );
-      setUserTo(author);
-    } else if (userRecieved) {
-      setUserTo(userRecieved);
-    } else {
-      setUserTo();
-    }
-  }, [messages, search, userRecieved]);
+    });
+  }, [user, authors]);
   const searchField = (value) => {
     setValueSearch(value);
     if (value.trim() === "") {
@@ -102,27 +58,7 @@ export default function ChatLeft({
       }
     }
   };
-  const getTimeChat = (date) => {
-    moment.locale("vi");
-    return moment(date)
-      .fromNow()
-
-      .replace("seconds", "giây")
-      .replace("second", "giây")
-      .replace("minutes", "phút")
-      .replace("minute", "phút")
-      .replace("hours", "giờ")
-      .replace("hour", "giờ")
-      .replace("days", "ngày")
-      .replace("day", "ngày")
-      .replace("a ", "1 ")
-      .replace("an ", "1 ")
-      .replace("month", "tháng")
-      .replace("year", "năm")
-      .replace("in", "")
-      .replace("ago", "")
-      .replace("few", "");
-  };
+  console.log(friendList);
   return (
     <div
       className={`h-full ${
@@ -167,36 +103,32 @@ export default function ChatLeft({
           )}
         </div>
       </div>
-      <div className="h-[calc(100%-150px)] overflow-auto scroll-chat px-2">
-        {searchFunction ? (
-          friendList?.length > 0 ? (
-            friendList?.map((item, index) => {
-              const author = authors?.find(
-                (x) => x?.authorId === item?.author?.authorId
-              );
+      <div className="mt-[10px] ml-2 mr-3 font-semibold pb-[10px] border-b border-gray-400">
+        Danh sách bạn bè
+      </div>
+      <div
+        className={`${
+          sizes.width > 800 ? "h-[calc(100%-175px)]" : "h-[calc(100%-130px)]"
+        } overflow-auto scroll-chat px-2 pb-4`}
+      >
+        {friendList?.length > 0 ? (
+          friendList
+            ?.sort((a, b) => a?.author?.name?.localeCompare(b?.author?.name))
+            .map((item, index) => {
               return (
                 <div
                   key={index}
                   onClick={() => {
                     setMobile(true);
-                    const findChat2 = messages?.filter((item) =>
-                      item?.member?.find((x) => x?.userId === user?.uid)
-                    );
-                    const findChat = findChat2?.find((item) =>
-                      item?.member?.find((x) => x?.userId === author?.userId)
-                    );
-                    router.push(`/chat?friendId=${author?.authorId}`);
+                    router.push(`/chat?friendId=${item?.author?.authorId}`);
                   }}
-                  className={`${
-                    userTo?.authorId === author?.authorId
-                      ? "bg-[#0084ff] bg-opacity-30"
-                      : "bg-white"
-                  } rounded-md shadow-md shadow-gray-400 flex items-center gap-x-2 pl-[15px] pr-2 py-[20px] mt-[10px] cursor-pointer`}
+                  className={`bg-white rounded-md shadow shadow-gray-400 bg-white flex items-center gap-x-2 pl-[15px] pr-2 py-[12px] mt-[10px] cursor-pointer`}
                 >
                   <Image
                     src={
-                      author?.user?.photo && author?.user?.photo?.length > 0
-                        ? author?.user?.photo
+                      item?.author?.user?.photo &&
+                      item?.author?.user?.photo?.length > 0
+                        ? item?.author?.user?.photo
                         : "/dumuc/avatar.jpg"
                     }
                     width={0}
@@ -207,137 +139,23 @@ export default function ChatLeft({
                   <div className="flex justify-between w-full">
                     <div>
                       <Link href="" className="text-base">
-                        {author?.name}
+                        {item?.author?.name}
                       </Link>
-                      {/* <p className='text-[13px] text-[#00000080] mt-2'>Tin nhắn mới nhất của bạn ....</p> */}
                     </div>
-                    {/* <span className='text-[13px] text-[#00000080]'>13 phút</span> */}
                   </div>
                 </div>
               );
             })
-          ) : valueSearch.trim() === "" ? (
-            <div className="h-full w-full flex justify-center items-center text-base">
-              Danh sách bạn bè trống
-            </div>
-          ) : (
-            <div className="h-full w-full flex justify-center items-center text-base">
-              Không tìm thấy kết quả vui lòng thử từ khóa khác
-            </div>
-          )
-        ) : messages?.length > 0 ? (
-          messages?.map((item, index) => {
-            return item?.member?.find((x) => x?.userId === user?.uid)
-              ? item?.member?.map((itemChild, indexChild) => {
-                  const author = authors?.find(
-                    (x) => x?.authorId === itemChild?.authorId
-                  );
-                  return (
-                    itemChild?.userId !== user.uid && (
-                      <div
-                        key={indexChild}
-                        onClick={() => {
-                          setMobile(true);
-                          router.push(`/chat?chatId=${item.id}`);
-                        }}
-                        className={`${
-                          userTo?.authorId === itemChild?.authorId
-                            ? "bg-[#0084ff] bg-opacity-30"
-                            : "bg-white"
-                        } rounded-md shadow-md shadow-gray-400 flex items-center gap-x-2 pl-[15px] pr-2 py-[20px] mt-[10px] cursor-pointer`}
-                      >
-                        <Image
-                          src={
-                            author?.user?.photo &&
-                            author?.user?.photo?.length > 0
-                              ? author?.user?.photo
-                              : "/dumuc/avatar.jpg"
-                          }
-                          width={0}
-                          height={0}
-                          sizes="100vw"
-                          className="w-[45px] h-[45px] rounded-full"
-                        />
-                        <div className="flex justify-between w-full">
-                          <div>
-                            <Link href="" className="text-base">
-                              {author?.name}
-                            </Link>
-                            {search.get("chatId") === item?.id &&
-                            activeMessage?.length > 0 ? (
-                              <p className="text-[13px] text-gray-600 mt-2">
-                                {activeMessage[activeMessage?.length - 1]?.files
-                                  ?.length > 0
-                                  ? "[File]"
-                                  : activeMessage[activeMessage?.length - 1]
-                                      ?.photos?.length > 0
-                                  ? "[Hình ảnh]"
-                                  : activeMessage[activeMessage?.length - 1]
-                                      ?.text?.length > 0
-                                  ? [
-                                      `${
-                                        activeMessage[activeMessage?.length - 1]
-                                          ?.text
-                                      }`,
-                                    ]
-                                  : "[Chưa có tin nhắn mới]"}
-                              </p>
-                            ) : (
-                              <p className="text-[13px] text-gray-600 mt-2">
-                                {item?.messages[item?.messages.length - 1]
-                                  ?.files?.length > 0
-                                  ? ["File"]
-                                  : item?.messages[item?.messages.length - 1]
-                                      ?.photos?.length > 0
-                                  ? ["Hình ảnh"]
-                                  : item?.messages[item?.messages.length - 1]
-                                      ?.text?.length > 0
-                                  ? [
-                                      `${
-                                        item?.messages[
-                                          item?.messages.length - 1
-                                        ]?.text
-                                      }`,
-                                    ]
-                                  : ["Chưa có tin nhắn mới"]}
-                              </p>
-                            )}
-                          </div>
-                          {search.get("chatId") === item?.id &&
-                          activeMessage?.length > 0 ? (
-                            <span className="text-[13px] text-gray-600">
-                              {getTimeChat(
-                                activeMessage[activeMessage?.length - 1]
-                                  ?.createdAt
-                              )}
-                            </span>
-                          ) : (
-                            <span className="text-[13px] text-gray-600">
-                              {getTimeChat(
-                                item?.messages[item?.messages.length - 1]
-                                  ?.createdAt
-                              )}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    )
-                  );
-                })
-              : null;
-          })
+        ) : valueSearch.trim() === "" ? (
+          <div className="h-full w-full flex justify-center items-center text-base">
+            Danh sách bạn bè trống
+          </div>
         ) : (
           <div className="h-full w-full flex justify-center items-center text-base">
-            Danh người nhắn đang trống
+            Không tìm thấy kết quả vui lòng thử từ khóa khác
           </div>
         )}
       </div>
-      {/* <ModalAddFriend
-        authors={authors}
-        onCallback={() => {}}
-        onCancel={() => setShowAddFriend(false)}
-        visible={showAddFriend}
-      /> */}
     </div>
   );
 }

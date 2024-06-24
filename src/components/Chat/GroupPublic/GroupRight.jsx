@@ -209,6 +209,7 @@ export default function ChatGroupRight({
                   },
                   new: true,
                   isDelete: deleteField(),
+                  createdAt: serverTimestamp(),
                 });
               });
               setNewMessage("");
@@ -273,6 +274,7 @@ export default function ChatGroupRight({
                     },
                     new: true,
                     isDelete: deleteField(),
+                    createdAt: serverTimestamp(),
                   });
                 });
               });
@@ -1771,6 +1773,7 @@ export default function ChatGroupRight({
                             },
                             new: true,
                             isDelete: deleteField(),
+                            createdAt: serverTimestamp(),
                           });
                         });
                         setChooseQuote();

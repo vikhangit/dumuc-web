@@ -112,7 +112,9 @@ export default function StoryAuthorTool({
               class="text-base sm:text-lg font-semibold leading-none text-gray-900 dark:text-white"
               href={`/author/${item?.author?.slug}/${item?.author?.authorId}`}
             >
-              {item?.author?.activeNickName
+              {item?.author?.activeNickName &&
+              item?.author?.nickName &&
+              item?.author?.nickName !== ""
                 ? item?.author?.nickName
                 : item?.author?.name}
             </Link>

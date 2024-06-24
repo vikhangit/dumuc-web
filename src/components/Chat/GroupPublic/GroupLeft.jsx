@@ -26,16 +26,6 @@ export default function ChatGroupLeft({
   // usingUser,
   reset,
 }) {
-  // useEffect(() => {
-  //   const handleBeforeUnload = (event) => {
-  //     event.preventDefault();
-  //     reset();
-  //   };
-  //   window.addEventListener("beforeunload", handleBeforeUnload);
-  //   return () => {
-  //     window.removeEventListener("beforeunload", handleBeforeUnload);
-  //   };
-  // }, []);
   const user = JSON.parse(localStorage.getItem("userLogin"));
   const userId = JSON.parse(localStorage.getItem("userId"));
   const userToken = JSON.parse(localStorage.getItem("userToken"));
@@ -48,37 +38,21 @@ export default function ChatGroupLeft({
   const [valueSearch, setValueSearch] = useState("");
   const [searchFunction, setSearchFunction] = useState(false);
   const [activeList, setActiveList] = useState();
-  const [avatar, setAvatar] = useState([]);
-  const [activeMessage, setActiveMessage] = useState([]);
+  const [activeMessage, setActiveMessage] = useState();
   useEffect(() => {
-    setGroupList(
-      messages?.filter(
-        (item) => !item?.isDelete?.find((x) => x?.user === userId)
-      )
+    const allGroupPublic = messages?.filter(
+      (item) =>
+        !item?.isDelete?.find((x) => x?.user === userId) &&
+        item?.isPrivate === false
     );
+    const myGroup = allGroupPublic?.filter((item) =>
+      item?.member?.find((x) => x?.user === userId)
+    );
+    const ortherGroup = allGroupPublic?.filter(
+      (item) => !item?.member?.find((x) => x?.user === userId)
+    );
+    setGroupList([...myGroup, ...ortherGroup]);
   }, [messages]);
-  useEffect(() => {
-    if (search.get("groupId")) {
-      const q = query(
-        collection(db, "chat-groups", search.get("groupId"), "messages"),
-        orderBy("createdAt", "asc")
-      );
-      const unsubscribe = onSnapshot(q, (querySnapshot) => {
-        let allMess = [];
-        querySnapshot.forEach((doc) =>
-          allMess.push({
-            id: doc.id,
-            ...doc.data(),
-            createdAt: doc.data()?.createdAt?.toDate(),
-          })
-        );
-        setActiveMessage(allMess);
-      });
-      return () => unsubscribe;
-    } else {
-      setActiveMessage([]);
-    }
-  }, [search]);
   useEffect(() => {
     if (search.get("groupId")) {
       const q = query(
@@ -114,15 +88,25 @@ export default function ChatGroupLeft({
 
   const searchField = (value) => {
     setValueSearch(value);
+    const allGroupPublic = messages?.filter(
+      (item) =>
+        !item?.isDelete?.find((x) => x?.user === userId) &&
+        item?.isPrivate === false
+    );
+    const myGroup = allGroupPublic?.filter((item) =>
+      item?.member?.find((x) => x?.user === userId)
+    );
+    const ortherGroup = allGroupPublic?.filter(
+      (item) => !item?.member?.find((x) => x?.user === userId)
+    );
+    setGroupList([...myGroup, ...ortherGroup]);
     if (value.trim() === "") {
-      setGroupList(
-        messages?.filter(
-          (item) => !item?.isDelete?.find((x) => x?.user === userId)
-        )
-      );
+      setGroupList([...myGroup, ...ortherGroup]);
     } else {
-      const searchList = messages?.filter((x) =>
-        x?.name?.toLowerCase()?.includes(value?.toLowerCase())
+      const searchList = messages?.filter(
+        (x) =>
+          x?.isPrivate === false &&
+          x?.name?.toLowerCase()?.includes(value?.toLowerCase())
       );
       if (searchList && searchList.length > 0) {
         setGroupList(searchList);
@@ -152,7 +136,7 @@ export default function ChatGroupLeft({
       .replace("ago", "")
       .replace("few", "");
   };
-  console.log(user?.uid);
+
   return (
     <div
       className={`h-full ${
@@ -198,107 +182,100 @@ export default function ChatGroupLeft({
           Tạo nhóm
         </button>
       </div>
-      <div className="h-[calc(100%-150px)] overflow-auto scroll-chat px-2">
-        {user &&
-        groupList?.length > 0 &&
-        groupList?.filter(
-          (x) => x?.isPrivate === false
-          // &&
-          //   !x?.isDelete?.find((ab) => ab?.user === userId)
-        )?.length > 0 ? (
-          groupList
-            ?.filter(
-              (x) => x?.isPrivate === false
-              // &&
-              //   !x?.isDelete?.find((ab) => ab?.user === userId)
-            )
-            ?.map((item, i) => {
-              const author = authors?.find(
-                (x) => x?.authorId === item?.lastMessage?.formAuthor?.authorId
-              );
-              return (
-                <div
-                  key={i}
-                  onClick={() => {
-                    // setActiveGroup(item);
-                    setMobile(true);
-                    router.push(`/chat/group-public?groupId=${item?.id}`);
-                  }}
-                  className={`${
-                    groupTo?.id === item?.id
-                      ? "bg-[#0084ff] bg-opacity-30"
-                      : "bg-white"
-                  } rounded-md shadow-md shadow-gray-400 flex items-center gap-x-2 pl-[15px] pr-2 py-[12px] mt-[10px] cursor-pointer`}
-                >
-                  <div className="w-[45px] h-[45px] rounded-full flex justify-center items-center border border-gray-400">
-                    <Image
-                      src={
-                        item?.avatar?.length > 0
-                          ? item?.avatar
-                          : "/dumuc/avatar.jpg"
-                      }
-                      width={0}
-                      height={0}
-                      sizes="100vw"
-                      className="w-full h-full rounded-full"
-                    />
-                  </div>
+      <div className="mt-[10px] ml-2 mr-3 font-semibold pb-[10px] border-b border-gray-400">
+        Nhóm công khai
+      </div>
+      <div
+        className={`${
+          sizes.width > 800 ? "h-[calc(100%-175px)]" : "h-[calc(100%-130px)]"
+        } overflow-auto scroll-chat px-2 pb-4`}
+      >
+        {groupList?.length > 0 ? (
+          groupList?.map((item, i) => {
+            const author = authors?.find(
+              (x) => x?.authorId === item?.lastMessage?.formAuthor?.authorId
+            );
+            return (
+              <div
+                key={i}
+                onClick={() => {
+                  // setActiveGroup(item);
+                  setMobile(true);
+                  router.push(`/chat/group-public?groupId=${item?.id}`);
+                }}
+                className={`${
+                  groupTo?.id === item?.id
+                    ? "bg-[#0084ff] bg-opacity-30"
+                    : "bg-white"
+                } rounded-md shadow shadow-gray-400 flex items-center gap-x-2 pl-[15px] pr-2 py-[12px] mt-[10px] cursor-pointer`}
+              >
+                <div className="w-[45px] h-[45px] rounded-full flex justify-center items-center border border-gray-400">
+                  <Image
+                    src={
+                      item?.avatar?.length > 0
+                        ? item?.avatar
+                        : "/dumuc/avatar.jpg"
+                    }
+                    width={0}
+                    height={0}
+                    sizes="100vw"
+                    className="w-full h-full rounded-full"
+                  />
+                </div>
 
-                  <div className=" w-full">
-                    <div className="flex justify-between w-full">
-                      <Link href="" className="text-base">
-                        {item?.name}
-                      </Link>
+                <div className=" w-full">
+                  <div className="flex justify-between w-full">
+                    <Link href="" className="text-base">
+                      {item?.name}
+                    </Link>
 
-                      {item?.isDelete?.find((ab) => ab?.user === userId) ? (
-                        <div></div>
-                      ) : (
-                        item?.member?.find((x) => x?.user === userId) && (
-                          <span className="text-[13px] text-gray-600">
-                            {item?.lastMessage &&
-                              getTimeChat(
-                                item?.lastMessage?.createdAt?.toDate()
-                              )}
-                          </span>
-                        )
-                      )}
-                    </div>
                     {item?.isDelete?.find((ab) => ab?.user === userId) ? (
-                      <p className="text-[13px] text-gray-600 mt-0.5 italic">
-                        Chưa có tin nhắn mới
-                      </p>
+                      <div></div>
                     ) : (
                       item?.member?.find((x) => x?.user === userId) && (
-                        <div className="flex justify-between w-full">
-                          {item?.lastMessage ? (
-                            <>
-                              <p className="text-[13px] text-gray-600 mt-0.5">
-                                {item?.lastMessage?.recall ? (
-                                  <span className="italic">
-                                    Tin nhắn đã thu hồi
-                                  </span>
-                                ) : (
-                                  `${author?.name}: ${item?.lastMessage?.text}`
-                                )}
-                              </p>
-                              {item?.new === true &&
-                                item?.lastMessage?.formAuthor?.userId !==
-                                  userId && (
-                                  <div className="rounded-full w-[10px] h-[10px] bg-[#C82027] text-white text-xs flex justify-center items-center"></div>
-                                )}
-                            </>
-                          ) : (
-                            <p className="text-[13px] text-gray-600 mt-0.5 italic">
-                              Chưa có tin nhắn mới
-                            </p>
-                          )}
-                        </div>
+                        <span className="text-[13px] text-gray-600">
+                          {item?.lastMessage &&
+                            getTimeChat(item?.lastMessage?.createdAt?.toDate())}
+                        </span>
                       )
                     )}
                   </div>
+                  {item?.isDelete?.find((ab) => ab?.user === userId) ? (
+                    <p className="text-[13px] text-gray-600 mt-0.5 italic">
+                      Chưa có tin nhắn mới
+                    </p>
+                  ) : (
+                    item?.member?.find((x) => x?.user === userId) && (
+                      <div className="flex justify-between w-full">
+                        {item?.lastMessage ? (
+                          <>
+                            <p className="text-[13px] text-gray-600 mt-0.5 line-clamp-1">
+                              {item?.lastMessage?.recall ? (
+                                <span className="italic">
+                                  Tin nhắn đã thu hồi
+                                </span>
+                              ) : (
+                                `${author?.name}: ${item?.lastMessage?.text}`
+                              )}
+                            </p>
+                            {item?.new === true &&
+                              item?.lastMessage?.formAuthor?.userId !==
+                                userId && (
+                                <div className="rounded-full w-[10px] h-[10px] bg-[#C82027] text-white text-xs flex justify-center items-center"></div>
+                              )}
+                          </>
+                        ) : (
+                          <p className="text-[13px] text-gray-600 mt-0.5 italic">
+                            Chưa có tin nhắn mới
+                          </p>
+                        )}
+                      </div>
+                    )
+                  )}
                 </div>
-              );
-            })
+              </div>
+            );
+          })
         ) : (
           <div className="h-full w-full flex justify-center items-center text-base">
             Danh nhóm đang trống

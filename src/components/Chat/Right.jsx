@@ -189,6 +189,7 @@ export default function ChatRight({
                     },
                     new: true,
                     isDelete: deleteField(),
+                    createdAt: serverTimestamp(),
                   });
                 });
               } else {
@@ -209,6 +210,7 @@ export default function ChatRight({
                       },
                       new: true,
                       isDelete: deleteField(),
+                      createdAt: serverTimestamp(),
                     });
                   });
                   router.push(`/chat?chatId=${data.id}`);
@@ -275,9 +277,10 @@ export default function ChatRight({
                         ...dataItem,
                         messageId: data?.id,
                         text: "[File]",
-                        isDelete: deleteField(),
                       },
+                      isDelete: deleteField(),
                       new: true,
+                      createdAt: serverTimestamp(),
                     });
                   });
                 });
@@ -313,6 +316,7 @@ export default function ChatRight({
                         },
                         new: true,
                         isDelete: deleteField(),
+                        createdAt: serverTimestamp(),
                       });
                     });
                     router.push(`/chat?chatId=${data.id}`);
@@ -339,7 +343,7 @@ export default function ChatRight({
     <div
       className={`h-full  ${
         sizes.width > 992
-          ? "basis-3/4"
+          ? "basis-2/3"
           : `${mobile ? "basis-full" : "hidden"} overflow-x-hidden`
       }`}
     >
@@ -1740,6 +1744,7 @@ export default function ChatRight({
                             },
                             new: true,
                             isDelete: deleteField(),
+                            createdAt: serverTimestamp(),
                           });
                         });
 
@@ -1770,6 +1775,7 @@ export default function ChatRight({
                               },
                               new: true,
                               isDelete: deleteField(),
+                              createdAt: serverTimestamp(),
                             });
                           });
                           router.push(`/chat?chatId=${data?.id}`);

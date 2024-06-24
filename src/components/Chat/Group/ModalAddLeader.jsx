@@ -61,10 +61,12 @@ export default function ModalAddLeader({
     const find = member?.find((x) => x?.user === userId);
     await updateDoc(washingtonRef, {
       member: arrayRemove(find),
+      createdAt: serverTimestamp(),
     })
       .then(async (result) => {
         await updateDoc(washingtonRef, {
           leader: memberList?.user,
+          createdAt: serverTimestamp(),
         });
         await addDoc(
           collection(db, "chat-groups", search.get("groupId"), "messages"),

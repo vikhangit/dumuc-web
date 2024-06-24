@@ -62,7 +62,7 @@ export default function ChatGroup() {
     }
   }, [sizes]);
   useEffect(() => {
-    const q = query(collection(db, "chat-rooms"), orderBy("createdAt", "asc"));
+    const q = query(collection(db, "chat-rooms"), orderBy("createdAt", "desc"));
     const unsubscribe = onSnapshot(q, (QuerySnapshot) => {
       let fetchedMessages = [];
       QuerySnapshot.forEach((doc) => {

@@ -52,8 +52,14 @@ const NewAuthorUI = ({ currentUrl = "/", params, searchParams }) => {
   const [usingUser, setUsingUser] = useState();
   const [following, setFollowing] = useState();
   const [showReport, setShowReport] = useState(false);
+  const [myFollow, setMyFollow] = useState([]);
+  const [myFriend, setMyFriend] = useState([]);
   useEffect(() => {
-    getProfile(user?.accessToken).then((dataCall) => setUsingUser(dataCall));
+    getProfile(user?.accessToken).then((dataCall) => {
+      setUsingUser(dataCall);
+      setMyFollow(data?.follows);
+      setMyFriend(data?.friendList);
+    });
   }, [user]);
   useEffect(() => {
     // getAuthor({authorId: id}).then((author) => setAuthorData(author))
@@ -619,6 +625,8 @@ const NewAuthorUI = ({ currentUrl = "/", params, searchParams }) => {
               slug={slug}
               usingUser={usingUser}
               setOpenLibrary={setOpenLibrary}
+              myFollow={myFollow}
+              myFriend={myFriend}
             />
           </div>
         </div>

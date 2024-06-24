@@ -166,6 +166,8 @@ const ProfilePage = () => {
     }
   }, [user, loading]);
 
+  console.log(usingUser);
+
   const save = () => {
     setLoadingSubmit(true);
     if (name === undefined || name === "") {
@@ -198,11 +200,11 @@ const ProfilePage = () => {
 
     //post data
     let item = {
+      ...usingUser,
       name: name,
       nickName,
       address,
       sex,
-      activeNickName: false,
       numberPlate:
         numberPlate2 != undefined && numberPlate2 != ""
           ? `${numberPlate?.replace(/\s/g, "")},${numberPlate2?.replace(
@@ -212,7 +214,8 @@ const ProfilePage = () => {
           : `${numberPlate?.replace(/\s/g, "")}`,
       userId: user?.userId,
     };
-    updateProfile(item, user?.accessToken).then(async () => {
+    updateProfile(item, user?.accessToken).then(async (re) => {
+      console.log("Result", re);
       const success = await updateEmail(email);
       if (success) {
         getProfile(user?.accessToken).then(async (profile) => {

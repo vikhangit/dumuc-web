@@ -193,7 +193,14 @@ export default function ChatGroupLeft({
           Tạo nhóm
         </button>
       </div>
-      <div className="h-[calc(100%-150px)] overflow-auto scroll-chat px-2">
+      <div className="mt-[10px] ml-2 mr-3 font-semibold pb-[10px] border-b border-gray-400">
+        Nhóm riêng tư
+      </div>
+      <div
+        className={`${
+          sizes.width > 800 ? "h-[calc(100%-175px)]" : "h-[calc(100%-130px)]"
+        } overflow-auto scroll-chat px-2 pb-4`}
+      >
         {groupList?.filter((x) => x?.isPrivate)?.length > 0 ? (
           groupList
             ?.filter((x) => x?.isPrivate)
@@ -215,7 +222,7 @@ export default function ChatGroupLeft({
                       groupTo?.id === item?.id
                         ? "bg-[#0084ff] bg-opacity-30"
                         : "bg-white"
-                    } rounded-md shadow-md shadow-gray-400 flex items-center gap-x-2 pl-[15px] pr-2 py-[12px] mt-[10px] cursor-pointer`}
+                    } rounded-md shadow shadow-gray-400 flex items-center gap-x-2 pl-[15px] pr-2 py-[12px] mt-[10px] cursor-pointer`}
                   >
                     <div className="w-[45px] h-[45px] rounded-full flex justify-center items-center border border-gray-400">
                       <Image
@@ -247,18 +254,20 @@ export default function ChatGroupLeft({
                         )}
                       </div>
                       {item?.member?.find((x) => x?.user === userId) && (
-                        <div className="flex justify-between w-full">
+                        <div className="flex justify-between w-full items-center">
                           {item?.lastMessage ? (
                             <>
-                              <p className="text-[13px] text-gray-600 mt-0.5">
-                                {item?.lastMessage?.recall ? (
-                                  <span className="italic">
-                                    Tin nhắn đã thu hồi
-                                  </span>
-                                ) : (
-                                  `${author?.name}: ${item?.lastMessage?.text}`
-                                )}
-                              </p>
+                              <div className="w-[calc(100%-35px)]">
+                                <p className="text-[13px] text-gray-600 mt-0.5 line-clamp-1">
+                                  {item?.lastMessage?.recall ? (
+                                    <span className="italic">
+                                      Tin nhắn đã thu hồi
+                                    </span>
+                                  ) : (
+                                    `${author?.name}: ${item?.lastMessage?.text}`
+                                  )}
+                                </p>
+                              </div>
                               {item?.new === true &&
                                 item?.lastMessage?.formAuthor?.userId !==
                                   userId && (

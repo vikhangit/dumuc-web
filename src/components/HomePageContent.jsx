@@ -60,11 +60,12 @@ const HomePageContent = () => {
     });
     getFeedsLoadMore({ limit: 5 }).then((result) => setFeedData(result));
     getTags().then((result) => setTags(result));
-    getStoriesLoadMore({ limit: 5 }).then((data) => {
+    getStoriesLoadMore({ limit: 100 }).then((data) => {
       setStories(data);
     });
     setLoading(false);
   }, [user]);
+  console.log("Friend", requestFr);
   return loading ? (
     <Loading />
   ) : (
@@ -80,7 +81,7 @@ const HomePageContent = () => {
                 </div>
               </div>
               <div
-                className={`rounded-lg hidden  xl:block shadow-gray-400 w-[280px]${
+                className={`rounded-lg hidden xl:block shadow-gray-400 w-[280px] ${
                   requestFr?.length > 0 ? "shadow bg-white py-2 px-2 mt-4" : ""
                 }`}
               >
@@ -124,7 +125,7 @@ const HomePageContent = () => {
                     user={user}
                     usingUser={usingUser}
                     onCallback={() => {
-                      getStoriesLoadMore({ limit: 5 }).then((data) => {
+                      getStoriesLoadMore({ limit: 100 }).then((data) => {
                         setStories(data);
                       });
                     }}

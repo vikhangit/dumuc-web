@@ -9,7 +9,7 @@ import {
   MdPending,
 } from "react-icons/md";
 import { useRouter } from "next/navigation";
-
+import { GoHome, GoHomeFill } from "react-icons/go";
 import { auth } from "utils/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { FaUserFriends } from "react-icons/fa";
@@ -23,26 +23,17 @@ export default function TabbarBottomChat({ active = "home" }) {
   return (
     <div
       className={`fixed bottom-0 w-full z-50 ${
-        sizes.width > 800 ? "h-[70px]" : "h-[45px]"
+        sizes.width > 800 ? "h-[70px]" : "h-[55px]"
       } bg-white border-t border-gray-200 dark:bg-gray-700 dark:border-gray-600`}
     >
       <div className="grid h-full mx-auto grid-cols-5 font-medium">
-        <div className="w-auto xl:w-[280px] flex justify-center items-center pl-2">
-          <div class="cursor-pointer inline-flex flex-col items-center justify-center px-0 sm:px-2 hover:bg-gray-50 dark:hover:bg-gray-800 group">
-            <Link href={"/"}>
-              <Image
-                width={0}
-                height={0}
-                sizes="100vw"
-                src="/icons/bottom/Home.png"
-                class="w-full h-8 h-8 cursor-pointer"
-                alt="DuMuc"
-              />
-            </Link>
-            <span class="text-base md:text-lg font-semibold text-gray-500 bottomTabBarHiden1">
-              Trang chủ
-            </span>
-          </div>
+        <div class="cursor-pointer inline-flex flex-col items-center justify-center px-0 sm:px-2 hover:bg-gray-50 dark:hover:bg-gray-800 group">
+          <Link href={"/"}>
+            <GoHomeFill size={32} color="#9C9C9C" />
+          </Link>
+          <span class="text-base md:text-lg font-semibold text-gray-500 bottomTabBarHiden1">
+            Trang chủ
+          </span>
         </div>
 
         {active === "chat" ? (

@@ -199,30 +199,32 @@ const Story = ({
             </SwiperSlide>
           )}
           {stories?.length > 0 &&
-            stories?.map((item, index) => {
-              return (
-                <SwiperSlide
-                  key={index}
-                  style={{
-                    height: 250,
-                    cursor: "pointer",
-                    position: "unset",
-                  }}
-                >
-                  <StoryItem
-                    authors={authors}
-                    data={stories}
-                    myFollow={myFollow}
-                    myFriend={myFriend}
-                    onCallback={onCallback}
-                    user={user}
-                    usingUser={usingUser}
-                    element={item}
-                    index={index}
-                  />
-                </SwiperSlide>
-              );
-            })}
+            stories
+              ?.sort((a, b) => b?.no - a?.no)
+              ?.map((item, index) => {
+                return (
+                  <SwiperSlide
+                    key={index}
+                    style={{
+                      height: 250,
+                      cursor: "pointer",
+                      position: "unset",
+                    }}
+                  >
+                    <StoryItem
+                      authors={authors}
+                      data={stories}
+                      myFollow={myFollow}
+                      myFriend={myFriend}
+                      onCallback={onCallback}
+                      user={user}
+                      usingUser={usingUser}
+                      element={item}
+                      index={index}
+                    />
+                  </SwiperSlide>
+                );
+              })}
         </Swiper>
         {activeSlide > 0 && (
           <button

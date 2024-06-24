@@ -285,7 +285,7 @@ https://flagcdn.com/48x36/vn.png 3x`}
         }
       }
     });
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     setLoadingAction(true);
@@ -316,26 +316,26 @@ https://flagcdn.com/48x36/vn.png 3x`}
         setLoadingAction(false);
       }
     });
-  }, []);
+  }, [user]);
 
-  useEffect(() => {
-    const saved_email = localStorage.getItem("emailForSignIn");
-    if (user && loading === false && saved_email === null) {
-      //redirect
-      localStorage.setItem("userLogin", JSON.stringify(user));
-      localStorage.setItem("userId", JSON.stringify(user?.uid));
-      localStorage.setItem("userToken", JSON.stringify(user?.accessToken));
-      if (
-        query?.url_return !== undefined &&
-        query?.url_return !== "undefined"
-      ) {
-        const url_return = query?.url_return;
-        router.push(url_return);
-      } else {
-        router.push("/");
-      }
-    }
-  }, [user, loading]);
+  // useEffect(() => {
+  //   const saved_email = localStorage.getItem("emailForSignIn");
+  //   if (user && loading === false && saved_email === null) {
+  //     //redirect
+  //     localStorage.setItem("userLogin", JSON.stringify(user));
+  //     localStorage.setItem("userId", JSON.stringify(user?.uid));
+  //     localStorage.setItem("userToken", JSON.stringify(user?.accessToken));
+  //     if (
+  //       query?.url_return !== undefined &&
+  //       query?.url_return !== "undefined"
+  //     ) {
+  //       const url_return = query?.url_return;
+  //       router.push(url_return);
+  //     } else {
+  //       router.push("/");
+  //     }
+  //   }
+  // }, [user, loading]);
 
   return (
     <main className="w-full">

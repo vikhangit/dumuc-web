@@ -66,6 +66,7 @@ export default function ModalAbout({
 
         await updateDoc(washingtonRef, {
           avatar: data?.url,
+          createdAt: serverTimestamp(),
         })
           .then(async (result) => {
             await addDoc(
@@ -170,6 +171,7 @@ export default function ModalAbout({
                         const washingtonRef = doc(db, "chat-groups", about?.id);
                         await updateDoc(washingtonRef, {
                           name,
+                          createdAt: serverTimestamp(),
                         })
                           .then(async (result) => {
                             await addDoc(
@@ -328,6 +330,7 @@ export default function ModalAbout({
                                       );
                                       await updateDoc(washingtonRef, {
                                         deputyLeader: item?.user,
+                                        createdAt: serverTimestamp(),
                                       })
                                         .then(async (result) => {
                                           await addDoc(
@@ -386,6 +389,7 @@ export default function ModalAbout({
                                       );
                                       await updateDoc(washingtonRef, {
                                         deputyLeader: "",
+                                        createdAt: serverTimestamp(),
                                       })
                                         .then(async (result) => {
                                           await addDoc(
@@ -446,10 +450,12 @@ export default function ModalAbout({
                                       await updateDoc(washingtonRef, {
                                         leader: item?.user,
                                         deputyLeader: "",
+                                        createdAt: serverTimestamp(),
                                       });
                                     } else {
                                       await updateDoc(washingtonRef, {
                                         leader: item?.user,
+                                        createdAt: serverTimestamp(),
                                       });
                                     }
                                     await addDoc(
@@ -502,6 +508,7 @@ export default function ModalAbout({
                                   );
                                   await updateDoc(washingtonRef, {
                                     member: arrayRemove(item),
+                                    createdAt: serverTimestamp(),
                                   })
                                     .then(async (result) => {
                                       if (
@@ -509,6 +516,7 @@ export default function ModalAbout({
                                       ) {
                                         await updateDoc(washingtonRef, {
                                           deputyLeader: "",
+                                          createdAt: serverTimestamp(),
                                         });
                                       }
                                       await addDoc(
@@ -556,6 +564,7 @@ export default function ModalAbout({
                                   ) {
                                     await updateDoc(washingtonRef, {
                                       member: arrayRemove(item),
+                                      createdAt: serverTimestamp(),
                                     })
                                       .then(async (result) => {
                                         await updateDoc(washingtonRef, {
@@ -607,11 +616,13 @@ export default function ModalAbout({
                                 } else {
                                   await updateDoc(washingtonRef, {
                                     member: arrayRemove(item),
+                                    createdAt: serverTimestamp(),
                                   })
                                     .then(async (result) => {
                                       if (item?.user === about?.deputyLeader) {
                                         await updateDoc(washingtonRef, {
                                           deputyLeader: "",
+                                          createdAt: serverTimestamp(),
                                         });
                                       }
                                       await addDoc(

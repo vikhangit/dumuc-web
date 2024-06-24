@@ -77,7 +77,9 @@ const StoryItem = ({
           ></div>
         )}
         <span className={`absolute bottom-2 left-2 text-sm font-medium z-20`}>
-          {item?.author?.activeNickName
+          {item?.author?.activeNickName &&
+          item?.author?.nickName &&
+          item?.author?.nickName !== ""
             ? item?.author?.nickName
             : item?.author?.name}
         </span>

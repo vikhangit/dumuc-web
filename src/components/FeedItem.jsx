@@ -93,7 +93,9 @@ const FeedItem = ({ data, index, user, usingUser }) => {
             class="text-lg sm:text-xl font-bold leading-none text-gray-900 dark:text-white"
             href={`/author/${item?.author?.slug}/${item?.author?.authorId}`}
           >
-            {item?.author?.activeNickName
+            {item?.author?.activeNickName &&
+            item?.author?.nickName &&
+            item?.author?.nickName !== ""
               ? item?.author?.nickName
               : item?.author?.name}
           </Link>
