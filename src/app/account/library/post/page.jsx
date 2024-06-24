@@ -27,15 +27,15 @@ const LibraryPage = ({ searchParams }) => {
   useEffect(() => {
     if (user && usingUser) {
       getPosts().then((postsData) =>
-        setPosts(postsData.filter((x) => x.userId == user?.uid))
+        setPosts(postsData?.filter((x) => x?.userId == user?.uid))
       );
       getFeeds().then((data) =>
-        setFeeds(data?.filter((x) => x.userId == user?.uid))
+        setFeeds(data?.filter((x) => x?.userId == user?.uid))
       );
       setLoadingSkeleton(false);
     }
   }, [user, usingUser, searchParams?.tab]);
-
+  console.log("Feeds", feeds);
   return loadingSkeleton ? (
     <Loading />
   ) : (
@@ -106,10 +106,12 @@ const LibraryPage = ({ searchParams }) => {
             }
             status={searchParams?.status}
             onCallback={async () =>
-              await getPostsByUser(user?.accessToken).then((postsData) =>
+              getPostsByUser(user?.accessToken).then((postsData) =>
                 setPosts(postsData)
               )
             }
+            user={user}
+            usingUser={usingUser}
           />
         </div>
       )}
@@ -151,10 +153,13 @@ const LibraryPage = ({ searchParams }) => {
             }}
             layout="list"
             onCallback={async () => {
-              await getFeeds().then((data) =>
-                setFeeds(data?.filter((x) => x.userId == user?.uid))
+              getFeeds().then((data) =>
+                setFeeds(data?.filter((x) => x?.userId == user?.uid))
               );
             }}
+            user={user}
+            usingUser={usingUser}
+            loading={loading}
           />
         </>
       )}

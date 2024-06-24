@@ -60,6 +60,7 @@ const FeedItem = ({ data, index, user, usingUser }) => {
   const onCallback = (feedId) => {
     getFeed({ feedId }).then((data) => setItem(data));
   };
+  console.log("Items", item);
 
   return (
     <div
