@@ -560,9 +560,7 @@ export default function ChatGroupRight({
                       "messages",
                       x?.id
                     );
-                    await deleteDoc(washingtonRef).then(() => {
-                      message?.success("Đã xóa tin nhắn");
-                    });
+                    await deleteDoc(washingtonRef);
                     if (groupTo?.lastMessage?.messageId === x?.id) {
                       const wRef = doc(
                         db,
@@ -605,6 +603,7 @@ export default function ChatGroupRight({
                   });
                   setActiveMultipleDelete(false);
                   setDeleteList([]);
+                  message?.success("Đã xóa tin nhắn");
                 }
               }}
             >
