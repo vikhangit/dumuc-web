@@ -36,8 +36,21 @@ const ModalImageZoom = dynamic(
   },
   { ssr: false }
 );
-import { MdAttachFile, MdReplay, MdReply } from "react-icons/md";
-import { FaFile, FaFileAudio, FaFileImage, FaFileLines } from "react-icons/fa6";
+import {
+  MdAttachFile,
+  MdDelete,
+  MdDeleteForever,
+  MdPlaylistRemove,
+  MdReplay,
+  MdReply,
+} from "react-icons/md";
+import {
+  FaCheck,
+  FaFile,
+  FaFileAudio,
+  FaFileImage,
+  FaFileLines,
+} from "react-icons/fa6";
 import { BiSolidFilePdf, BiSolidFileTxt } from "react-icons/bi";
 import { BsEmojiSmile, BsFileEarmarkWordFill } from "react-icons/bs";
 import { SiMicrosoftpowerpoint } from "react-icons/si";
@@ -125,6 +138,7 @@ export default function ChatGroupRight({
       const washingtonRef = doc(db, "chat-groups", groupTo?.id);
       await updateDoc(washingtonRef, {
         new: false,
+        lastMessagesCount: deleteField(),
       });
     }
   };
@@ -179,6 +193,9 @@ export default function ChatGroupRight({
             newPhoto.push(data?.url);
             if (newPhoto.length === array.length) {
               const myAuthor = authors?.find((x) => x?.userId === userId);
+              const find = messages?.find(
+                (x) => x?.id === search.get("groupId")
+              );
               let dataItem = {
                 text: newMessage,
                 photos: newPhoto,
@@ -208,6 +225,9 @@ export default function ChatGroupRight({
                     text: "[Hình ảnh]",
                   },
                   new: true,
+                  lastMessagesCount: find?.lastMessagesCount
+                    ? find?.lastMessagesCount + 1
+                    : 1,
                   isDelete: deleteField(),
                   createdAt: serverTimestamp(),
                 });
@@ -243,6 +263,9 @@ export default function ChatGroupRight({
             });
             if (newPhoto.length === array.length) {
               const myAuthor = authors?.find((x) => x?.userId === userId);
+              const find = messages?.find(
+                (x) => x?.id === search.get("groupId")
+              );
               newPhoto?.map(async (x) => {
                 let dataItem = {
                   text: newMessage,
@@ -274,6 +297,9 @@ export default function ChatGroupRight({
                     },
                     new: true,
                     isDelete: deleteField(),
+                    lastMessagesCount: find?.lastMessagesCount
+                      ? find?.lastMessagesCount + 1
+                      : 1,
                     createdAt: serverTimestamp(),
                   });
                 });
@@ -297,14 +323,15 @@ export default function ChatGroupRight({
   const [showModalAddMember, setShowModalAddMember] = useState(false);
   const [openAbout, setOpenAbout] = useState(false);
   const [typeAbout, setTypeAbout] = useState("about");
-  const [activeAbout, setActiveAbout] = useState();
+  const [activeMultipleDelete, setActiveMultipleDelete] = useState(false);
+  const [deleteList, setDeleteList] = useState([]);
   return (
     <div
       className={`h-full ${
         sizes.width > 992 ? "basis-2/3" : `${mobile ? "basis-full" : "hidden"}`
       }`}
     >
-      <div className="h-[75px] flex justify-between items-center px-[15px] pl-[0px] sm:px-[20px] shadow-md shadow-gray-400">
+      <div className="h-[75px] flex justify-between items-center px-[15px] pl-[0px] sm:px-[20px] border-b border-gray-300">
         {groupTo && (
           <>
             <div className="flex items-center gap-x-2 sm:gap-x-4">
@@ -353,7 +380,7 @@ export default function ChatGroupRight({
                       setOpenAbout(true);
                       setTypeAbout("about");
                     }}
-                    className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left`}
+                    className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left`}
                   >
                     Thông tin nhóm
                   </Link>
@@ -366,7 +393,7 @@ export default function ChatGroupRight({
                           setOpenAbout(true);
                           setTypeAbout("member");
                         }}
-                        className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left`}
+                        className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left`}
                       >
                         Xem thành viên
                       </Link>
@@ -406,11 +433,56 @@ export default function ChatGroupRight({
                           width: 200,
                         }}
                       >
-                        <button className="border-0 hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left">
+                        <button className="border-0 hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left">
                           Xóa tin nhắn
                         </button>
                       </Popconfirm>
                     </>
+                  )}
+                  {groupTo?.leader === userId && (
+                    <Popconfirm
+                      placement="topLeft"
+                      title="Chuyển đổi nhóm"
+                      description="Bạn có chắc chắn chuyển đổi nhóm thành nhóm riêng tư không?"
+                      onConfirm={async () => {
+                        const cityRef = doc(db, "chat-groups", groupTo?.id);
+                        await updateDoc(cityRef, {
+                          isPrivate: true,
+                        }).then(async () => {
+                          await addDoc(
+                            collection(
+                              db,
+                              "chat-groups",
+                              search.get("groupId"),
+                              "messages"
+                            ),
+                            {
+                              type: "change",
+                              notify: true,
+                              user: userId,
+                              text: "đã đổi nhóm thành nhóm riêng tư",
+                              createdAt: serverTimestamp(),
+                            }
+                          ).then(() => {
+                            message.success(
+                              "Đã chuyển nhóm sang công khai thành công"
+                            );
+
+                            router.push(`/chat/group?groupId=${groupTo?.id}`);
+                          });
+                        });
+                      }}
+                      onCancel={() => {}}
+                      okText="Đồng ý"
+                      cancelText="Hủy bỏ"
+                      style={{
+                        width: 200,
+                      }}
+                    >
+                      <button className="border-0 hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left">
+                        Chuyển nhóm thành riêng tư
+                      </button>
+                    </Popconfirm>
                   )}
                   {groupTo?.leader === userId && (
                     <Link
@@ -420,9 +492,9 @@ export default function ChatGroupRight({
                         setOpenAbout(true);
                         setTypeAbout("request");
                       }}
-                      className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left flex item-cemter justify-between`}
+                      className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left flex item-cemter justify-between`}
                     >
-                      Yêu cầu than gia nhóm
+                      Yêu cầu tham gia nhóm
                       <div className="bg-[#C82027]  text-white w-[12px] h-[12px] rounded-full flex justify-center items-center text-[10px] font-semibold">
                         {groupTo?.requestList
                           ? groupTo?.requestList?.length
@@ -453,8 +525,8 @@ export default function ChatGroupRight({
                         width: 200,
                       }}
                     >
-                      <button className="border-0 hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left">
-                        Xóa nhóm
+                      <button className="border-0 hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left">
+                        Giải tán nhóm
                       </button>
                     </Popconfirm>
                   )}
@@ -464,6 +536,92 @@ export default function ChatGroupRight({
           </>
         )}
       </div>
+      {activeMultipleDelete && (
+        <div
+          ref={addFriend}
+          className="flex justify-between items-center px-[15px] border-b py-2 border-gray-300"
+        >
+          <div className="flex items-center gap-x-2">
+            <MdDeleteForever size={24} color="#c80000" />
+            <span>Đã chọn: {deleteList?.length}</span>
+          </div>
+          <div className="flex items-center gap-x-2">
+            <button
+              className={`bg-[#c80000] text-white font-semibold px-4 py-1 ${
+                deleteList.length <= 0 && "bg-opacity-50"
+              }`}
+              onClick={() => {
+                if (deleteList.length > 0) {
+                  deleteList?.map(async (x) => {
+                    const washingtonRef = doc(
+                      db,
+                      "chat-groups",
+                      search.get("groupId"),
+                      "messages",
+                      x?.id
+                    );
+                    await deleteDoc(washingtonRef).then(() => {
+                      message?.success("Đã xóa tin nhắn");
+                    });
+                    if (groupTo?.lastMessage?.messageId === x?.id) {
+                      const wRef = doc(
+                        db,
+                        "chat-groups",
+                        search.get("groupId")
+                      );
+                      const finIndexMessages = groupTo?.messages?.findLastIndex(
+                        (x) => {
+                          if (!x?.isDelete) {
+                            return x;
+                          } else {
+                            if (
+                              x?.isDelete?.find((aa) => aa?.user !== userId)
+                            ) {
+                              return x;
+                            }
+                          }
+                        }
+                      );
+
+                      await updateDoc(wRef, {
+                        lastMessage:
+                          finIndexMessages > -1
+                            ? {
+                                ...groupTo?.messages[finIndexMessages],
+                                messageId:
+                                  groupTo?.messages[finIndexMessages]?.id,
+                                text:
+                                  groupTo?.messages[finIndexMessages]?.photos
+                                    ?.length > 0
+                                    ? "[Hình ảnh]"
+                                    : groupTo?.messages[finIndexMessages]?.files
+                                        ?.length > 0
+                                    ? "[File]"
+                                    : groupTo?.messages[finIndexMessages]?.text,
+                              }
+                            : deleteField(),
+                      });
+                    }
+                  });
+                  setActiveMultipleDelete(false);
+                  setDeleteList([]);
+                }
+              }}
+            >
+              Xóa
+            </button>
+            <button
+              className="bg-gray-300 font-semibold px-4 py-1"
+              onClick={() => {
+                setActiveMultipleDelete(false);
+                setDeleteList([]);
+              }}
+            >
+              Hủy
+            </button>
+          </div>
+        </div>
+      )}
       {groupTo ? (
         groupTo?.member?.find((x) => x?.user === userId) ? (
           <>
@@ -499,33 +657,65 @@ export default function ChatGroupRight({
                         return (
                           <div
                             key={index}
-                            className={`flex gap-x-2 cursor-pointer sm:gap-x-4 ${
+                            className={`flex items-start gap-x-2 cursor-pointer sm:gap-x-4 ${
                               item?.formAuthor?.userId === userId
                                 ? "flex-row-reverse"
                                 : "flex-row"
                             } ${index !== 0 && "mt-3"}`}
                           >
-                            <Image
-                              onClick={() =>
-                                router.push(
-                                  `/author/${author?.slug}/${author?.authorId}`
-                                )
-                              }
-                              src={
-                                author?.user?.photo &&
-                                author?.user?.photo?.length > 0
-                                  ? author?.user?.photo
-                                  : "/dumuc/avatar.jpg"
-                              }
-                              width={0}
-                              height={0}
-                              sizes="100vw"
-                              className={`${
-                                sizes.width > 400
-                                  ? "w-[45px] h-[45px]"
-                                  : "w-[40px] h-[40px]"
-                              }  rounded-full cursor-pointer`}
-                            />
+                            <div
+                              className={`flex items-center gap-x-3 ${
+                                item?.formAuthor?.userId === userId
+                                  ? "flex-row-reverse"
+                                  : "flex-row"
+                              }`}
+                            >
+                              {activeMultipleDelete && (
+                                <div
+                                  className={`w-[15px] h-[15px] border  rounded-full ${
+                                    deleteList?.find((x) => x?.id === item?.id)
+                                      ? "bg-green-500 border-green-500"
+                                      : "bg-white border-gray-400"
+                                  }  flex justify-center items-center cursor-pointer`}
+                                  onClick={() => {
+                                    const find = deleteList?.findIndex(
+                                      (x) => x?.id === item?.id
+                                    );
+                                    if (find < 0) {
+                                      deleteList.push(item);
+                                    } else {
+                                      deleteList.splice(find, 1);
+                                    }
+                                    setDeleteList([...deleteList]);
+                                  }}
+                                >
+                                  {deleteList?.find(
+                                    (x) => x?.id === item?.id
+                                  ) && <FaCheck color="white" size={10} />}
+                                </div>
+                              )}
+                              <Image
+                                onClick={() =>
+                                  router.push(
+                                    `/author/${author?.slug}/${author?.authorId}`
+                                  )
+                                }
+                                src={
+                                  author?.user?.photo &&
+                                  author?.user?.photo?.length > 0
+                                    ? author?.user?.photo
+                                    : "/dumuc/avatar.jpg"
+                                }
+                                width={0}
+                                height={0}
+                                sizes="100vw"
+                                className={`${
+                                  sizes.width > 400
+                                    ? "w-[45px] h-[45px]"
+                                    : "w-[40px] h-[40px]"
+                                }  rounded-full cursor-pointer`}
+                              />
+                            </div>
                             <div
                               className={`w-2/3 sm-w-1/2 flex items-center gap-x-2 ${
                                 item?.formAuthor?.userId === userId
@@ -585,43 +775,92 @@ export default function ChatGroupRight({
                                             >
                                               {item?.formAuthor?.userId ===
                                                 userId && (
-                                                <Link
-                                                  href={``}
-                                                  onClick={async (e) => {
-                                                    e.preventDefault();
-                                                    const washingtonRef = doc(
-                                                      db,
-                                                      "chat-groups",
-                                                      search.get("groupId"),
-                                                      "messages",
-                                                      item?.id
-                                                    );
-                                                    await updateDoc(
-                                                      washingtonRef,
-                                                      {
-                                                        recall: true,
-                                                      }
-                                                    );
-                                                    if (
-                                                      groupTo?.lastMessage
-                                                        ?.messageId === item?.id
-                                                    ) {
-                                                      const wRef = doc(
+                                                <>
+                                                  <Link
+                                                    href={``}
+                                                    onClick={async (e) => {
+                                                      e.preventDefault();
+                                                      const washingtonRef = doc(
                                                         db,
                                                         "chat-groups",
-                                                        search.get("groupId")
+                                                        search.get("groupId"),
+                                                        "messages",
+                                                        item?.id
                                                       );
-                                                      await updateDoc(wRef, {
-                                                        lastMessage: {
+                                                      await updateDoc(
+                                                        washingtonRef,
+                                                        {
                                                           recall: true,
-                                                        },
-                                                      });
-                                                    }
-                                                  }}
-                                                  className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left flex items-center gap-x-2 text-black`}
-                                                >
-                                                  <MdReplay size={20} /> Thu hồi
-                                                </Link>
+                                                        }
+                                                      );
+                                                      if (
+                                                        groupTo?.lastMessage
+                                                          ?.messageId ===
+                                                        item?.id
+                                                      ) {
+                                                        const wRef = doc(
+                                                          db,
+                                                          "chat-groups",
+                                                          search.get("groupId")
+                                                        );
+                                                        await updateDoc(wRef, {
+                                                          lastMessage: {
+                                                            recall: true,
+                                                          },
+                                                        });
+                                                      }
+                                                    }}
+                                                    className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left flex items-center gap-x-2 text-black`}
+                                                  >
+                                                    <MdReplay size={20} /> Thu
+                                                    hồi
+                                                  </Link>
+                                                  <Link
+                                                    href={``}
+                                                    onClick={async (e) => {
+                                                      e.preventDefault();
+                                                      const washingtonRef = doc(
+                                                        db,
+                                                        "chat-groups",
+                                                        groupTo?.id,
+                                                        "messages",
+                                                        item?.id
+                                                      );
+                                                      await updateDoc(
+                                                        washingtonRef,
+                                                        {
+                                                          isDelete: arrayUnion({
+                                                            user: userId,
+                                                          }),
+                                                        }
+                                                      );
+                                                      if (
+                                                        groupTo?.lastMessage
+                                                          ?.messageId ===
+                                                        item?.id
+                                                      ) {
+                                                        const wRef = doc(
+                                                          db,
+                                                          "chat-groups",
+                                                          search.get("groupId")
+                                                        );
+                                                        await updateDoc(wRef, {
+                                                          lastMessage: {
+                                                            ...item,
+                                                            messageId: item?.id,
+                                                            isDelete:
+                                                              arrayUnion({
+                                                                user: userId,
+                                                              }),
+                                                          },
+                                                        });
+                                                      }
+                                                    }}
+                                                    className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left flex items-center gap-x-2 text-black`}
+                                                  >
+                                                    <MdDelete size={20} /> Xóa
+                                                  </Link>
+                                                </>
                                               )}
                                               <Link
                                                 href={``}
@@ -629,24 +868,41 @@ export default function ChatGroupRight({
                                                   e.preventDefault();
                                                   setChooseQuote(item);
                                                 }}
-                                                className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left  flex items-center gap-x-2 text-black`}
+                                                className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left  flex items-center gap-x-2 text-black`}
                                               >
                                                 <MdReply size={20} /> Trả lời
                                               </Link>
-                                              {/* <Link
-                                               href={``}
-                                               onClick={async (e) => {
-                                                 e.preventDefault();
-                                                 setPhotoForward(item?.photos);
-                                                 setMessageForward("");
-                                                 setFieldForward([]);
-                                                 setShowForward(true);
-                                               }}
-                                               className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left  flex items-center gap-x-2 text-black`}
-                                             >
-                                               <IoMdShareAlt size={20} />
-                                               Chuyển tiếp
-                                             </Link> */}
+                                              {groupTo?.leader === userId && (
+                                                <Link
+                                                  href={``}
+                                                  onClick={async (e) => {
+                                                    e.preventDefault();
+                                                    setActiveMultipleDelete(
+                                                      true
+                                                    );
+                                                    const find =
+                                                      deleteList?.findIndex(
+                                                        (x) =>
+                                                          x?.id === item?.id
+                                                      );
+                                                    if (find < 0) {
+                                                      deleteList.push(item);
+                                                    } else {
+                                                      deleteList.splice(
+                                                        find,
+                                                        1
+                                                      );
+                                                    }
+                                                    setDeleteList([
+                                                      ...deleteList,
+                                                    ]);
+                                                  }}
+                                                  className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left  flex items-center gap-x-2 text-black`}
+                                                >
+                                                  <MdPlaylistRemove size={20} />
+                                                  Xóa nhiều
+                                                </Link>
+                                              )}
                                             </div>
                                           </button>
                                         )}
@@ -698,43 +954,92 @@ export default function ChatGroupRight({
                                             >
                                               {item?.formAuthor?.userId ===
                                                 userId && (
-                                                <Link
-                                                  href={``}
-                                                  onClick={async (e) => {
-                                                    e.preventDefault();
-                                                    const washingtonRef = doc(
-                                                      db,
-                                                      "chat-groups",
-                                                      search.get("groupId"),
-                                                      "messages",
-                                                      item?.id
-                                                    );
-                                                    await updateDoc(
-                                                      washingtonRef,
-                                                      {
-                                                        recall: true,
-                                                      }
-                                                    );
-                                                    if (
-                                                      groupTo?.lastMessage
-                                                        ?.messageId === item?.id
-                                                    ) {
-                                                      const wRef = doc(
+                                                <>
+                                                  <Link
+                                                    href={``}
+                                                    onClick={async (e) => {
+                                                      e.preventDefault();
+                                                      const washingtonRef = doc(
                                                         db,
                                                         "chat-groups",
-                                                        search.get("groupId")
+                                                        search.get("groupId"),
+                                                        "messages",
+                                                        item?.id
                                                       );
-                                                      await updateDoc(wRef, {
-                                                        lastMessage: {
+                                                      await updateDoc(
+                                                        washingtonRef,
+                                                        {
                                                           recall: true,
-                                                        },
-                                                      });
-                                                    }
-                                                  }}
-                                                  className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left flex items-center gap-x-2 text-black`}
-                                                >
-                                                  <MdReplay size={20} /> Thu hồi
-                                                </Link>
+                                                        }
+                                                      );
+                                                      if (
+                                                        groupTo?.lastMessage
+                                                          ?.messageId ===
+                                                        item?.id
+                                                      ) {
+                                                        const wRef = doc(
+                                                          db,
+                                                          "chat-groups",
+                                                          search.get("groupId")
+                                                        );
+                                                        await updateDoc(wRef, {
+                                                          lastMessage: {
+                                                            recall: true,
+                                                          },
+                                                        });
+                                                      }
+                                                    }}
+                                                    className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left flex items-center gap-x-2 text-black`}
+                                                  >
+                                                    <MdReplay size={20} /> Thu
+                                                    hồi
+                                                  </Link>
+                                                  <Link
+                                                    href={``}
+                                                    onClick={async (e) => {
+                                                      e.preventDefault();
+                                                      const washingtonRef = doc(
+                                                        db,
+                                                        "chat-groups",
+                                                        groupTo?.id,
+                                                        "messages",
+                                                        item?.id
+                                                      );
+                                                      await updateDoc(
+                                                        washingtonRef,
+                                                        {
+                                                          isDelete: arrayUnion({
+                                                            user: userId,
+                                                          }),
+                                                        }
+                                                      );
+                                                      if (
+                                                        groupTo?.lastMessage
+                                                          ?.messageId ===
+                                                        item?.id
+                                                      ) {
+                                                        const wRef = doc(
+                                                          db,
+                                                          "chat-groups",
+                                                          search.get("groupId")
+                                                        );
+                                                        await updateDoc(wRef, {
+                                                          lastMessage: {
+                                                            ...item,
+                                                            messageId: item?.id,
+                                                            isDelete:
+                                                              arrayUnion({
+                                                                user: userId,
+                                                              }),
+                                                          },
+                                                        });
+                                                      }
+                                                    }}
+                                                    className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left flex items-center gap-x-2 text-black`}
+                                                  >
+                                                    <MdDelete size={20} /> Xóa
+                                                  </Link>
+                                                </>
                                               )}
                                               <Link
                                                 href={``}
@@ -742,24 +1047,41 @@ export default function ChatGroupRight({
                                                   e.preventDefault();
                                                   setChooseQuote(item);
                                                 }}
-                                                className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left  flex items-center gap-x-2 text-black`}
+                                                className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left  flex items-center gap-x-2 text-black`}
                                               >
                                                 <MdReply size={20} /> Trả lời
                                               </Link>
-                                              {/* <Link
-                                               href={``}
-                                               onClick={async (e) => {
-                                                 e.preventDefault();
-                                                 setPhotoForward(item?.photos);
-                                                 setMessageForward("");
-                                                 setFieldForward([]);
-                                                 setShowForward(true);
-                                               }}
-                                               className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left  flex items-center gap-x-2 text-black`}
-                                             >
-                                               <IoMdShareAlt size={20} />
-                                               Chuyển tiếp
-                                             </Link> */}
+                                              {groupTo?.leader === userId && (
+                                                <Link
+                                                  href={``}
+                                                  onClick={async (e) => {
+                                                    e.preventDefault();
+                                                    setActiveMultipleDelete(
+                                                      true
+                                                    );
+                                                    const find =
+                                                      deleteList?.findIndex(
+                                                        (x) =>
+                                                          x?.id === item?.id
+                                                      );
+                                                    if (find < 0) {
+                                                      deleteList.push(item);
+                                                    } else {
+                                                      deleteList.splice(
+                                                        find,
+                                                        1
+                                                      );
+                                                    }
+                                                    setDeleteList([
+                                                      ...deleteList,
+                                                    ]);
+                                                  }}
+                                                  className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left  flex items-center gap-x-2 text-black`}
+                                                >
+                                                  <MdPlaylistRemove size={20} />
+                                                  Xóa nhiều
+                                                </Link>
+                                              )}
                                             </div>
                                           </button>
                                         )}
@@ -1021,40 +1343,88 @@ export default function ChatGroupRight({
                                         >
                                           {item?.formAuthor?.userId ===
                                             userId && (
-                                            <Link
-                                              href={``}
-                                              onClick={async (e) => {
-                                                e.preventDefault();
-                                                const washingtonRef = doc(
-                                                  db,
-                                                  "chat-groups",
-                                                  search.get("groupId"),
-                                                  "messages",
-                                                  item?.id
-                                                );
-                                                await updateDoc(washingtonRef, {
-                                                  recall: true,
-                                                });
-                                                if (
-                                                  groupTo?.lastMessage
-                                                    ?.messageId === item?.id
-                                                ) {
-                                                  const wRef = doc(
+                                            <>
+                                              <Link
+                                                href={``}
+                                                onClick={async (e) => {
+                                                  e.preventDefault();
+                                                  const washingtonRef = doc(
                                                     db,
                                                     "chat-groups",
-                                                    search.get("groupId")
+                                                    search.get("groupId"),
+                                                    "messages",
+                                                    item?.id
                                                   );
-                                                  await updateDoc(wRef, {
-                                                    lastMessage: {
+                                                  await updateDoc(
+                                                    washingtonRef,
+                                                    {
                                                       recall: true,
-                                                    },
-                                                  });
-                                                }
-                                              }}
-                                              className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left flex items-center gap-x-2 text-black`}
-                                            >
-                                              <MdReplay size={20} /> Thu hồi
-                                            </Link>
+                                                    }
+                                                  );
+                                                  if (
+                                                    groupTo?.lastMessage
+                                                      ?.messageId === item?.id
+                                                  ) {
+                                                    const wRef = doc(
+                                                      db,
+                                                      "chat-groups",
+                                                      search.get("groupId")
+                                                    );
+                                                    await updateDoc(wRef, {
+                                                      lastMessage: {
+                                                        recall: true,
+                                                      },
+                                                    });
+                                                  }
+                                                }}
+                                                className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left flex items-center gap-x-2 text-black`}
+                                              >
+                                                <MdReplay size={20} /> Thu hồi
+                                              </Link>
+                                              <Link
+                                                href={``}
+                                                onClick={async (e) => {
+                                                  e.preventDefault();
+                                                  const washingtonRef = doc(
+                                                    db,
+                                                    "chat-groups",
+                                                    groupTo?.id,
+                                                    "messages",
+                                                    item?.id
+                                                  );
+                                                  await updateDoc(
+                                                    washingtonRef,
+                                                    {
+                                                      isDelete: arrayUnion({
+                                                        user: userId,
+                                                      }),
+                                                    }
+                                                  );
+                                                  if (
+                                                    groupTo?.lastMessage
+                                                      ?.messageId === item?.id
+                                                  ) {
+                                                    const wRef = doc(
+                                                      db,
+                                                      "chat-groups",
+                                                      search.get("groupId")
+                                                    );
+                                                    await updateDoc(wRef, {
+                                                      lastMessage: {
+                                                        ...item,
+                                                        messageId: item?.id,
+                                                        isDelete: arrayUnion({
+                                                          user: userId,
+                                                        }),
+                                                      },
+                                                    });
+                                                  }
+                                                }}
+                                                className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left flex items-center gap-x-2 text-black`}
+                                              >
+                                                <MdDelete size={20} /> Xóa
+                                              </Link>
+                                            </>
                                           )}
                                           <Link
                                             href={``}
@@ -1062,24 +1432,33 @@ export default function ChatGroupRight({
                                               e.preventDefault();
                                               setChooseQuote(item);
                                             }}
-                                            className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left  flex items-center gap-x-2 text-black`}
+                                            className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left  flex items-center gap-x-2 text-black`}
                                           >
                                             <MdReply size={20} /> Trả lời
                                           </Link>
-                                          {/* <Link
-                                           href={``}
-                                           onClick={async (e) => {
-                                             e.preventDefault();
-                                             setFieldForward(item?.files);
-                                             setMessageForward("");
-                                             setPhotoForward([]);
-                                             setShowForward(true);
-                                           }}
-                                           className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left  flex items-center gap-x-2 text-black`}
-                                         >
-                                           <IoMdShareAlt size={20} />
-                                           Chuyển tiếp
-                                         </Link> */}
+                                          {groupTo?.leader === userId && (
+                                            <Link
+                                              href={``}
+                                              onClick={async (e) => {
+                                                e.preventDefault();
+                                                setActiveMultipleDelete(true);
+                                                const find =
+                                                  deleteList?.findIndex(
+                                                    (x) => x?.id === item?.id
+                                                  );
+                                                if (find < 0) {
+                                                  deleteList.push(item);
+                                                } else {
+                                                  deleteList.splice(find, 1);
+                                                }
+                                                setDeleteList([...deleteList]);
+                                              }}
+                                              className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left  flex items-center gap-x-2 text-black`}
+                                            >
+                                              <MdPlaylistRemove size={20} />
+                                              Xóa nhiều
+                                            </Link>
+                                          )}
                                         </div>
                                       </button>
                                     )}
@@ -1123,40 +1502,88 @@ export default function ChatGroupRight({
                                         >
                                           {item?.formAuthor?.userId ===
                                             userId && (
-                                            <Link
-                                              href={``}
-                                              onClick={async (e) => {
-                                                e.preventDefault();
-                                                const washingtonRef = doc(
-                                                  db,
-                                                  "chat-groups",
-                                                  search.get("groupId"),
-                                                  "messages",
-                                                  item?.id
-                                                );
-                                                await updateDoc(washingtonRef, {
-                                                  recall: true,
-                                                });
-                                                if (
-                                                  groupTo?.lastMessage
-                                                    ?.messageId === item?.id
-                                                ) {
-                                                  const wRef = doc(
+                                            <>
+                                              <Link
+                                                href={``}
+                                                onClick={async (e) => {
+                                                  e.preventDefault();
+                                                  const washingtonRef = doc(
                                                     db,
                                                     "chat-groups",
-                                                    search.get("groupId")
+                                                    search.get("groupId"),
+                                                    "messages",
+                                                    item?.id
                                                   );
-                                                  await updateDoc(wRef, {
-                                                    lastMessage: {
+                                                  await updateDoc(
+                                                    washingtonRef,
+                                                    {
                                                       recall: true,
-                                                    },
-                                                  });
-                                                }
-                                              }}
-                                              className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left flex items-center gap-x-2 text-black`}
-                                            >
-                                              <MdReplay size={20} /> Thu hồi
-                                            </Link>
+                                                    }
+                                                  );
+                                                  if (
+                                                    groupTo?.lastMessage
+                                                      ?.messageId === item?.id
+                                                  ) {
+                                                    const wRef = doc(
+                                                      db,
+                                                      "chat-groups",
+                                                      search.get("groupId")
+                                                    );
+                                                    await updateDoc(wRef, {
+                                                      lastMessage: {
+                                                        recall: true,
+                                                      },
+                                                    });
+                                                  }
+                                                }}
+                                                className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left flex items-center gap-x-2 text-black`}
+                                              >
+                                                <MdReplay size={20} /> Thu hồi
+                                              </Link>
+                                              <Link
+                                                href={``}
+                                                onClick={async (e) => {
+                                                  e.preventDefault();
+                                                  const washingtonRef = doc(
+                                                    db,
+                                                    "chat-groups",
+                                                    groupTo?.id,
+                                                    "messages",
+                                                    item?.id
+                                                  );
+                                                  await updateDoc(
+                                                    washingtonRef,
+                                                    {
+                                                      isDelete: arrayUnion({
+                                                        user: userId,
+                                                      }),
+                                                    }
+                                                  );
+                                                  if (
+                                                    groupTo?.lastMessage
+                                                      ?.messageId === item?.id
+                                                  ) {
+                                                    const wRef = doc(
+                                                      db,
+                                                      "chat-groups",
+                                                      search.get("groupId")
+                                                    );
+                                                    await updateDoc(wRef, {
+                                                      lastMessage: {
+                                                        ...item,
+                                                        messageId: item?.id,
+                                                        isDelete: arrayUnion({
+                                                          user: userId,
+                                                        }),
+                                                      },
+                                                    });
+                                                  }
+                                                }}
+                                                className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left flex items-center gap-x-2 text-black`}
+                                              >
+                                                <MdDelete size={20} /> Xóa
+                                              </Link>
+                                            </>
                                           )}
                                           <Link
                                             href={``}
@@ -1164,24 +1591,33 @@ export default function ChatGroupRight({
                                               e.preventDefault();
                                               setChooseQuote(item);
                                             }}
-                                            className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left  flex items-center gap-x-2 text-black`}
+                                            className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left  flex items-center gap-x-2 text-black`}
                                           >
                                             <MdReply size={20} /> Trả lời
                                           </Link>
-                                          {/* <Link
-                                           href={``}
-                                           onClick={async (e) => {
-                                             e.preventDefault();
-                                             setMessageForward(item?.text);
-                                             setPhotoForward([]);
-                                             setFieldForward([]);
-                                             setShowForward(true);
-                                           }}
-                                           className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left  flex items-center gap-x-2 text-black`}
-                                         >
-                                           <IoMdShareAlt size={20} />
-                                           Chuyển tiếp
-                                         </Link> */}
+                                          {groupTo?.leader === userId && (
+                                            <Link
+                                              href={``}
+                                              onClick={async (e) => {
+                                                e.preventDefault();
+                                                setActiveMultipleDelete(true);
+                                                const find =
+                                                  deleteList?.findIndex(
+                                                    (x) => x?.id === item?.id
+                                                  );
+                                                if (find < 0) {
+                                                  deleteList.push(item);
+                                                } else {
+                                                  deleteList.splice(find, 1);
+                                                }
+                                                setDeleteList([...deleteList]);
+                                              }}
+                                              className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left  flex items-center gap-x-2 text-black`}
+                                            >
+                                              <MdPlaylistRemove size={20} />
+                                              Xóa nhiều
+                                            </Link>
+                                          )}
                                         </div>
                                       </button>
                                     )}
@@ -1423,7 +1859,25 @@ export default function ChatGroupRight({
                               {item?.type === "name" && (
                                 <HiPencil size={16} color="green" />
                               )}
-                              {item.type === "name" ? (
+                              {item.type === "change" ? (
+                                <div className="flex items-center gap-x-1">
+                                  <Image
+                                    src={
+                                      author?.user?.photo &&
+                                      author?.user?.photo?.length > 0
+                                        ? author?.user?.photo
+                                        : "/dumuc/avatar.jpg"
+                                    }
+                                    width={0}
+                                    height={0}
+                                    sizes="100vw"
+                                    className="w-[15px] h-[15px] rounded-full"
+                                  />
+                                  <p className="text-[12px]">
+                                    <strong>{author?.name}</strong> {item?.text}
+                                  </p>
+                                </div>
+                              ) : item.type === "name" ? (
                                 <div className="flex items-center gap-x-1">
                                   <Image
                                     src={
@@ -1752,6 +2206,9 @@ export default function ChatGroupRight({
                           recall: false,
                           reply: chooseQuote || null,
                         };
+                        const find = messages?.find(
+                          (x) => x?.id === search.get("groupId")
+                        );
                         await addDoc(
                           collection(
                             db,
@@ -1773,6 +2230,9 @@ export default function ChatGroupRight({
                             },
                             new: true,
                             isDelete: deleteField(),
+                            lastMessagesCount: find?.lastMessagesCount
+                              ? find?.lastMessagesCount + 1
+                              : 1,
                             createdAt: serverTimestamp(),
                           });
                         });

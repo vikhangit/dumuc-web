@@ -7,7 +7,7 @@ import { Modal, Spinner } from "flowbite-react";
 import { getSossByUser } from "@apis/soss";
 import moment from "moment";
 import { DateTimeLog } from "@utils/dateFormat";
-import { MdPeople } from "react-icons/md";
+import { MdPending, MdPeople } from "react-icons/md";
 import { useRouter } from "next/navigation";
 import { auth } from "utils/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
@@ -76,7 +76,7 @@ export default function TabbarBottom({ active = "home" }) {
             data-tooltip-target="tooltip-new"
             type="button"
             class={`${
-              sizes.width > 800 ? "w-[60px] h-[60px]" : "w-[32px] h-[32px]"
+              sizes.width > 800 ? "w-[60px] h-[60px]" : "w-8 h-8"
             } inline-flex items-center justify-center rounded-full hover:bg-black group focus:ring-4 focus:ring-blue-300 focus:outline-none dark:focus:ring-blue-800`}
           >
             <Image
@@ -125,14 +125,7 @@ export default function TabbarBottom({ active = "home" }) {
           }
           className="cursor-pointer inline-flex flex-col items-center justify-center px-0 sm:px-2 hover:bg-gray-50 dark:hover:bg-gray-800 group"
         >
-          <Image
-            width={0}
-            height={0}
-            sizes="100vw"
-            src="/icons/comment-1.jpeg"
-            alt=""
-            className="w-8 h-8"
-          />
+          <MdPending size={32} color="#9C9C9C" />
           <span class="text-base md:text-lg font-semibold text-[#9C9C9C] text-center bottomTabBarHiden1">
             Chat
           </span>

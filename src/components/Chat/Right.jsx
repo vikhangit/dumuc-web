@@ -35,7 +35,7 @@ const ModalImageZoom = dynamic(
   },
   { ssr: false }
 );
-import { MdAttachFile, MdReplay, MdReply } from "react-icons/md";
+import { MdAttachFile, MdDelete, MdReplay, MdReply } from "react-icons/md";
 import {
   FaFile,
   FaFileAudio,
@@ -114,6 +114,7 @@ export default function ChatRight({
       const washingtonRef = doc(db, "chat-rooms", search.get("chatId"));
       await updateDoc(washingtonRef, {
         new: false,
+        lastMessagesCount: deleteField(),
       });
     }
   };
@@ -123,6 +124,7 @@ export default function ChatRight({
       read();
     }
   });
+  const findRoom = messages?.find((x) => x?.id === search.get("chatId"));
   useEffect(() => {
     setHeight(textareaRef.current?.offsetHeight);
     setSendHeight(sendRef.current?.offsetHeight);
@@ -189,6 +191,9 @@ export default function ChatRight({
                     },
                     new: true,
                     isDelete: deleteField(),
+                    lastMessagesCount: findRoom?.lastMessagesCount
+                      ? findRoom?.lastMessagesCount + 1
+                      : 1,
                     createdAt: serverTimestamp(),
                   });
                 });
@@ -209,6 +214,7 @@ export default function ChatRight({
                         text: "[Hình ảnh]",
                       },
                       new: true,
+                      lastMessagesCount: 1,
                       isDelete: deleteField(),
                       createdAt: serverTimestamp(),
                     });
@@ -280,6 +286,9 @@ export default function ChatRight({
                       },
                       isDelete: deleteField(),
                       new: true,
+                      lastMessagesCount: findRoom?.lastMessagesCount
+                        ? findRoom?.lastMessagesCount + 1
+                        : 1,
                       createdAt: serverTimestamp(),
                     });
                   });
@@ -315,6 +324,7 @@ export default function ChatRight({
                           text: "[File]",
                         },
                         new: true,
+                        lastMessagesCount: 1,
                         isDelete: deleteField(),
                         createdAt: serverTimestamp(),
                       });
@@ -411,7 +421,7 @@ export default function ChatRight({
                     onClick={async (e) => {
                       e.preventDefault();
                     }}
-                    className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left`}
+                    className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left`}
                   ></Link>
                   <Popconfirm
                     placement="topLeft"
@@ -452,7 +462,7 @@ export default function ChatRight({
                       width: 200,
                     }}
                   >
-                    <button className="border-0 hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left">
+                    <button className="border-0 hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left">
                       Xóa tin nhắn
                     </button>
                   </Popconfirm>
@@ -461,7 +471,7 @@ export default function ChatRight({
                     onClick={(e) => {
                       e.preventDefault();
                     }}
-                    className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left`}
+                    className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left`}
                   >
                     Báo cáo
                   </Link>
@@ -712,45 +722,88 @@ export default function ChatRight({
                                       >
                                         {item?.formAuthor?.userId ===
                                           user?.uid && (
-                                          <Link
-                                            href={``}
-                                            onClick={async (e) => {
-                                              e.preventDefault();
-                                              const washingtonRef = doc(
-                                                db,
-                                                "chat-rooms",
-                                                search.get("chatId"),
-                                                "messages",
-                                                item?.id
-                                              );
-                                              await updateDoc(washingtonRef, {
-                                                recall: true,
-                                              });
-
-                                              if (
-                                                messages?.find(
-                                                  (x) =>
-                                                    x?.id ===
-                                                    search.get("chatId")
-                                                )?.lastMessage?.messageId ===
-                                                item?.id
-                                              ) {
-                                                const wRef = doc(
+                                          <>
+                                            <Link
+                                              href={``}
+                                              onClick={async (e) => {
+                                                e.preventDefault();
+                                                const washingtonRef = doc(
                                                   db,
                                                   "chat-rooms",
-                                                  search.get("chatId")
+                                                  search.get("chatId"),
+                                                  "messages",
+                                                  item?.id
                                                 );
-                                                await updateDoc(wRef, {
-                                                  lastMessage: {
-                                                    recall: true,
-                                                  },
+                                                await updateDoc(washingtonRef, {
+                                                  recall: true,
                                                 });
-                                              }
-                                            }}
-                                            className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left flex items-center gap-x-2 text-black`}
-                                          >
-                                            <MdReplay size={20} /> Thu hồi
-                                          </Link>
+
+                                                if (
+                                                  messages?.find(
+                                                    (x) =>
+                                                      x?.id ===
+                                                      search.get("chatId")
+                                                  )?.lastMessage?.messageId ===
+                                                  item?.id
+                                                ) {
+                                                  const wRef = doc(
+                                                    db,
+                                                    "chat-rooms",
+                                                    search.get("chatId")
+                                                  );
+                                                  await updateDoc(wRef, {
+                                                    lastMessage: {
+                                                      recall: true,
+                                                    },
+                                                  });
+                                                }
+                                              }}
+                                              className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left flex items-center gap-x-2 text-black`}
+                                            >
+                                              <MdReplay size={20} /> Thu hồi
+                                            </Link>
+                                            <Link
+                                              href={``}
+                                              onClick={async (e) => {
+                                                e.preventDefault();
+                                                const washingtonRef = doc(
+                                                  db,
+                                                  "chat-rooms",
+                                                  search.get("chatId"),
+                                                  "messages",
+                                                  item?.id
+                                                );
+                                                await updateDoc(washingtonRef, {
+                                                  isDelete: arrayUnion({
+                                                    user: user?.uid,
+                                                  }),
+                                                });
+
+                                                if (
+                                                  findRoom?.lastMessage
+                                                    ?.messageId === item?.id
+                                                ) {
+                                                  const wRef = doc(
+                                                    db,
+                                                    "chat-rooms",
+                                                    search.get("chatId")
+                                                  );
+                                                  await updateDoc(wRef, {
+                                                    lastMessage: {
+                                                      ...item,
+                                                      messageId: item?.id,
+                                                      isDelete: arrayUnion({
+                                                        user: user?.uid,
+                                                      }),
+                                                    },
+                                                  });
+                                                }
+                                              }}
+                                              className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left flex items-center gap-x-2 text-black`}
+                                            >
+                                              <MdDelete size={20} /> Xóa
+                                            </Link>
+                                          </>
                                         )}
                                         <Link
                                           href={``}
@@ -758,7 +811,7 @@ export default function ChatRight({
                                             e.preventDefault();
                                             setChooseQuote(item);
                                           }}
-                                          className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left  flex items-center gap-x-2 text-black`}
+                                          className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left  flex items-center gap-x-2 text-black`}
                                         >
                                           <MdReply size={20} /> Trả lời
                                         </Link>
@@ -771,7 +824,7 @@ export default function ChatRight({
                                             setFieldForward([]);
                                             setShowForward(true);
                                           }}
-                                          className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left  flex items-center gap-x-2 text-black`}
+                                          className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left  flex items-center gap-x-2 text-black`}
                                         >
                                           <IoMdShareAlt size={20} />
                                           Chuyển tiếp
@@ -861,7 +914,7 @@ export default function ChatRight({
                                                 });
                                               }
                                             }}
-                                            className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left flex items-center gap-x-2 text-black`}
+                                            className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left flex items-center gap-x-2 text-black`}
                                           >
                                             <MdReplay size={20} /> Thu hồi
                                           </Link>
@@ -872,7 +925,7 @@ export default function ChatRight({
                                             e.preventDefault();
                                             setChooseQuote(item);
                                           }}
-                                          className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left  flex items-center gap-x-2 text-black`}
+                                          className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left  flex items-center gap-x-2 text-black`}
                                         >
                                           <MdReply size={20} /> Trả lời
                                         </Link>
@@ -885,7 +938,7 @@ export default function ChatRight({
                                             setFieldForward([]);
                                             setShowForward(true);
                                           }}
-                                          className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left  flex items-center gap-x-2 text-black`}
+                                          className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left  flex items-center gap-x-2 text-black`}
                                         >
                                           <IoMdShareAlt size={20} />
                                           Chuyển tiếp
@@ -912,6 +965,7 @@ export default function ChatRight({
                               </div>
                             </div>
                           ))}
+
                         {item?.files?.length > 0 &&
                           (item?.recall ? (
                             <div
@@ -1148,43 +1202,85 @@ export default function ChatRight({
                                     } bg-white shadow-sm shadow-gray-500 text-[10px] sm:text-xs font-medium w-[120px] rounded p-1`}
                                   >
                                     {item?.formAuthor?.userId === user?.uid && (
-                                      <Link
-                                        href={``}
-                                        onClick={async (e) => {
-                                          e.preventDefault();
-                                          const washingtonRef = doc(
-                                            db,
-                                            "chat-rooms",
-                                            search.get("chatId"),
-                                            "messages",
-                                            item?.id
-                                          );
-                                          await updateDoc(washingtonRef, {
-                                            recall: true,
-                                          });
-                                          if (
-                                            messages?.find(
-                                              (x) =>
-                                                x?.id === search.get("chatId")
-                                            )?.lastMessage?.messageId ===
-                                            item?.id
-                                          ) {
-                                            const wRef = doc(
+                                      <>
+                                        <Link
+                                          href={``}
+                                          onClick={async (e) => {
+                                            e.preventDefault();
+                                            const washingtonRef = doc(
                                               db,
                                               "chat-rooms",
-                                              search.get("chatId")
+                                              search.get("chatId"),
+                                              "messages",
+                                              item?.id
                                             );
-                                            await updateDoc(wRef, {
-                                              lastMessage: {
-                                                recall: true,
-                                              },
+                                            await updateDoc(washingtonRef, {
+                                              recall: true,
                                             });
-                                          }
-                                        }}
-                                        className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left flex items-center gap-x-2 text-black`}
-                                      >
-                                        <MdReplay size={20} /> Thu hồi
-                                      </Link>
+                                            if (
+                                              messages?.find(
+                                                (x) =>
+                                                  x?.id === search.get("chatId")
+                                              )?.lastMessage?.messageId ===
+                                              item?.id
+                                            ) {
+                                              const wRef = doc(
+                                                db,
+                                                "chat-rooms",
+                                                search.get("chatId")
+                                              );
+                                              await updateDoc(wRef, {
+                                                lastMessage: {
+                                                  recall: true,
+                                                },
+                                              });
+                                            }
+                                          }}
+                                          className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left flex items-center gap-x-2 text-black`}
+                                        >
+                                          <MdReplay size={20} /> Thu hồi
+                                        </Link>
+                                        <Link
+                                          href={``}
+                                          onClick={async (e) => {
+                                            e.preventDefault();
+                                            const washingtonRef = doc(
+                                              db,
+                                              "chat-rooms",
+                                              search.get("chatId"),
+                                              "messages",
+                                              item?.id
+                                            );
+                                            await updateDoc(washingtonRef, {
+                                              isDelete: arrayUnion({
+                                                user: user?.uid,
+                                              }),
+                                            });
+                                            if (
+                                              findRoom?.lastMessage
+                                                ?.messageId === item?.id
+                                            ) {
+                                              const wRef = doc(
+                                                db,
+                                                "chat-rooms",
+                                                search.get("chatId")
+                                              );
+                                              await updateDoc(wRef, {
+                                                lastMessage: {
+                                                  ...item,
+                                                  messageId: item?.id,
+                                                  isDelete: arrayUnion({
+                                                    user: user?.uid,
+                                                  }),
+                                                },
+                                              });
+                                            }
+                                          }}
+                                          className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left flex items-center gap-x-2 text-black`}
+                                        >
+                                          <MdDelete size={20} /> Xóa
+                                        </Link>
+                                      </>
                                     )}
                                     <Link
                                       href={``}
@@ -1192,7 +1288,7 @@ export default function ChatRight({
                                         e.preventDefault();
                                         setChooseQuote(item);
                                       }}
-                                      className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left  flex items-center gap-x-2 text-black`}
+                                      className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left  flex items-center gap-x-2 text-black`}
                                     >
                                       <MdReply size={20} /> Trả lời
                                     </Link>
@@ -1205,7 +1301,7 @@ export default function ChatRight({
                                         setPhotoForward([]);
                                         setShowForward(true);
                                       }}
-                                      className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left  flex items-center gap-x-2 text-black`}
+                                      className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left  flex items-center gap-x-2 text-black`}
                                     >
                                       <IoMdShareAlt size={20} />
                                       Chuyển tiếp
@@ -1248,43 +1344,85 @@ export default function ChatRight({
                                     } bg-white shadow-sm shadow-gray-500 text-[10px] sm:text-xs font-medium w-[120px] rounded p-1`}
                                   >
                                     {item?.formAuthor?.userId === user?.uid && (
-                                      <Link
-                                        href={``}
-                                        onClick={async (e) => {
-                                          e.preventDefault();
-                                          const washingtonRef = doc(
-                                            db,
-                                            "chat-rooms",
-                                            search.get("chatId"),
-                                            "messages",
-                                            item?.id
-                                          );
-                                          await updateDoc(washingtonRef, {
-                                            recall: true,
-                                          });
-                                          if (
-                                            messages?.find(
-                                              (x) =>
-                                                x?.id === search.get("chatId")
-                                            )?.lastMessage?.messageId ===
-                                            item?.id
-                                          ) {
-                                            const wRef = doc(
+                                      <>
+                                        <Link
+                                          href={``}
+                                          onClick={async (e) => {
+                                            e.preventDefault();
+                                            const washingtonRef = doc(
                                               db,
                                               "chat-rooms",
-                                              search.get("chatId")
+                                              search.get("chatId"),
+                                              "messages",
+                                              item?.id
                                             );
-                                            await updateDoc(wRef, {
-                                              lastMessage: {
-                                                recall: true,
-                                              },
+                                            await updateDoc(washingtonRef, {
+                                              recall: true,
                                             });
-                                          }
-                                        }}
-                                        className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left flex items-center gap-x-2 text-black`}
-                                      >
-                                        <MdReplay size={20} /> Thu hồi
-                                      </Link>
+                                            if (
+                                              messages?.find(
+                                                (x) =>
+                                                  x?.id === search.get("chatId")
+                                              )?.lastMessage?.messageId ===
+                                              item?.id
+                                            ) {
+                                              const wRef = doc(
+                                                db,
+                                                "chat-rooms",
+                                                search.get("chatId")
+                                              );
+                                              await updateDoc(wRef, {
+                                                lastMessage: {
+                                                  recall: true,
+                                                },
+                                              });
+                                            }
+                                          }}
+                                          className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left flex items-center gap-x-2 text-black`}
+                                        >
+                                          <MdReplay size={20} /> Thu hồi
+                                        </Link>
+                                        <Link
+                                          href={``}
+                                          onClick={async (e) => {
+                                            e.preventDefault();
+                                            const washingtonRef = doc(
+                                              db,
+                                              "chat-rooms",
+                                              search.get("chatId"),
+                                              "messages",
+                                              item?.id
+                                            );
+                                            await updateDoc(washingtonRef, {
+                                              isDelete: arrayUnion({
+                                                user: user?.uid,
+                                              }),
+                                            });
+                                            if (
+                                              findRoom?.lastMessage
+                                                ?.messageId === item?.id
+                                            ) {
+                                              const wRef = doc(
+                                                db,
+                                                "chat-rooms",
+                                                search.get("chatId")
+                                              );
+                                              await updateDoc(wRef, {
+                                                lastMessage: {
+                                                  ...item,
+                                                  messageId: item?.id,
+                                                  isDelete: arrayUnion({
+                                                    user: user?.uid,
+                                                  }),
+                                                },
+                                              });
+                                            }
+                                          }}
+                                          className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left flex items-center gap-x-2 text-black`}
+                                        >
+                                          <MdDelete size={20} /> Xóa
+                                        </Link>
+                                      </>
                                     )}
                                     <Link
                                       href={``}
@@ -1292,7 +1430,7 @@ export default function ChatRight({
                                         e.preventDefault();
                                         setChooseQuote(item);
                                       }}
-                                      className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left  flex items-center gap-x-2 text-black`}
+                                      className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left  flex items-center gap-x-2 text-black`}
                                     >
                                       <MdReply size={20} /> Trả lời
                                     </Link>
@@ -1305,7 +1443,7 @@ export default function ChatRight({
                                         setFieldForward([]);
                                         setShowForward(true);
                                       }}
-                                      className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left  flex items-center gap-x-2 text-black`}
+                                      className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left  flex items-center gap-x-2 text-black`}
                                     >
                                       <IoMdShareAlt size={20} />
                                       Chuyển tiếp
@@ -1623,7 +1761,7 @@ export default function ChatRight({
             ref={sendRef}
             className={`bg-white ${""} w-full ${
               sizes.width > 992 ? "" : ""
-            } relative border-l pb-2`}
+            } relative z-[888] border-l pb-2`}
           >
             <div className="flex items-center px-4 py-2 gap-x-4 relative">
               <div className="absolute bottom-full">
@@ -1743,6 +1881,9 @@ export default function ChatRight({
                               ...dataItem,
                             },
                             new: true,
+                            lastMessagesCount: findRoom?.lastMessagesCount
+                              ? findRoom?.lastMessagesCount + 1
+                              : 1,
                             isDelete: deleteField(),
                             createdAt: serverTimestamp(),
                           });
@@ -1775,6 +1916,7 @@ export default function ChatRight({
                               },
                               new: true,
                               isDelete: deleteField(),
+                              lastMessagesCount: 1,
                               createdAt: serverTimestamp(),
                             });
                           });

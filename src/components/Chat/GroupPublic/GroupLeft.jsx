@@ -13,7 +13,15 @@ import { useRouter, useSearchParams } from "next/navigation";
 import ModalCreateGroup from "./ModalCreateGroup";
 import { FaCamera } from "react-icons/fa6";
 import moment from "moment";
-import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
+import {
+  collection,
+  deleteField,
+  doc,
+  onSnapshot,
+  orderBy,
+  query,
+  updateDoc,
+} from "firebase/firestore";
 
 export default function ChatGroupLeft({
   activeGroup,
@@ -39,20 +47,73 @@ export default function ChatGroupLeft({
   const [searchFunction, setSearchFunction] = useState(false);
   const [activeList, setActiveList] = useState();
   const [activeMessage, setActiveMessage] = useState();
+  const [typeMessage, setTypeMessage] = useState([]);
   useEffect(() => {
-    const allGroupPublic = messages?.filter(
-      (item) =>
-        !item?.isDelete?.find((x) => x?.user === userId) &&
-        item?.isPrivate === false
+    // type 1= "Sáng lập"
+    // 2 = Đã tham gia
+    // 3 = Đã yêu cầu tham gia
+    // 4 = Chưa tham gia
+    setTypeMessage(
+      messages
+        ?.map((item) => {
+          if (item?.isPrivate === false) {
+            if (
+              item?.member?.find((x) => x?.user === userId) &&
+              item?.leader === userId
+            ) {
+              return { ...item, typeGroup: 1 };
+            } else if (
+              item?.member?.find((x) => x?.user === userId) &&
+              item?.leader !== userId
+            ) {
+              return {
+                ...item,
+                typeGroup: 2,
+              };
+            } else if (
+              !item?.member?.find((x) => x?.user === userId) &&
+              item?.requestList?.find((x) => x?.user === userId)
+            ) {
+              return {
+                ...item,
+                typeGroup: 3,
+              };
+            } else if (
+              !item?.member?.find((x) => x?.user === userId) &&
+              !item?.requestList?.find((x) => x?.user === userId)
+            ) {
+              return {
+                ...item,
+                typeGroup: 4,
+              };
+            }
+          }
+        })
+        ?.filter((x) => x !== undefined)
+        ?.sort((a, b) => a?.name?.localeCompare(b?.name))
     );
-    const myGroup = allGroupPublic?.filter((item) =>
-      item?.member?.find((x) => x?.user === userId)
-    );
-    const ortherGroup = allGroupPublic?.filter(
-      (item) => !item?.member?.find((x) => x?.user === userId)
-    );
-    setGroupList([...myGroup, ...ortherGroup]);
   }, [messages]);
+  useEffect(() => {
+    const showMessage = typeMessage?.filter(
+      (item) => !item?.isDelete?.find((x) => x?.user === userId)
+    );
+    const myGroupAndLeader = showMessage?.filter(
+      (item) => item?.typeGroup === 1
+    );
+    const myGroupAndMember = showMessage?.filter(
+      (item) => item?.typeGroup === 2
+    );
+    const ortherGroupRequest = showMessage?.filter(
+      (item) => item?.typeGroup === 3
+    );
+    const ortherGroup = showMessage?.filter((item) => item?.typeGroup === 4);
+    setGroupList([
+      ...myGroupAndLeader,
+      ...myGroupAndMember,
+      ...ortherGroupRequest,
+      ...ortherGroup,
+    ]);
+  }, [typeMessage]);
   useEffect(() => {
     if (search.get("groupId")) {
       const q = query(
@@ -88,25 +149,30 @@ export default function ChatGroupLeft({
 
   const searchField = (value) => {
     setValueSearch(value);
-    const allGroupPublic = messages?.filter(
-      (item) =>
-        !item?.isDelete?.find((x) => x?.user === userId) &&
-        item?.isPrivate === false
+    const showMessage = typeMessage?.filter(
+      (item) => !item?.isDelete?.find((x) => x?.user === userId)
     );
-    const myGroup = allGroupPublic?.filter((item) =>
-      item?.member?.find((x) => x?.user === userId)
+    const myGroupAndLeader = showMessage?.filter(
+      (item) => item?.typeGroup === 1
     );
-    const ortherGroup = allGroupPublic?.filter(
-      (item) => !item?.member?.find((x) => x?.user === userId)
+    const myGroupAndMember = showMessage?.filter(
+      (item) => item?.typeGroup === 2
     );
-    setGroupList([...myGroup, ...ortherGroup]);
+    const ortherGroupRequest = showMessage?.filter(
+      (item) => item?.typeGroup === 3
+    );
+    const ortherGroup = showMessage?.filter((item) => item?.typeGroup === 4);
+
     if (value.trim() === "") {
-      setGroupList([...myGroup, ...ortherGroup]);
+      setGroupList([
+        ...myGroupAndLeader,
+        ...myGroupAndMember,
+        ...ortherGroupRequest,
+        ...ortherGroup,
+      ]);
     } else {
-      const searchList = messages?.filter(
-        (x) =>
-          x?.isPrivate === false &&
-          x?.name?.toLowerCase()?.includes(value?.toLowerCase())
+      const searchList = typeMessage?.filter((x) =>
+        x?.name?.toLowerCase()?.includes(value?.toLowerCase())
       );
       if (searchList && searchList.length > 0) {
         setGroupList(searchList);
@@ -195,83 +261,165 @@ export default function ChatGroupLeft({
             const author = authors?.find(
               (x) => x?.authorId === item?.lastMessage?.formAuthor?.authorId
             );
+            const finIndexMessages = item?.messages?.findLastIndex((x) => {
+              if (!x?.isDelete) {
+                return x;
+              } else {
+                if (x?.isDelete?.find((aa) => aa?.user !== userId)) {
+                  return x;
+                }
+              }
+            });
+
             return (
               <div
                 key={i}
-                onClick={() => {
+                onClick={async () => {
                   // setActiveGroup(item);
                   setMobile(true);
+                  const washingtonRef = doc(db, "chat-groups", item?.id);
+                  if (groupTo?.lastMessage?.formAuthor?.userId !== userId) {
+                    await updateDoc(washingtonRef, {
+                      new: false,
+                      lastMessagesCount: deleteField(),
+                    });
+                  }
                   router.push(`/chat/group-public?groupId=${item?.id}`);
                 }}
                 className={`${
                   groupTo?.id === item?.id
                     ? "bg-[#0084ff] bg-opacity-30"
                     : "bg-white"
-                } rounded-md shadow shadow-gray-400 flex items-center gap-x-2 pl-[15px] pr-2 py-[12px] mt-[10px] cursor-pointer`}
+                } rounded-md shadow shadow-gray-400  pl-[15px] pr-2 py-[10px] mt-[10px] cursor-pointer`}
               >
-                <div className="w-[45px] h-[45px] rounded-full flex justify-center items-center border border-gray-400">
-                  <Image
-                    src={
-                      item?.avatar?.length > 0
-                        ? item?.avatar
-                        : "/dumuc/avatar.jpg"
-                    }
-                    width={0}
-                    height={0}
-                    sizes="100vw"
-                    className="w-full h-full rounded-full"
-                  />
+                <div className="text-[12px] font-semibold w-fit">
+                  {item?.typeGroup === 1 ? (
+                    <div className="bg-green-500 text-white px-2">Sáng lập</div>
+                  ) : item?.typeGroup === 2 ? (
+                    <div className="bg-indigo-500 text-white px-2">
+                      Đã tham gia
+                    </div>
+                  ) : item?.typeGroup === 3 ? (
+                    <div className="bg-yellow-500 text-white px-2">
+                      Đã yêu cầu tham gia
+                    </div>
+                  ) : (
+                    <div className="bg-gray-500 text-white px-2">
+                      Chưa tham gia
+                    </div>
+                  )}
                 </div>
+                <div className="flex items-center gap-x-2 mt-[10px]">
+                  <div className="w-[45px] h-[45px] rounded-full flex justify-center items-center border border-gray-400">
+                    <Image
+                      src={
+                        item?.avatar?.length > 0
+                          ? item?.avatar
+                          : "/dumuc/avatar.jpg"
+                      }
+                      width={0}
+                      height={0}
+                      sizes="100vw"
+                      className="w-full h-full rounded-full"
+                    />
+                  </div>
 
-                <div className=" w-full">
-                  <div className="flex justify-between w-full">
-                    <Link href="" className="text-base">
-                      {item?.name}
-                    </Link>
-
+                  <div className=" w-full">
+                    <div className="flex justify-between w-full">
+                      <Link href="" className="text-base">
+                        {item?.name}
+                      </Link>
+                      {item?.isDelete?.find((ab) => ab?.user === userId) ? (
+                        <div></div>
+                      ) : (
+                        item?.member?.find((x) => x?.user === userId) && (
+                          <span className="text-[13px] text-gray-600">
+                            {item?.lastMessage &&
+                              getTimeChat(
+                                item?.lastMessage?.createdAt?.toDate()
+                              )}
+                          </span>
+                        )
+                      )}
+                    </div>
                     {item?.isDelete?.find((ab) => ab?.user === userId) ? (
-                      <div></div>
+                      <p className="text-[13px] text-gray-600 mt-0.5 italic">
+                        Chưa có tin nhắn mới
+                      </p>
                     ) : (
                       item?.member?.find((x) => x?.user === userId) && (
-                        <span className="text-[13px] text-gray-600">
-                          {item?.lastMessage &&
-                            getTimeChat(item?.lastMessage?.createdAt?.toDate())}
-                        </span>
+                        <div className="flex justify-between w-full">
+                          {item?.lastMessage ? (
+                            <>
+                              <p className="text-[13px] text-gray-600 mt-0.5 line-clamp-1">
+                                {item?.lastMessage?.recall ? (
+                                  <span className="italic">
+                                    Tin nhắn đã thu hồi
+                                  </span>
+                                ) : item?.lastMessage?.isDelete?.find(
+                                    (x) => x?.user === user?.uid
+                                  ) ? (
+                                  finIndexMessages > -1 ? (
+                                    item?.messages[finIndexMessages]?.recall ? (
+                                      <span className="italic">
+                                        Tin nhắn đã thu hồi
+                                      </span>
+                                    ) : item?.messages[
+                                        finIndexMessages
+                                      ]?.isDelete?.find(
+                                        (x) => x?.user === userId
+                                      ) ? (
+                                      <span className="italic">
+                                        Chưa có tin nhắn mới
+                                      </span>
+                                    ) : (
+                                      <span>
+                                        {author?.name}:{" "}
+                                        {item?.messages[finIndexMessages]
+                                          ?.photos?.length > 0 && "[Hình ảnh]"}
+                                        {item?.messages[finIndexMessages]?.files
+                                          ?.length > 0 && "[File]"}
+                                        {item?.messages[finIndexMessages]?.text}
+                                      </span>
+                                    )
+                                  ) : (
+                                    <span className="italic">
+                                      Chưa có tin nhắn mới
+                                    </span>
+                                  )
+                                ) : (
+                                  <span
+                                    className={
+                                      item?.new === true &&
+                                      item?.lastMessage?.formAuthor?.userId !==
+                                        user?.uid &&
+                                      "font-semibold text-gray-900"
+                                    }
+                                  >
+                                    {author?.name}: {item?.lastMessage?.text}
+                                  </span>
+                                )}
+                              </p>
+                              {item?.new === true &&
+                                item?.lastMessage?.formAuthor?.userId !==
+                                  user?.uid && (
+                                  <div className="rounded-full w-[20px] h-[20px] bg-[#C82027] text-white text-[10px] flex justify-center items-center">
+                                    {item?.lastMessagesCount &&
+                                    item?.lastMessagesCount > 5
+                                      ? "+5"
+                                      : item?.lastMessagesCount}
+                                  </div>
+                                )}
+                            </>
+                          ) : (
+                            <p className="text-[13px] text-gray-600 mt-0.5 italic">
+                              Chưa có tin nhắn mới
+                            </p>
+                          )}
+                        </div>
                       )
                     )}
                   </div>
-                  {item?.isDelete?.find((ab) => ab?.user === userId) ? (
-                    <p className="text-[13px] text-gray-600 mt-0.5 italic">
-                      Chưa có tin nhắn mới
-                    </p>
-                  ) : (
-                    item?.member?.find((x) => x?.user === userId) && (
-                      <div className="flex justify-between w-full">
-                        {item?.lastMessage ? (
-                          <>
-                            <p className="text-[13px] text-gray-600 mt-0.5 line-clamp-1">
-                              {item?.lastMessage?.recall ? (
-                                <span className="italic">
-                                  Tin nhắn đã thu hồi
-                                </span>
-                              ) : (
-                                `${author?.name}: ${item?.lastMessage?.text}`
-                              )}
-                            </p>
-                            {item?.new === true &&
-                              item?.lastMessage?.formAuthor?.userId !==
-                                userId && (
-                                <div className="rounded-full w-[10px] h-[10px] bg-[#C82027] text-white text-xs flex justify-center items-center"></div>
-                              )}
-                          </>
-                        ) : (
-                          <p className="text-[13px] text-gray-600 mt-0.5 italic">
-                            Chưa có tin nhắn mới
-                          </p>
-                        )}
-                      </div>
-                    )
-                  )}
                 </div>
               </div>
             );

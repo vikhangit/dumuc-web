@@ -301,7 +301,7 @@ export default function ModalAbout({
                         </div>
                       </div>
                       <button className="relative group">
-                        <HiOutlineDotsHorizontal />
+                        <HiOutlineDotsHorizontal size={16} />
                         <div className="absolute z-[9999] hidden group-hover:flex flex-col justify-start items-start top-full right-0 bg-white shadow-sm shadow-gray-500 text-[10px] sm:text-xs font-medium w-[140px] rounded p-1">
                           <Link
                             href={`/author/${author?.slug}/${author?.authorId}`}

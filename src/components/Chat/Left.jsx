@@ -307,6 +307,16 @@ export default function ChatLeft({
                 const author = authors?.find(
                   (x) => x?.authorId === itemChild?.authorId
                 );
+                const finIndexMessages = item?.messages?.findLastIndex((x) => {
+                  if (!x?.isDelete) {
+                    return x;
+                  } else {
+                    if (x?.isDelete?.find((aa) => aa?.user !== user?.uid)) {
+                      return x;
+                    }
+                  }
+                });
+                console.log("FindIndeMEsss", item?.messages[finIndexMessages]);
                 return (
                   itemChild?.userId !== user?.uid && (
                     <div
@@ -315,9 +325,14 @@ export default function ChatLeft({
                         setMobile(true);
                         router.push(`/chat?chatId=${item.id}`);
                         const washingtonRef = doc(db, "chat-rooms", item?.id);
-                        await updateDoc(washingtonRef, {
-                          new: false,
-                        });
+                        if (
+                          item?.lastMessage?.formAuthor?.userId !== user?.uid
+                        ) {
+                          await updateDoc(washingtonRef, {
+                            new: false,
+                            lastMessagesCount: deleteField(),
+                          });
+                        }
                       }}
                       className={`${
                         userRecieved?.authorId === itemChild?.authorId
@@ -345,7 +360,14 @@ export default function ChatLeft({
                           <Link href="" className="text-base">
                             {author?.name}
                           </Link>
-                          <span className="text-[13px] text-gray-600">
+                          <span
+                            className={`text-[13px] text-gray-600 ${
+                              item?.new === true &&
+                              item?.lastMessage?.formAuthor?.userId !==
+                                user?.uid &&
+                              "font-semibold text-gray-900"
+                            }`}
+                          >
                             {getTimeChat(
                               item?.lastMessage?.createdAt?.toDate()
                             )}
@@ -358,8 +380,47 @@ export default function ChatLeft({
                                 <span className="italic">
                                   Tin nhắn đã thu hồi
                                 </span>
+                              ) : item?.lastMessage?.isDelete?.find(
+                                  (x) => x?.user === user?.uid
+                                ) ? (
+                                finIndexMessages > -1 ? (
+                                  item?.messages[finIndexMessages]?.recall ? (
+                                    <span className="italic">
+                                      Tin nhắn đã thu hồi
+                                    </span>
+                                  ) : item?.messages[
+                                      finIndexMessages
+                                    ]?.isDelete?.find(
+                                      (x) => x?.user === userId
+                                    ) ? (
+                                    <span className="italic">
+                                      Chưa có tin nhắn mới
+                                    </span>
+                                  ) : (
+                                    <span>
+                                      {item?.messages[finIndexMessages]?.photos
+                                        ?.length > 0 && "[Hình ảnh]"}
+                                      {item?.messages[finIndexMessages]?.files
+                                        ?.length > 0 && "[File]"}
+                                      {item?.messages[finIndexMessages]?.text}
+                                    </span>
+                                  )
+                                ) : (
+                                  <span className="italic">
+                                    Chưa có tin nhắn mới
+                                  </span>
+                                )
                               ) : (
-                                item?.lastMessage?.text
+                                <span
+                                  className={
+                                    item?.new === true &&
+                                    item?.lastMessage?.formAuthor?.userId !==
+                                      user?.uid &&
+                                    "font-semibold text-gray-900"
+                                  }
+                                >
+                                  {item?.lastMessage?.text}
+                                </span>
                               )
                             ) : (
                               <span className="italic">
@@ -371,7 +432,12 @@ export default function ChatLeft({
                           {item?.new === true &&
                             item?.lastMessage?.formAuthor?.userId !==
                               user?.uid && (
-                              <div className="rounded-full w-[10px] h-[10px] bg-[#C82027] text-white text-xs flex justify-center items-center"></div>
+                              <div className="rounded-full w-[20px] h-[20px] bg-[#C82027] text-white text-[10px] flex justify-center items-center">
+                                {item?.lastMessagesCount &&
+                                item?.lastMessagesCount > 5
+                                  ? "+5"
+                                  : item?.lastMessagesCount}
+                              </div>
                             )}
                         </div>
                       </div>
