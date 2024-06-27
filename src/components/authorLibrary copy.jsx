@@ -447,7 +447,7 @@ export default function AuthorLibrary({
                             {author?.name}
                           </p>
                           {item?.author?.userId !== user?.uid ? (
-                            <div className="flex gap-x-2 mt-2">
+                            <div className="grid grid-cols-3 gap-x-2 mt-2">
                               {typeArr.find(
                                 (i) =>
                                   i?.author === item?.authorId && i?.type === 1

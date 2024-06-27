@@ -359,7 +359,7 @@ export default function AuthorLibrary({
                             {author?.name}
                           </p>
                           {item?.author?.userId !== user?.uid ? (
-                            <div className="flex gap-x-2 mt-2">
+                            <div className="flex flex-wrap gap-2 mt-2">
                               {typeArr.find(
                                 (i) =>
                                   i?.author === item?.authorId && i?.type === 1
@@ -392,7 +392,7 @@ export default function AuthorLibrary({
                                     //
                                   }}
                                   type="button"
-                                  class="flex items-center gap-x-1 px-2 py-1 text-xs font-medium text-center text-white bg-[#c80000] rounded-[4px] hover:brightness-110 focus:ring-4 focus:outline-none focus:ring-blue-300"
+                                  class="flex text-center items-center gap-x-1 px-2 py-1 text-xs font-medium text-center text-white bg-[#c80000] rounded-[4px] hover:brightness-110 focus:ring-4 focus:outline-none focus:ring-blue-300"
                                 >
                                   Kết bạn
                                 </button>
@@ -403,7 +403,7 @@ export default function AuthorLibrary({
                                 ) ? (
                                 <button
                                   type="button"
-                                  class="flex items-center gap-x-1 px-2 py-1 text-xs font-medium text-center text-white bg-[#c80000] rounded-[4px] hover:brightness-110 focus:ring-4 focus:outline-none focus:ring-blue-300"
+                                  class="flex text-center items-center gap-x-1 px-2 py-1 text-xs font-medium text-center text-white bg-[#c80000] rounded-[4px] hover:brightness-110 focus:ring-4 focus:outline-none focus:ring-blue-300"
                                 >
                                   Bạn bè
                                 </button>
@@ -440,7 +440,7 @@ export default function AuthorLibrary({
                                     //
                                   }}
                                   type="button"
-                                  class="flex items-center gap-x-1 px-2 py-1 text-xs font-medium text-center text-white bg-[#c80000] rounded-[4px] hover:brightness-110 focus:ring-4 focus:outline-none focus:ring-blue-300"
+                                  class="flex text-center items-center gap-x-1 px-2 py-1 text-xs font-medium text-center text-white bg-[#c80000] rounded-[4px] hover:brightness-110 focus:ring-4 focus:outline-none focus:ring-blue-300"
                                 >
                                   <>Hủy lời mời</>
                                 </button>
@@ -451,7 +451,7 @@ export default function AuthorLibrary({
                                 ) ? (
                                 <button
                                   type="button"
-                                  class="flex items-center group gap-x-1 px-2 py-1 text-xs font-medium text-center text-white bg-[#c80000] rounded-[4px] hover:brightness-110 focus:ring-4 focus:outline-none focus:ring-blue-300"
+                                  class="flex text-center items-center group gap-x-1 px-2 py-1 text-xs font-medium text-center text-white bg-[#c80000] rounded-[4px] hover:brightness-110 focus:ring-4 focus:outline-none focus:ring-blue-300"
                                 >
                                   Phản hồi
                                   <div className="absolute hidden group-hover:flex flex-col justify-start items-start top-full left-0 bg-white shadow-sm shadow-gray-500 text-[10px] sm:text-xs font-medium w-[120px] rounded p-1">
@@ -505,7 +505,7 @@ export default function AuthorLibrary({
                                           "Bạn đã đồng ý kết bạn"
                                         );
                                       }}
-                                      className="hover:bg-[#c80000] text-black hover:text-white w-full rounded px-1.5 py-0.5 text-left"
+                                      className="hover:bg-[#c80000] text-black hover:text-white w-full rounded px-1.5 py-0.5 text-center"
                                     >
                                       Xác nhận
                                     </Link>
@@ -539,7 +539,7 @@ export default function AuthorLibrary({
                                           "Đã xóa yêu cầu kết bạn"
                                         );
                                       }}
-                                      className="hover:bg-[#c80000] text-black hover:text-white w-full rounded px-1.5 py-0.5 text-left"
+                                      className="text-center hover:bg-[#c80000] text-black hover:text-white w-full rounded px-1.5 py-0.5 text-center"
                                     >
                                       Xóa lời mời
                                     </Link>
@@ -550,7 +550,7 @@ export default function AuthorLibrary({
                               )}
                               <Link
                                 href={`/chat?friendId=${item?.authorId}`}
-                                className="flex items-center gap-x-2 px-2 py-1 text-xs font-medium text-center bg-blue-700 text-white rounded-[4px] hover:brightness-110 focus:ring-4 focus:outline-none focus:ring-blue-300"
+                                className="flex text-center items-center gap-x-2 px-2 py-1 text-xs font-medium text-center bg-blue-700 text-white rounded-[4px] hover:brightness-110 focus:ring-4 focus:outline-none focus:ring-blue-300"
                               >
                                 Nhắn tin
                               </Link>
@@ -608,7 +608,7 @@ export default function AuthorLibrary({
                                     setFollowedArray([...followedArray]);
                                     message.success("Đã theo dõi thành công");
                                   }}
-                                  className={`bg-gray-300 rounded px-2 py-1 text-left text-xs font-medium`}
+                                  className={`bg-gray-300 rounded px-2 py-1 text-center text-xs font-medium`}
                                 >
                                   Theo dõi
                                 </Link>
@@ -662,7 +662,7 @@ export default function AuthorLibrary({
                           {author?.name}
                         </p>
                         {item?.author?.userId !== user?.uid ? (
-                          <div className="flex gap-x-2 mt-2">
+                          <div className="flex flex-wrap gap-2 mt-2">
                             {typeArr.find(
                               (i) =>
                                 i?.author === item?.authorId && i?.type === 1
@@ -956,7 +956,7 @@ export default function AuthorLibrary({
                           {author?.name}
                         </p>
                         {item?.author?.userId !== user?.uid ? (
-                          <div className="flex gap-x-2 mt-2">
+                          <div className="flex flex-wrap gap-2 mt-2">
                             {typeArr.find(
                               (i) =>
                                 i?.author === item?.authorId && i?.type === 1
