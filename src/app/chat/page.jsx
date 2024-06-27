@@ -162,7 +162,7 @@ export default function ChatGroup() {
           userRecieved={userRecieved}
           mobile={mobile}
           setMobile={setMobile}
-          messages={messages}
+          data={messages}
           authors={authors}
           friendListP={friendList}
           user={user}

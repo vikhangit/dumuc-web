@@ -57,8 +57,8 @@ const NewAuthorUI = ({ currentUrl = "/", params, searchParams }) => {
   useEffect(() => {
     getProfile(user?.accessToken).then((dataCall) => {
       setUsingUser(dataCall);
-      setMyFollow(data?.follows);
-      setMyFriend(data?.friendList);
+      setMyFollow(dataCall?.follows);
+      setMyFriend(dataCall?.friendList);
     });
   }, [user]);
   useEffect(() => {

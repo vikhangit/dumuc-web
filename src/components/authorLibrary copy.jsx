@@ -103,13 +103,13 @@ export default function AuthorLibrary({
   );
 
   const [typeArr, setTypeArr] = useState([]);
-  const [arrayList, setArrayList] = useState(userAuthor?.friendList);
+  const [typeArrFollows, setTypeArrFollows] = useState([]);
+  const [typeArrFollwer, setTypeArrFollwer] = useState([]);
   useEffect(() => {
-    setArrayList(userAuthor?.friendList);
-  }, [userAuthor]);
-  useEffect(() => {
-    // setTypeArr([]);
-    arrayList
+    setTypeArr([]);
+    setTypeArrFollows([]);
+    setTypeArrFollwer([]);
+    userAuthor?.friendList
       // ?.filter((n) => n?.userId !== user?.uid)
       ?.map((x) => {
         const friendType = checkFriendType(x?.authorId);
@@ -143,26 +143,123 @@ export default function AuthorLibrary({
           }
         }
       });
-  }, [arrayList]);
+    userAuthor?.follows
+      // ?.filter((n) => n?.userId !== user?.uid)
+      ?.map((x) => {
+        const friendType = checkFriendType(x?.authorId);
+        if (typeArrFollows?.find((a) => a.author === x?.authorId)) {
+          setTypeArrFollows(typeArrFollows);
+        } else {
+          if (friendType === 2) {
+            typeArrFollows.push({
+              author: x?.authorId,
+              type: 2,
+            });
+            setTypeArrFollows([...typeArrFollows]);
+          } else if (friendType === 3) {
+            typeArrFollows.push({
+              author: x?.authorId,
+              type: 3,
+            });
+            setTypeArrFollows([...typeArrFollows]);
+          } else if (friendType === 4) {
+            typeArrFollows.push({
+              author: x?.authorId,
+              type: 4,
+            });
+            setTypeArrFollows([...typeArrFollows]);
+          } else {
+            typeArrFollows.push({
+              author: x?.authorId,
+              type: 1,
+            });
+            setTypeArrFollows([...typeArrFollows]);
+          }
+        }
+      });
+    userAuthor?.follower
+      // ?.filter((n) => n?.userId !== user?.uid)
+      ?.map((x) => {
+        const friendType = checkFriendType(x?.authorId);
+        if (typeArrFollwer?.find((a) => a.author === x?.authorId)) {
+          setTypeArrFollwer(typeArrFollwer);
+        } else {
+          if (friendType === 2) {
+            typeArrFollwer.push({
+              author: x?.authorId,
+              type: 2,
+            });
+            setTypeArrFollwer([...typeArrFollwer]);
+          } else if (friendType === 3) {
+            typeArrFollwer.push({
+              author: x?.authorId,
+              type: 3,
+            });
+            setTypeArrFollwer([...typeArrFollwer]);
+          } else if (friendType === 4) {
+            typeArr2.push({
+              author: x?.authorId,
+              type: 4,
+            });
+            setTypeArrFollwer([...typeArrFollwer]);
+          } else {
+            typeArrFollwer.push({
+              author: x?.authorId,
+              type: 1,
+            });
+            setTypeArrFollwer([...typeArrFollwer]);
+          }
+        }
+      });
+  }, [userAuthor]);
   const [followedArray, setFollowedArray] = useState([]);
+  const [followedArrayFollows, setFollowedArrayFollows] = useState([]);
+  const [followedArrayFollower, setFollowedArrayFollower] = useState([]);
   const [myFollowed, setMyFollowed] = useState([]);
   useEffect(() => {
     setMyFollowed(myFollow);
   }, [myFollow]);
   useEffect(() => {
-    // setFollowedArray([]);
-    arrayList?.map((item) => {
-      console.log(":::::", item);
+    setFollowedArray([]);
+    userAuthor?.friendList?.map((item) => {
       if (followedArray?.find((a) => a?.authorId === item?.authorId)) {
         setFollowedArray(followedArray);
       } else {
         if (myFollowed?.find((x) => x?.authorId === item?.authorId)) {
           followedArray.push(item);
           setFollowedArray([...followedArray]);
+        } else {
+          setFollowedArray([]);
         }
       }
     });
-  }, [arrayList, myFollowed]);
+
+    userAuthor?.follows?.map((item) => {
+      if (followedArrayFollows?.find((a) => a?.authorId === item?.authorId)) {
+        setFollowedArrayFollows(followedArrayFollows);
+      } else {
+        if (myFollowed?.find((x) => x?.authorId === item?.authorId)) {
+          followedArrayFollows.push(item);
+          setFollowedArrayFollows([...followedArrayFollows]);
+        } else {
+          setFollowedArrayFollows([]);
+        }
+      }
+    });
+
+    userAuthor?.follower?.map((item) => {
+      if (followedArrayFollower?.find((a) => a?.authorId === item?.authorId)) {
+        setFollowedArrayFollower(followedArrayFollower);
+      } else {
+        if (myFollowed?.find((x) => x?.authorId === item?.authorId)) {
+          followedArrayFollower.push(item);
+          setFollowedArrayFollower([...followedArrayFollower]);
+        } else {
+          setFollowedArrayFollower([]);
+        }
+      }
+    });
+  }, [userAuthor, myFollowed]);
   return (
     <div>
       <div className="px-3">
@@ -281,10 +378,7 @@ export default function AuthorLibrary({
             <div>
               <div className="flex text-dm font-semibold bg-white">
                 <button
-                  onClick={() => {
-                    setTab(0);
-                    setArrayList(userAuthor?.friendList);
-                  }}
+                  onClick={() => setTab(0)}
                   className={`px-3 py-3 ${
                     tab === 0 && "border-b-2 border-[#c80000]"
                   }`}
@@ -292,10 +386,7 @@ export default function AuthorLibrary({
                   Bạn bè
                 </button>
                 <button
-                  onClick={() => {
-                    setTab(2);
-                    setArrayList(userAuthor?.follower);
-                  }}
+                  onClick={() => setTab(2)}
                   className={`px-3 py-3 ${
                     tab === 2 && "border-b-2 border-[#c80000]"
                   }`}
@@ -303,10 +394,7 @@ export default function AuthorLibrary({
                   Người theo dõi
                 </button>
                 <button
-                  onClick={() => {
-                    setTab(1);
-                    setArrayList(userAuthor?.follows);
-                  }}
+                  onClick={() => setTab(1)}
                   className={`px-3 py-3 ${
                     tab === 1 && "border-b-2 border-[#c80000]"
                   }`}
@@ -404,6 +492,11 @@ export default function AuthorLibrary({
                                 <button
                                   type="button"
                                   class="flex items-center gap-x-1 px-2 py-1 text-xs font-medium text-center text-white bg-[#c80000] rounded-[4px] hover:brightness-110 focus:ring-4 focus:outline-none focus:ring-blue-300"
+                                  onClick={() =>
+                                    router.push(
+                                      `/author/${x?.slug}/${item?.authorId}`
+                                    )
+                                  }
                                 >
                                   Bạn bè
                                 </button>
@@ -663,7 +756,7 @@ export default function AuthorLibrary({
                         </p>
                         {item?.author?.userId !== user?.uid ? (
                           <div className="flex gap-x-2 mt-2">
-                            {typeArr.find(
+                            {typeArrFollows.find(
                               (i) =>
                                 i?.author === item?.authorId && i?.type === 1
                             ) ? (
@@ -681,16 +774,16 @@ export default function AuthorLibrary({
                                     },
                                     user?.accessToken
                                   );
-                                  const findIndex = typeArr.findIndex(
+                                  const findIndex = typeArrFollows.findIndex(
                                     (ab) => ab?.author === item?.authorId
                                   );
-                                  typeArr.splice(findIndex, 1);
-                                  setTypeArr([...typeArr]);
-                                  typeArr.push({
+                                  typeArrFollows.splice(findIndex, 1);
+                                  setTypeArrFollows([...typeArrFollows]);
+                                  typeArrFollows.push({
                                     type: 3,
                                     author: item?.authorId,
                                   });
-                                  setTypeArr([...typeArr]);
+                                  setTypeArrFollows([...typeArrFollows]);
                                   message.success("Đã gữi yêu cầu kết bạn.");
                                   //
                                 }}
@@ -699,7 +792,7 @@ export default function AuthorLibrary({
                               >
                                 Kết bạn
                               </button>
-                            ) : typeArr.find(
+                            ) : typeArrFollows.find(
                                 (i) =>
                                   i?.author === item?.authorId && i?.type === 2
                               ) ? (
@@ -709,7 +802,7 @@ export default function AuthorLibrary({
                               >
                                 Bạn bè
                               </button>
-                            ) : typeArr.find(
+                            ) : typeArrFollows.find(
                                 (i) =>
                                   i?.author === item?.authorId && i?.type === 3
                               ) ? (
@@ -727,12 +820,12 @@ export default function AuthorLibrary({
                                     },
                                     user?.accessToken
                                   );
-                                  const findIndex = typeArr.findIndex(
+                                  const findIndex = typeArrFollows.findIndex(
                                     (ab) => ab?.author === item?.authorId
                                   );
-                                  typeArr.splice(findIndex, 1);
-                                  setTypeArr([...typeArr]);
-                                  typeArr.push({
+                                  typeArrFollows.splice(findIndex, 1);
+                                  setTypeArrFollows([...typeArrFollows]);
+                                  typeArrFollows.push({
                                     type: 1,
                                     author: item?.authorId,
                                   });
@@ -745,7 +838,7 @@ export default function AuthorLibrary({
                               >
                                 <>Hủy lời mời</>
                               </button>
-                            ) : typeArr.find(
+                            ) : typeArrFollows.find(
                                 (i) =>
                                   i?.author === item?.authorId && i?.type === 4
                               ) ? (
@@ -789,16 +882,17 @@ export default function AuthorLibrary({
                                         );
                                       });
 
-                                      const findIndex = typeArr.findIndex(
-                                        (ab) => ab?.author === item?.authorId
-                                      );
-                                      typeArr.splice(findIndex, 1);
-                                      setTypeArr([...typeArr]);
+                                      const findIndex =
+                                        typeArrFollows.findIndex(
+                                          (ab) => ab?.author === item?.authorId
+                                        );
+                                      typeArrFollows.splice(findIndex, 1);
+                                      setTypeArrFollows([...typeArrFollows]);
                                       typeArr.push({
                                         type: 2,
                                         author: item?.authorId,
                                       });
-                                      setTypeArr([...typeArr]);
+                                      setTypeArrFollows([...typeArrFollows]);
                                       message.success("Bạn đã đồng ý kết bạn");
                                     }}
                                     className="hover:bg-[#c80000] text-black hover:text-white w-full rounded px-1.5 py-0.5 text-left"
@@ -824,13 +918,13 @@ export default function AuthorLibrary({
                                       const findIndex = typeArr.findIndex(
                                         (ab) => ab?.author === item?.authorId
                                       );
-                                      typeArr.splice(findIndex, 1);
-                                      setTypeArr([...typeArr]);
-                                      typeArr.push({
+                                      typeArrFollows.splice(findIndex, 1);
+                                      setTypeArrFollows([...typeArrFollows]);
+                                      typeArrFollows.push({
                                         type: 1,
                                         author: item?.authorId,
                                       });
-                                      setTypeArr([...typeArr]);
+                                      setTypeArrFollows([...typeArrFollows]);
                                       message.success("Đã xóa yêu cầu kết bạn");
                                     }}
                                     className="hover:bg-[#c80000] text-black hover:text-white w-full rounded px-1.5 py-0.5 text-left"
@@ -848,7 +942,7 @@ export default function AuthorLibrary({
                             >
                               Nhắn tin
                             </Link>
-                            {followedArray?.find(
+                            {followedArrayFollows?.find(
                               (a) => a?.authorId === item?.author?.authorId
                             ) ? (
                               <Link
@@ -867,12 +961,15 @@ export default function AuthorLibrary({
                                     },
                                     user?.accessToken
                                   );
-                                  const findIndex = followedArray?.findIndex(
-                                    (ab) =>
-                                      ab?.author === item?.author?.authorId
-                                  );
-                                  followedArray.splice(findIndex, 1);
-                                  setFollowedArray([...followedArray]);
+                                  const findIndex =
+                                    followedArrayFollows?.findIndex(
+                                      (ab) =>
+                                        ab?.author === item?.author?.authorId
+                                    );
+                                  followedArrayFollows.splice(findIndex, 1);
+                                  setFollowedArrayFollows([
+                                    ...followedArrayFollows,
+                                  ]);
                                   message.success("Đã hủy dõi");
                                 }}
                                 className={`bg-gray-300 rounded px-2 py-1 text-left text-xs font-medium`}
@@ -898,8 +995,10 @@ export default function AuthorLibrary({
                                     user?.accessToken
                                   );
                                   // setFollowing(true);
-                                  followedArray?.push(item);
-                                  setFollowedArray([...followedArray]);
+                                  followedArrayFollows?.push(item);
+                                  setFollowedArrayFollows([
+                                    ...followedArrayFollows,
+                                  ]);
                                   message.success("Đã theo dõi thành công");
                                 }}
                                 className={`bg-gray-300 rounded px-2 py-1 text-left text-xs font-medium`}
@@ -957,7 +1056,7 @@ export default function AuthorLibrary({
                         </p>
                         {item?.author?.userId !== user?.uid ? (
                           <div className="flex gap-x-2 mt-2">
-                            {typeArr.find(
+                            {typeArrFollwer.find(
                               (i) =>
                                 i?.author === item?.authorId && i?.type === 1
                             ) ? (
@@ -975,16 +1074,16 @@ export default function AuthorLibrary({
                                     },
                                     user?.accessToken
                                   );
-                                  const findIndex = typeArr.findIndex(
+                                  const findIndex = typeArrFollwer.findIndex(
                                     (ab) => ab?.author === item?.authorId
                                   );
-                                  typeArr.splice(findIndex, 1);
-                                  setTypeArr([...typeArr]);
-                                  typeArr.push({
+                                  typeArrFollwer.splice(findIndex, 1);
+                                  setTypeArrFollwer([...typeArrFollwer]);
+                                  typeArrFollwer.push({
                                     type: 3,
                                     author: item?.authorId,
                                   });
-                                  setTypeArr([...typeArr]);
+                                  setTypeArrFollwer([...typeArrFollwer]);
                                   message.success("Đã gữi yêu cầu kết bạn.");
                                   //
                                 }}
@@ -993,7 +1092,7 @@ export default function AuthorLibrary({
                               >
                                 Kết bạn
                               </button>
-                            ) : typeArr.find(
+                            ) : typeArrFollwer.find(
                                 (i) =>
                                   i?.author === item?.authorId && i?.type === 2
                               ) ? (
@@ -1003,7 +1102,7 @@ export default function AuthorLibrary({
                               >
                                 Bạn bè
                               </button>
-                            ) : typeArr.find(
+                            ) : typeArrFollwer.find(
                                 (i) =>
                                   i?.author === item?.authorId && i?.type === 3
                               ) ? (
@@ -1021,16 +1120,16 @@ export default function AuthorLibrary({
                                     },
                                     user?.accessToken
                                   );
-                                  const findIndex = typeArr.findIndex(
+                                  const findIndex = typeArrFollwer.findIndex(
                                     (ab) => ab?.author === item?.authorId
                                   );
-                                  typeArr.splice(findIndex, 1);
-                                  setTypeArr([...typeArr]);
+                                  typeArrFollwer.splice(findIndex, 1);
+                                  setTypeArrFollwer([...typeArrFollwer]);
                                   typeArr.push({
                                     type: 1,
                                     author: item?.authorId,
                                   });
-                                  setTypeArr([...typeArr]);
+                                  setTypeArrFollwer([...typeArrFollwer]);
                                   message.success("Đã hủy kết bạn.");
                                   //
                                 }}
@@ -1039,7 +1138,7 @@ export default function AuthorLibrary({
                               >
                                 <>Hủy lời mời</>
                               </button>
-                            ) : typeArr.find(
+                            ) : typeArrFollwer.find(
                                 (i) =>
                                   i?.author === item?.authorId && i?.type === 4
                               ) ? (
@@ -1083,16 +1182,17 @@ export default function AuthorLibrary({
                                         );
                                       });
 
-                                      const findIndex = typeArr.findIndex(
-                                        (ab) => ab?.author === item?.authorId
-                                      );
-                                      typeArr.splice(findIndex, 1);
-                                      setTypeArr([...typeArr]);
-                                      typeArr.push({
+                                      const findIndex =
+                                        typeArrFollwer.findIndex(
+                                          (ab) => ab?.author === item?.authorId
+                                        );
+                                      typeArrFollwer.splice(findIndex, 1);
+                                      setTypeArrFollwer([...typeArrFollwer]);
+                                      typeArrFollwer.push({
                                         type: 2,
                                         author: item?.authorId,
                                       });
-                                      setTypeArr([...typeArr]);
+                                      setTypeArrFollwer([...typeArrFollwer]);
                                       message.success("Bạn đã đồng ý kết bạn");
                                     }}
                                     className="hover:bg-[#c80000] text-black hover:text-white w-full rounded px-1.5 py-0.5 text-left"
@@ -1115,16 +1215,17 @@ export default function AuthorLibrary({
                                         },
                                         user?.accessToken
                                       );
-                                      const findIndex = typeArr.findIndex(
-                                        (ab) => ab?.author === item?.authorId
-                                      );
-                                      typeArr.splice(findIndex, 1);
-                                      setTypeArr([...typeArr]);
-                                      typeArr.push({
+                                      const findIndex =
+                                        typeArrFollwer.findIndex(
+                                          (ab) => ab?.author === item?.authorId
+                                        );
+                                      typeArrFollwer.splice(findIndex, 1);
+                                      setTypeArrFollwer([...typeArrFollwer]);
+                                      typeArrFollwer.push({
                                         type: 1,
                                         author: item?.authorId,
                                       });
-                                      setTypeArr([...typeArr]);
+                                      setTypeArrFollwer([...typeArrFollwer]);
                                       message.success("Đã xóa yêu cầu kết bạn");
                                     }}
                                     className="hover:bg-[#c80000] text-black hover:text-white w-full rounded px-1.5 py-0.5 text-left"
@@ -1142,7 +1243,7 @@ export default function AuthorLibrary({
                             >
                               Nhắn tin
                             </Link>
-                            {followedArray?.find(
+                            {followedArrayFollower?.find(
                               (a) => a?.authorId === item?.author?.authorId
                             ) ? (
                               <Link
@@ -1161,12 +1262,15 @@ export default function AuthorLibrary({
                                     },
                                     user?.accessToken
                                   );
-                                  const findIndex = followedArray?.findIndex(
-                                    (ab) =>
-                                      ab?.author === item?.author?.authorId
-                                  );
-                                  followedArray.splice(findIndex, 1);
-                                  setFollowedArray([...followedArray]);
+                                  const findIndex =
+                                    followedArrayFollower?.findIndex(
+                                      (ab) =>
+                                        ab?.author === item?.author?.authorId
+                                    );
+                                  followedArrayFollower.splice(findIndex, 1);
+                                  setFollowedArrayFollower([
+                                    ...followedArrayFollower,
+                                  ]);
                                   message.success("Đã hủy dõi");
                                 }}
                                 className={`bg-gray-300 rounded px-2 py-1 text-left text-xs font-medium`}
@@ -1192,8 +1296,10 @@ export default function AuthorLibrary({
                                     user?.accessToken
                                   );
                                   // setFollowing(true);
-                                  followedArray?.push(item);
-                                  setFollowedArray([...followedArray]);
+                                  followedArrayFollower?.push(item);
+                                  setFollowedArrayFollower([
+                                    ...followedArrayFollower,
+                                  ]);
                                   message.success("Đã theo dõi thành công");
                                 }}
                                 className={`bg-gray-300 rounded px-2 py-1 text-left text-xs font-medium`}
@@ -1206,6 +1312,15 @@ export default function AuthorLibrary({
                           ""
                         )}
                       </div>
+                      <button
+                        onClick={() => {
+                          router.push(`/chat?friendId=${authorData?.authorId}`);
+                        }}
+                        className="flex items-center gap-x-2 px-5 py-2 text-xs font-medium text-center bg-blue-700 text-white rounded-[4px] hover:brightness-110 focus:ring-4 focus:outline-none focus:ring-blue-300"
+                      >
+                        <MdPending size={20} />
+                        Nhắn tin
+                      </button>
                     </div>
                   );
                 })}
