@@ -340,7 +340,7 @@ const FeedItem = ({ data, index, user, usingUser }) => {
           </div>
         )}
       </div>
-      <div className="mt-10"></div>
+      <div className="mt-[15px]"></div>
       <FeedLikeShareComment
         item={item}
         index={index}
