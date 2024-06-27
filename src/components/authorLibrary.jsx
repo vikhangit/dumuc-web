@@ -358,7 +358,7 @@ export default function AuthorLibrary({
                           >
                             {author?.name}
                           </p>
-                          {item?.author?.userId !== user?.uid ? (
+                          {user && item?.author?.userId !== user?.uid ? (
                             <div className="flex flex-wrap gap-2 mt-2">
                               {typeArr.find(
                                 (i) =>
@@ -661,7 +661,7 @@ export default function AuthorLibrary({
                         >
                           {author?.name}
                         </p>
-                        {item?.author?.userId !== user?.uid ? (
+                        {user && item?.author?.userId !== user?.uid ? (
                           <div className="flex flex-wrap gap-2 mt-2">
                             {typeArr.find(
                               (i) =>
@@ -955,7 +955,7 @@ export default function AuthorLibrary({
                         >
                           {author?.name}
                         </p>
-                        {item?.author?.userId !== user?.uid ? (
+                        {user && item?.author?.userId !== user?.uid ? (
                           <div className="flex flex-wrap gap-2 mt-2">
                             {typeArr.find(
                               (i) =>
