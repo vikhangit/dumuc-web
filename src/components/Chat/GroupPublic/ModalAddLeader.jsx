@@ -38,7 +38,7 @@ export default function ModalAddLeader({
   member,
   onCloseParent,
 }) {
-  const user = JSON.parse(localStorage.getItem("userLogin"));
+  const [user] = useAuthState(auth);
   const userId = JSON.parse(localStorage.getItem("userId"));
   const userToken = JSON.parse(localStorage.getItem("userToken"));
   const router = useRouter();
@@ -50,7 +50,7 @@ export default function ModalAddLeader({
   const [friendList, setFriendList] = useState([]);
   const [memberList, setMemberList] = useState();
   useEffect(() => {
-    getProfile(userToken).then((dataCall) => {
+    getProfile(user?.accessToken).then((dataCall) => {
       setUsingUser(dataCall);
       setFriendList(dataCall?.friendList?.filter((x) => x.status === 2));
     });
@@ -88,7 +88,6 @@ export default function ModalAddLeader({
         setLoading(false);
         onCancel();
         onCloseParent();
-        router.push("/chat/group-public");
       })
       .catch((err) => {
         message.error("Bạn đã rời khỏi nhóm thất bại");

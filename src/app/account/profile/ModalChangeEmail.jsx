@@ -52,16 +52,17 @@ export default function ModalChangeEmail({ visible, onCancel }) {
       .then(async () => {
         const success = await verifyBeforeUpdateEmail(email);
         if (success) {
-          await updateProfile({ email: email }, user?.accessToken).then(
-            async () => {
-              await signOut().then(async (res) => {
-                router.push("/auth");
-                message.success(
-                  "Đã xác thực email. Vui lòng kiểm tra trong hộp thư email của bạn"
-                );
-              });
-            }
-          );
+          await updateProfile(
+            { ...usingUser, email: email },
+            user?.accessToken
+          ).then(async () => {
+            await signOut().then(async (res) => {
+              router.push("/auth");
+              message.success(
+                "Đã xác thực email. Vui lòng kiểm tra trong hộp thư email của bạn"
+              );
+            });
+          });
         } else {
           message.error("Đã xãy ra lỗi trong quá trình xác thực");
         }

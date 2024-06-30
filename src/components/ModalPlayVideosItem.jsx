@@ -46,6 +46,10 @@ export default function ModalPlayVideosItem({
   myFriend,
   close,
 }) {
+  const [data, setData] = useState(item);
+  useEffect(() => {
+    setData(item);
+  }, [item]);
   return (
     <div className="bg-white w-full">
       {item?.type === "file" ? (

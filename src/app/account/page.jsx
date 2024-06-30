@@ -50,8 +50,8 @@ const AccountPage = () => {
   }, [user, loading]);
 
   useEffect(() => {
-    getProfile(user?.accessToken).then((profile) => {
-      setProfile(profile);
+    getProfile(user?.accessToken).then((data) => {
+      setProfile(data);
     });
   }, [user]);
 

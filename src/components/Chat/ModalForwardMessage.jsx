@@ -18,6 +18,7 @@ import {
   addDoc,
   arrayUnion,
   collection,
+  deleteField,
   doc,
   serverTimestamp,
   updateDoc,
@@ -75,15 +76,37 @@ export default function ModalForwardMessage({
       const findChat = findMe?.find((a) =>
         a?.member?.find((t) => t?.userId === x?.userId)
       );
+      let dataItem = {
+        text: newMessage,
+        photos: photos,
+        files: file,
+        createdAt: serverTimestamp(),
+        formAuthor: myAuthor,
+        recall: false,
+        reply: null,
+      };
       if (findChat) {
-        await addDoc(collection(db, "chat-rooms", findChat?.id, "messages"), {
-          text: newMessage,
-          photos: photos,
-          files: file,
-          createdAt: serverTimestamp(),
-          formAuthor: myAuthor,
-          recall: false,
-          reply: null,
+        await addDoc(
+          collection(db, "chat-rooms", findChat?.id, "messages"),
+          dataItem
+        ).then(async (dataMessage) => {
+          const washingtonRef = doc(db, "chat-rooms", `${findChat?.id}`);
+          await updateDoc(washingtonRef, {
+            lastMessage: {
+              ...dataItem,
+              messageId: dataMessage?.id,
+              text:
+                photos?.length > 0
+                  ? "[Hình ảnh]"
+                  : file?.length > 0
+                  ? "[Hình ảnh]"
+                  : dataItem?.text,
+            },
+            new: true,
+            lastMessagesCount: 1,
+            isDelete: deleteField(),
+            createdAt: serverTimestamp(),
+          });
         });
       } else {
         await addDoc(collection(db, "chat-rooms"), {
@@ -92,16 +115,26 @@ export default function ModalForwardMessage({
         }).then(async (data) => {
           await addDoc(
             collection(db, "chat-rooms", `${data?.id}`, "messages"),
-            {
-              text: newMessage,
-              photos: photos,
-              files: file,
+            dataItem
+          ).then(async (dataMessage) => {
+            const washingtonRef = doc(db, "chat-rooms", `${data?.id}`);
+            await updateDoc(washingtonRef, {
+              lastMessage: {
+                ...dataItem,
+                messageId: dataMessage?.id,
+                text:
+                  photos?.length > 0
+                    ? "[Hình ảnh]"
+                    : file?.length > 0
+                    ? "[Hình ảnh]"
+                    : dataItem?.text,
+              },
+              new: true,
+              lastMessagesCount: 1,
+              isDelete: deleteField(),
               createdAt: serverTimestamp(),
-              formAuthor: myAuthor,
-              recall: false,
-              reply: null,
-            }
-          );
+            });
+          });
         });
       }
       // const washingtonRef = doc(db, "chat-groups", search.get("groupId"));

@@ -40,7 +40,7 @@ export default function QuickAddStory({
   const [link, setLink] = useState("");
   const [photo, setPhoto] = useState("");
   const [photoChange, setPhotoChange] = useState("");
-  const [active, setActive] = useState(0);
+  const [active, setActive] = useState(1);
   const [error, setError] = useState("");
   const refImage = useRef(null);
   useEffect(() => {
@@ -76,7 +76,7 @@ export default function QuickAddStory({
             ? JSON.parse(localStorage.getItem("storyPrivate")) === "0"
               ? true
               : false
-            : true,
+            : false,
         },
         user?.accessToken
       ).then((result) => {
@@ -84,7 +84,13 @@ export default function QuickAddStory({
           type: activeItem?.type,
           storyId: activeItem?.storyId,
         });
-        createUserStories({ ...result?.data }, user?.accessToken);
+        createUserStories({ ...result?.data }, user?.accessToken).then(() => {
+          onCallback();
+          localStorage.removeItem("storyPrivate");
+          setLoading(false);
+          onCancel();
+          setLink("");
+        });
       });
     } else {
       createStoryByUser(
@@ -96,17 +102,19 @@ export default function QuickAddStory({
             ? JSON.parse(localStorage.getItem("storyPrivate")) === "0"
               ? true
               : false
-            : true,
+            : false,
         },
         user?.accessToken
       ).then((result) => {
-        createUserStories({ ...result?.data }, user?.accessToken);
+        createUserStories({ ...result?.data }, user?.accessToken).then(() => {
+          onCallback();
+          localStorage.removeItem("storyPrivate");
+          setLoading(false);
+          onCancel();
+          setLink("");
+        });
       });
     }
-    onCancel();
-    localStorage.removeItem("storyPrivate");
-    onCallback();
-    setLoading(false);
   };
   return (
     <Modal
@@ -114,6 +122,7 @@ export default function QuickAddStory({
       title={``}
       onCancel={() => {
         onCancel();
+        setLink("");
       }}
       destroyOnClose={true}
       footer={

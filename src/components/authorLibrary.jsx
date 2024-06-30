@@ -243,7 +243,7 @@ export default function AuthorLibrary({
               <div className="flex flex-col gap-1 text-sm font-normal text-[#000000]">
                 {authorData?.user?.activeId && (
                   <p>
-                    <strong>ID:</strong> dumuc{authorData?.user?.username}
+                    <strong>ID:</strong> Dumuc{authorData?.user?.username}
                   </p>
                 )}
                 {authorData?.user?.phone && authorData?.user?.activePhone && (
@@ -262,16 +262,28 @@ export default function AuthorLibrary({
                     {authorData?.user?.phone}
                   </p>
                 )}
-                {authorData?.user?.numberPlate && (
+                {authorData?.user?.numberPlate?.length > 0 && (
                   <p>
                     <strong>Biển số xe:</strong> {authorData?.user?.numberPlate}
                   </p>
                 )}
-                {authorData?.user?.address && (
-                  <p>
-                    <strong>Địa chỉ:</strong> {authorData?.user?.address}
+                {authorData?.user?.address?.length > 0 && (
+                  <p className="flex items-center gap-x-2">
+                    <strong className="text-nowrap">Địa chỉ:</strong>{" "}
+                    <div>{authorData?.user?.address}</div>
                   </p>
                 )}
+                {authorData?.user?.review?.length > 0 &&
+                  authorData?.user?.activeReview && (
+                    <p className="flex items-center gap-x-2">
+                      <strong className="text-nowrap">Giới thiệu:</strong>{" "}
+                      <div
+                        dangerouslySetInnerHTML={{
+                          __html: authorData?.user?.review,
+                        }}
+                      ></div>
+                    </p>
+                  )}
               </div>
             </div>
           </div>

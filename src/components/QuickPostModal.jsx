@@ -21,6 +21,7 @@ const CustomEditor = dynamic(
   },
   { ssr: false }
 );
+import { Editor } from "@tinymce/tinymce-react";
 export default function QuickPostModal({
   user,
   usingUser,
@@ -70,7 +71,13 @@ export default function QuickPostModal({
   const [inputVisible, setInputVisible] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const inputRef = useRef(null);
-  const [active, setActive] = useState();
+  const [active, setActive] = useState(1);
+  const editorRef = useRef(null);
+  const log = () => {
+    if (editorRef.current) {
+      console.log(editorRef.current.getContent());
+    }
+  };
   useEffect(() => {
     if (inputVisible) {
       inputRef.current?.focus();
@@ -149,7 +156,7 @@ export default function QuickPostModal({
         ? JSON.parse(localStorage.getItem("isPrivate")) === "0"
           ? true
           : false
-        : true,
+        : false,
     };
 
     if (description === undefined || description === "") {
@@ -212,7 +219,7 @@ export default function QuickPostModal({
           setDescription();
           setEmotion("");
           setTags([]);
-          setActive(0);
+          setActive(1);
           onCancel();
           onCallback();
           message.success("Đăng tin thành công");
@@ -390,6 +397,29 @@ export default function QuickPostModal({
             setData={setDescription}
             placeholder={`${usingUser?.name} ơi bạn đang nghĩ gì?`}
           />
+          {/* <CKEditorUsing /> */}
+          {/* <Editor
+            ref={editorRef}
+            apiKey="1d9dhsd2rtc5asyzz1d0ltkwxw2u5hzuipl4wz72ss8u0dv2"
+            onInit={(evt, editor) => (editorRef.current = editor)}
+            initialValue="<p>This is the initial content of the editor.</p>"
+            init={{
+              height: 500,
+              // menubar: false,
+              plugins: [
+                "advlist autolink lists link image charmap print preview anchor",
+                "searchreplace visualblocks code fullscreen",
+                "insertdatetime media table paste code help wordcount",
+              ],
+              toolbar:
+                "undo redo | formatselect | " +
+                "bold italic backcolor | alignleft aligncenter " +
+                "alignright alignjustify | bullist numlist outdent indent | " +
+                "removeformat | help",
+              content_style:
+                "body { font-family:Helvetica,Arial,sans-serif; font-size:14px }",
+            }}
+          /> */}
           {descriptionError !== "" && (
             <p class="mt-1.5 text-sm text-[#c80000] font-semibold">
               {descriptionError}

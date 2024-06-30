@@ -58,9 +58,9 @@ const HomePageContent = () => {
       setMyFollow(data?.follows);
       setMyFriend(data?.friendList);
     });
-    getFeedsLoadMore({ limit: 5 }).then((result) => setFeedData(result));
+    getFeedsLoadMore({ limit: 1000 }).then((result) => setFeedData(result));
     getTags().then((result) => setTags(result));
-    getStoriesLoadMore({ limit: 100 }).then((data) => {
+    getStoriesLoadMore({ limit: 1000 }).then((data) => {
       setStories(data);
     });
     setLoading(false);
@@ -120,7 +120,7 @@ const HomePageContent = () => {
               </div>
               <div>
                 {
-                  <StoryWrapper
+                  <Story
                     data={stories}
                     user={user}
                     usingUser={usingUser}
@@ -143,7 +143,7 @@ const HomePageContent = () => {
                 loading={loading}
                 authors={authors}
                 onCallback={() =>
-                  getFeedsLoadMore({ limit: 5 }).then((result) =>
+                  getFeedsLoadMore({ limit: 1000 }).then((result) =>
                     setFeedData(result)
                   )
                 }

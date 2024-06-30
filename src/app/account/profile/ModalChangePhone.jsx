@@ -97,6 +97,7 @@ export default function ModalChangePhone({ visible, onCancel }) {
       await updatePhoneNumber(user, phoneCredential);
       await updateProfile(
         {
+          ...usingUser,
           phone:
             phoneNumber.indexOf("0") === 0
               ? replaceStringByIndex(phoneNumber.replace(/\D/g, ""), 0, 0)

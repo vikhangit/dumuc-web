@@ -2,7 +2,7 @@
 import { deletePostByUser, getPost, updatePostByUser } from "@apis/posts";
 import ArticleBookmark from "@components/ArticleBookmark";
 import { useWindowSize } from "@hooks/useWindowSize";
-import { message } from "antd";
+import { Dropdown, Popconfirm, message } from "antd";
 import moment from "moment";
 import Image from "next/image";
 import Link from "next/link";
@@ -83,97 +83,124 @@ const ArticleMeta = ({ item, user, usingUser, onCallback, commentsCount }) => {
       <div
         className={`flex flex-end  ${sizes.width > 365 ? "w-auto" : "w-auto"}`}
       >
-        {
-          <div className="relative cursor-pointer group">
-            <IoMdMore size={24} />
-            <div className="absolute hidden group-hover:flex flex-col top-full right-0 bg-white shadow-sm shadow-gray-500 text-[10px] sm:text-xs font-medium w-[80px] rounded p-1">
-              {postItem.userId === user?.uid && (
-                <Link
-                  href={`/forum/post?id=${postItem?.postId}`}
-                  className="hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5"
-                >
-                  Sửa
-                </Link>
-              )}
-              {postItem?.userId === user?.uid && (
-                <Link
-                  href=""
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (postItem?.isPrivate) {
-                      return updatePostByUser(
-                        {
-                          ...postItem,
-                          isPrivate: false,
-                        },
-                        user?.accessToken
-                      ).then((result) => {
-                        message.success("Công khai bài viết thành công");
-                        onCallbackData();
-                      });
-                    } else {
-                      return updatePostByUser(
-                        {
-                          ...postItem,
-                          isPrivate: true,
-                        },
-                        user?.accessToken
-                      ).then((result) => {
-                        message.success("Ẩn bài viết thành công");
-                        onCallbackData();
-                      });
-                    }
-                  }}
-                  className="hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5"
-                >
-                  {postItem?.isPrivate ? "Hủy ẩn" : "Ẩn"}
-                </Link>
-              )}
-              {postItem?.userId !== user?.uid && (
-                <Link
-                  href={``}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    let data = {
-                      ...postItem,
-                      isReport: true,
-                    };
-                    return updatePostByUser(data, user?.accessToken).then(
-                      (result) => {
-                        message.success(
-                          "Chúng tôi sẽ xem xét báo cáo của bạn về bài viết này. Xin cảm ơn"
-                        );
-                        onCallbackData();
+        <Dropdown
+          placement="bottomRight"
+          menu={{
+            items: [
+              {
+                label: (
+                  <Link
+                    href={`/forum/post?id=${postItem?.postId}`}
+                    className=" w-full"
+                  >
+                    Sửa bài viết
+                  </Link>
+                ),
+                disabled: postItem.userId === user?.uid ? false : true,
+              },
+              {
+                label: (
+                  <Link
+                    href=""
+                    onClick={(e) => {
+                      e.preventDefault();
+                      if (postItem?.isPrivate) {
+                        return updatePostByUser(
+                          {
+                            ...postItem,
+                            isPrivate: false,
+                          },
+                          user?.accessToken
+                        ).then((result) => {
+                          message.success("Công khai bài viết thành công");
+                          onCallbackData();
+                        });
+                      } else {
+                        return updatePostByUser(
+                          {
+                            ...postItem,
+                            isPrivate: true,
+                          },
+                          user?.accessToken
+                        ).then((result) => {
+                          message.success("Ẩn bài viết thành công");
+                          onCallbackData();
+                        });
                       }
-                    );
-                  }}
-                  className="hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5"
-                >
-                  Báo cáo
-                </Link>
-              )}
-
-              {postItem?.userId === user?.uid && (
-                <Link
-                  href=""
-                  onClick={(e) => {
-                    e.preventDefault();
-                    return deletePostByUser(
-                      postItem?.postId,
-                      user?.accessToken
-                    ).then((result) => {
-                      message.success("Xóa bài viết thành công");
-                      router.push("/forum");
-                    });
-                  }}
-                  className="hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5"
-                >
-                  Xóa
-                </Link>
-              )}
-            </div>
-          </div>
-        }
+                    }}
+                    className="w-full"
+                  >
+                    {postItem?.isPrivate ? "Hủy ẩn bài viết" : "Ẩn bài viết"}
+                  </Link>
+                ),
+                disabled: postItem?.userId === user?.uid ? false : true,
+              },
+              {
+                label: (
+                  <Link
+                    href={``}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      let data = {
+                        ...postItem,
+                        isReport: true,
+                      };
+                      return updatePostByUser(data, user?.accessToken).then(
+                        (result) => {
+                          message.success(
+                            "Chúng tôi sẽ xem xét báo cáo của bạn về bài viết này. Xin cảm ơn"
+                          );
+                          onCallbackData();
+                        }
+                      );
+                    }}
+                    className=" w-full"
+                  >
+                    Báo cáo bài viết
+                  </Link>
+                ),
+                disabled: postItem?.userId !== user?.uid ? false : true,
+              },
+              {
+                label: (
+                  <Popconfirm
+                    placement="bottomRight"
+                    title="Xóa bài viết"
+                    description="Bài viết sẽ bị xóa vĩnh viễn. Bạn có chắc chắn xóa?"
+                    onConfirm={async () => {
+                      return deletePostByUser(
+                        postItem?.postId,
+                        user?.accessToken
+                      ).then((result) => {
+                        message.success("Xóa bài viết thành công");
+                        router.push("/forum");
+                      });
+                    }}
+                    onCancel={() => {}}
+                    okText="Đồng ý"
+                    cancelText="Hủy bỏ"
+                    style={{
+                      width: 200,
+                    }}
+                  >
+                    <Link
+                      href=""
+                      onClick={(e) => {
+                        e.preventDefault();
+                      }}
+                      className="w-full"
+                    >
+                      Xóa bài viết
+                    </Link>
+                  </Popconfirm>
+                ),
+                disabled: postItem?.userId === user?.uid ? false : true,
+              },
+            ],
+          }}
+        >
+          <IoMdMore size={24} />
+        </Dropdown>
         <ArticleBookmark
           id={postItem?.postId}
           onCallback={onCallbackData}

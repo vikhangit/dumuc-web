@@ -1,6 +1,7 @@
 import {
   deleteAddFriend,
   deleteRecieveFriend,
+  getProfile,
   receiveRequestAddFriend,
   sendRequestAddFriend,
 } from "@apis/users";
@@ -14,44 +15,40 @@ import { useEffect } from "react";
 import { getAuthors } from "@apis/posts";
 import { useWindowSize } from "@hooks/useWindowSize";
 
-export default function RequestFriend({ items, onCallback, authors, user }) {
-  const [loading, setLoading] = useState(-1);
+export default function RequestFriend({
+  items,
+  onCallback,
+  setItems,
+  authors,
+  user,
+  setUsingUser,
+  setTab,
+}) {
+  const [loading, setLoading] = useState(false);
   const [loadingRemove, setLoadingRemove] = useState(-1);
   const sizes = useWindowSize();
   const [friendList, setFriendList] = useState(items);
   useEffect(() => {
     setFriendList(items);
   }, [items]);
-  console.log("123", friendList);
   return (
     <div>
-      {friendList?.length > 0 && (
-        <div className="font-semibold my-2 flex justify-between">
-          Lời mời kết bạn ({requestFr?.length})
-          {/* <button
-            className="text-[10px] text-blue-500 hover:underline"
-            onClick={() => setShowRequesFriend(!showRequesFriend)}
+      {friendList?.length > 0 ? (
+        <div>
+          <ul
+            class={`pb-1 grid ${
+              sizes.width > 992
+                ? "grid-cols-1 xl:grid-cols-2"
+                : `grid-cols-1 ${
+                    sizes.width > 650
+                      ? `grid-cols-3`
+                      : sizes.width > 400
+                      ? `grid-cols-2`
+                      : `grid-cols-1`
+                  }`
+            } gap-4`}
           >
-            showRequesFriend ? "Ẩn" : "Hiện"
-          </button>*/}
-        </div>
-      )}
-      <div>
-        <ul
-          class={`pb-1 grid ${
-            sizes.width > 992
-              ? "grid-cols-1 xl:grid-cols-2"
-              : `grid-cols-1 ${
-                  sizes.width > 650
-                    ? `grid-cols-3`
-                    : sizes.width > 400
-                    ? `grid-cols-2`
-                    : `grid-cols-1`
-                }`
-          } gap-4`}
-        >
-          {friendList?.length > 0 &&
-            friendList.map(async (item, index) => {
+            {friendList.map(async (item, index) => {
               const author = authors?.find(
                 (x) => x?.authorId === item?.authorId
               );
@@ -83,38 +80,67 @@ export default function RequestFriend({ items, onCallback, authors, user }) {
                     <div className="w-full flex gap-x-2 mt-2">
                       <button
                         onClick={async () => {
-                          friendList.splice(index, 1);
-                          setFriendList([...friendList]);
-                          await deleteAddFriend(
-                            {
-                              authorId: item?.author?.authorId,
-                            },
-                            user?.accessToken
-                          ).then(() => {
-                            deleteRecieveFriend(
+                          if (!loading) {
+                            setLoading(true);
+                            await deleteAddFriend(
                               {
-                                authorUserId: item?.author?.userId,
+                                authorId: item?.author?.authorId,
                               },
                               user?.accessToken
-                            );
-                          });
-                          await sendRequestAddFriend(
-                            {
-                              authorId: item?.author?.authorId,
-                              status: 2,
-                            },
-                            user?.accessToken
-                          ).then(() => {
-                            receiveRequestAddFriend(
+                            ).then(() => {
+                              deleteRecieveFriend(
+                                {
+                                  authorUserId: item?.author?.userId,
+                                },
+                                user?.accessToken
+                              );
+                            });
+                            await sendRequestAddFriend(
                               {
-                                authorUserId: item?.author?.userId,
+                                authorId: item?.author?.authorId,
                                 status: 2,
                               },
                               user?.accessToken
+                            ).then(() => {
+                              receiveRequestAddFriend(
+                                {
+                                  authorUserId: item?.author?.userId,
+                                  status: 2,
+                                },
+                                user?.accessToken
+                              ).then(() => {
+                                getProfile(user?.accessToken).then((data) => {
+                                  setItems(
+                                    data?.friendList
+                                      ?.map((item) => {
+                                        let obj = {
+                                          ...item,
+                                          author: authors?.find(
+                                            (x) =>
+                                              x?.authorId ===
+                                              item?.author?.authorId
+                                          ),
+                                        };
+                                        return obj;
+                                      })
+                                      ?.filter((x) => x !== undefined)
+                                      ?.sort((a, b) =>
+                                        a?.author?.name?.localeCompare(
+                                          b?.author?.name
+                                        )
+                                      )
+                                  );
+                                });
+                              });
+                            });
+                            setTab(0);
+                            message.success("Đã chấp nhận yêu cầu kết bạn");
+                            setLoading(false);
+                          } else {
+                            message.warning(
+                              "Thao tác đang thực hiện xin đừng spam"
                             );
-                          });
-
-                          message.success("Đã chấp nhận yêu cầu kết bạn");
+                          }
                         }}
                         className="px-3 py-1 text-xs font-medium text-center text-white bg-[#c80000] rounded-[4px] hover:brightness-110 focus:ring-4 focus:outline-none focus:ring-blue-300 basis-1/2"
                       >
@@ -122,22 +148,51 @@ export default function RequestFriend({ items, onCallback, authors, user }) {
                       </button>
                       <button
                         onClick={() => {
-                          friendList.splice(index, 1);
-                          setFriendList([...friendList]);
-                          deleteAddFriend(
-                            {
-                              authorId: item?.author?.authorId,
-                            },
-                            user?.accessToken
-                          );
-                          deleteRecieveFriend(
-                            {
-                              authorUserId: item?.author?.userId,
-                            },
-                            user?.accessToken
-                          );
-
-                          message.success("Đã xóa yêu cầu kết bạn");
+                          if (!loading) {
+                            setLoading(true);
+                            deleteAddFriend(
+                              {
+                                authorId: item?.author?.authorId,
+                              },
+                              user?.accessToken
+                            );
+                            deleteRecieveFriend(
+                              {
+                                authorUserId: item?.author?.userId,
+                              },
+                              user?.accessToken
+                            ).then(() => {
+                              getProfile(user?.accessToken).then((data) => {
+                                setItems(
+                                  data?.friendList
+                                    ?.map((item) => {
+                                      let obj = {
+                                        ...item,
+                                        author: authors?.find(
+                                          (x) =>
+                                            x?.authorId ===
+                                            item?.author?.authorId
+                                        ),
+                                      };
+                                      return obj;
+                                    })
+                                    ?.filter((x) => x !== undefined)
+                                    ?.sort((a, b) =>
+                                      a?.author?.name?.localeCompare(
+                                        b?.author?.name
+                                      )
+                                    )
+                                );
+                              });
+                            });
+                            setTab(1);
+                            setLoading(false);
+                            message.success("Đã xóa yêu cầu kết bạn");
+                          } else {
+                            message.warning(
+                              "Thao tác đang thực hiện xin đừng span"
+                            );
+                          }
                         }}
                         className="px-3 py-1 text-xs font-medium text-center text-black bg-gray-300 rounded-[4px] hover:brightness-110 focus:ring-4 focus:outline-none focus:ring-blue-300 basis-1/2"
                       >
@@ -148,8 +203,11 @@ export default function RequestFriend({ items, onCallback, authors, user }) {
                 )
               );
             })}
-        </ul>
-      </div>
+          </ul>
+        </div>
+      ) : (
+        <div className="p-2 italic">Chưa có lời mời kết bạn</div>
+      )}
     </div>
   );
 }

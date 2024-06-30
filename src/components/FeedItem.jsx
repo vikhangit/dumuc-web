@@ -1,7 +1,7 @@
 "use client";
 import FeedBookmark from "@components/FeedBookmark";
 import "@fancyapps/ui/dist/fancybox/fancybox.css";
-import { message } from "antd";
+import { Dropdown, Popconfirm, message } from "antd";
 import {
   createFeedView,
   deleteFeedByUser,
@@ -37,6 +37,7 @@ const ModalImageZoomFeed = dynamic(
   },
   { ssr: false }
 );
+import { TbLock } from "react-icons/tb";
 
 const FeedItem = ({ data, index, user, usingUser }) => {
   const router = useRouter();
@@ -60,8 +61,29 @@ const FeedItem = ({ data, index, user, usingUser }) => {
   const onCallback = (feedId) => {
     getFeed({ feedId }).then((data) => setItem(data));
   };
-  console.log("Items", item);
 
+  const find1 = item?.description?.indexOf("<p>https://");
+  const text =
+    find1 > -1 ? item?.description?.substring(0, find1) : item?.description;
+  const link = find1 > -1 && item?.description?.substring(find1);
+  const href =
+    link &&
+    link
+      ?.replaceAll("<p>", "")
+      ?.replaceAll("</p>", "")
+      ?.replaceAll("&nbsp;", "");
+  const linkTag =
+    link &&
+    link
+      ?.replaceAll(
+        "<p>",
+        `<a href="${
+          href && href
+        }" target="_blank" class="underline text-blue-500">`
+      )
+      ?.replaceAll("</p>", "</a>");
+  const descriptionData = linkTag ? `${text}${linkTag}` : text;
+  console.log(item?.description);
   return (
     <div
       key={item?.feedId}
@@ -106,123 +128,157 @@ const FeedItem = ({ data, index, user, usingUser }) => {
           <p class="text-sm sm:text-base font-normal text-gray-500 truncate dark:text-gray-400 flex items-center">
             {moment(item?.publishDate).format("DD")} tháng{" "}
             {moment(item?.publishDate).format("MM")}{" "}
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              className="w-4 h-4 ml-1"
-            >
-              <path d="M15.75 8.25a.75.75 0 01.75.75c0 1.12-.492 2.126-1.27 2.812a.75.75 0 11-.992-1.124A2.243 2.243 0 0015 9a.75.75 0 01.75-.75z" />
-              <path
-                fillRule="evenodd"
-                d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM4.575 15.6a8.25 8.25 0 009.348 4.425 1.966 1.966 0 00-1.84-1.275.983.983 0 01-.97-.822l-.073-.437c-.094-.565.25-1.11.8-1.267l.99-.282c.427-.123.783-.418.982-.816l.036-.073a1.453 1.453 0 012.328-.377L16.5 15h.628a2.25 2.25 0 011.983 1.186 8.25 8.25 0 00-6.345-12.4c.044.262.18.503.389.676l1.068.89c.442.369.535 1.01.216 1.49l-.51.766a2.25 2.25 0 01-1.161.886l-.143.048a1.107 1.107 0 00-.57 1.664c.369.555.169 1.307-.427 1.605L9 13.125l.423 1.059a.956.956 0 01-1.652.928l-.679-.906a1.125 1.125 0 00-1.906.172L4.575 15.6z"
-                clipRule="evenodd"
-              />
-            </svg>
+            {item?.isPrivate ? (
+              <div className="ml-1 flex items-center gap-x-1">
+                <TbLock size={16} /> Riêng tư
+              </div>
+            ) : (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                className="w-4 h-4 ml-1"
+              >
+                <path d="M15.75 8.25a.75.75 0 01.75.75c0 1.12-.492 2.126-1.27 2.812a.75.75 0 11-.992-1.124A2.243 2.243 0 0015 9a.75.75 0 01.75-.75z" />
+                <path
+                  fillRule="evenodd"
+                  d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM4.575 15.6a8.25 8.25 0 009.348 4.425 1.966 1.966 0 00-1.84-1.275.983.983 0 01-.97-.822l-.073-.437c-.094-.565.25-1.11.8-1.267l.99-.282c.427-.123.783-.418.982-.816l.036-.073a1.453 1.453 0 012.328-.377L16.5 15h.628a2.25 2.25 0 011.983 1.186 8.25 8.25 0 00-6.345-12.4c.044.262.18.503.389.676l1.068.89c.442.369.535 1.01.216 1.49l-.51.766a2.25 2.25 0 01-1.161.886l-.143.048a1.107 1.107 0 00-.57 1.664c.369.555.169 1.307-.427 1.605L9 13.125l.423 1.059a.956.956 0 01-1.652.928l-.679-.906a1.125 1.125 0 00-1.906.172L4.575 15.6z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            )}
           </p>
         </div>
         <div className="flex justify-end items-center">
           <button className="flex gap-x-1 items-center mr-2">
             <IoEyeOutline size={20} /> {item?.viewsCount}
           </button>
-          {
-            <div className="relative cursor-pointer group">
-              <IoMdMore size={24} />
-              <div className="absolute z-40 hidden group-hover:flex flex-col top-full right-0 bg-white shadow-sm shadow-gray-500 text-[10px] sm:text-xs font-medium w-[80px] rounded p-1">
-                {item?.userId === user?.uid && (
-                  <Link
-                    href=""
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setShowPostText(true);
-                      setShowImage(true);
-                    }}
-                    className="hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5"
-                  >
-                    Sửa
-                  </Link>
-                )}
-                {item?.userId === user?.uid && (
-                  <Link
-                    href=""
-                    onClick={(e) => {
-                      e.preventDefault();
-                      if (item.isPrivate) {
+          <Dropdown
+            placement="bottomRight"
+            menu={{
+              items: [
+                {
+                  label: (
+                    <Link
+                      href=""
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setShowPostText(true);
+                        setShowImage(true);
+                      }}
+                      className="w-full"
+                    >
+                      Sửa bài viết
+                    </Link>
+                  ),
+                  disabled: item?.userId === user?.uid ? false : true,
+                },
+                {
+                  label: (
+                    <Link
+                      href=""
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (item.isPrivate) {
+                          return updateFeedByUser(
+                            {
+                              ...item,
+                              isPrivate: false,
+                              feedId: item?.feedId,
+                            },
+                            user?.accessToken
+                          ).then((result) => {
+                            message.success("Công khai bài viết thành công");
+                            onCallback(item?.feedId);
+                          });
+                        } else {
+                          return updateFeedByUser(
+                            {
+                              ...item,
+                              isPrivate: true,
+                              feedId: item?.feedId,
+                            },
+                            user?.accessToken
+                          ).then((result) => {
+                            message.success("Ẩn bài viết thành công");
+                            onCallback(item?.feedId);
+                          });
+                        }
+                      }}
+                      className=" w-full"
+                    >
+                      {item?.isPrivate ? "Hủy ẩn bài viết" : "Ẩn bài viết"}
+                    </Link>
+                  ),
+                  disabled: item?.userId === user?.uid ? false : true,
+                },
+                {
+                  label: (
+                    <Link
+                      href=""
+                      onClick={(e) => {
+                        e.preventDefault();
                         return updateFeedByUser(
                           {
                             ...item,
-                            isPrivate: false,
+                            isReport: true,
                             feedId: item?.feedId,
                           },
                           user?.accessToken
                         ).then((result) => {
-                          message.success("Công khai bài viết thành công");
+                          message.success(
+                            "Chúng tôi sẽ xem xét báo cáo của bạn về bài viết này. Xin cảm ơn!!!"
+                          );
                           onCallback(item?.feedId);
                         });
-                      } else {
-                        return updateFeedByUser(
-                          {
-                            ...item,
-                            isPrivate: true,
-                            feedId: item?.feedId,
-                          },
+                      }}
+                      className="w-full"
+                    >
+                      Báo cáo bài viết
+                    </Link>
+                  ),
+                  disabled: item?.userId !== user?.uid ? false : true,
+                },
+                {
+                  label: (
+                    <Popconfirm
+                      placement="bottomRight"
+                      title="Xóa bài viết"
+                      description="Bài viết sẽ bị xóa vĩnh viễn. Bạn có chắc chắn xóa?"
+                      onConfirm={async () => {
+                        return deleteFeedByUser(
+                          item?.feedId,
                           user?.accessToken
                         ).then((result) => {
-                          message.success("Ẩn bài viết thành công");
+                          message.success("Xóa bài viết thành công");
                           onCallback(item?.feedId);
                         });
-                      }
-                    }}
-                    className="hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5"
-                  >
-                    {item?.isPrivate ? "Hủy ẩn" : "Ẩn"}
-                  </Link>
-                )}
-                {item?.userId !== user?.uid && (
-                  <Link
-                    href=""
-                    onClick={(e) => {
-                      e.preventDefault();
-                      return updateFeedByUser(
-                        {
-                          ...item,
-                          isReport: true,
-                          feedId: item?.feedId,
-                        },
-                        user?.accessToken
-                      ).then((result) => {
-                        message.success(
-                          "Chúng tôi sẽ xem xét báo cáo của bạn về bài viết này. Xin cảm ơn!!!"
-                        );
-                        onCallback(item?.feedId);
-                      });
-                    }}
-                    className="hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5"
-                  >
-                    Báo cáo
-                  </Link>
-                )}
-                {item?.userId === user?.uid && (
-                  <Link
-                    href=""
-                    onClick={(e) => {
-                      e.preventDefault();
-                      return deleteFeedByUser(
-                        item?.feedId,
-                        user?.accessToken
-                      ).then((result) => {
-                        message.success("Xóa bài viết thành công");
-                        onCallback(item?.feedId);
-                      });
-                    }}
-                    className="hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5"
-                  >
-                    Xóa
-                  </Link>
-                )}
-              </div>
-            </div>
-          }
+                      }}
+                      onCancel={() => {}}
+                      okText="Đồng ý"
+                      cancelText="Hủy bỏ"
+                      style={{
+                        width: 200,
+                      }}
+                    >
+                      <Link
+                        href=""
+                        onClick={(e) => {
+                          e.preventDefault();
+                        }}
+                        className="w-full"
+                      >
+                        Xóa bài viết
+                      </Link>
+                    </Popconfirm>
+                  ),
+                  disabled: item?.userId === user?.uid ? false : true,
+                },
+              ],
+            }}
+          >
+            <IoMdMore size={24} />
+          </Dropdown>
           <QuickPostModal
             feed={item}
             visible={showPostText}
@@ -277,7 +333,7 @@ const FeedItem = ({ data, index, user, usingUser }) => {
         )}
         <div className="text-base mt-2">
           <div
-            dangerouslySetInnerHTML={{ __html: item?.description }}
+            dangerouslySetInnerHTML={{ __html: descriptionData }}
             className={`text-lg font-normal text-justify [&>figure]:mt-2 html`}
           ></div>
         </div>

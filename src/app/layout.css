@@ -93,7 +93,9 @@
   margin-top: 5px;
  }
 }
-
+body{
+  position: relative !important;
+}
 /* Small devices (portrait tablets and large phones, 600px and up) */
 @media only screen and (min-width: 600px) {
   body {
@@ -710,4 +712,8 @@ div[data-slot="input-wrapper"] textarea::-webkit-scrollbar-thumbmb{
 /* Handle on hover */
 div[data-slot="input-wrapper"] textarea::-webkit-scrollbar-thumb:hover{
   background: #DADBDE;
+}
+
+.ant-dropdown-menu-item.ant-dropdown-menu-item-disabled.ant-dropdown-menu-item-only-child{
+  display: none;
 }

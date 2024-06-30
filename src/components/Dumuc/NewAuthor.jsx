@@ -29,7 +29,7 @@ import {
   receiveRequestAddFriend,
   sendRequestAddFriend,
 } from "@apis/users";
-import { message } from "antd";
+import { Dropdown, message } from "antd";
 import Link from "next/link";
 import { Spinner } from "flowbite-react";
 import dynamic from "next/dynamic";
@@ -144,7 +144,7 @@ const NewAuthorUI = ({ currentUrl = "/", params, searchParams }) => {
                   )}
                   {user ? (
                     authorData?.user?.email !== user?.email && (
-                      <div className="flex items-center gap-x-2 mt-2">
+                      <div className="flex gap-x-2 mt-2">
                         {friendType === 1 ? (
                           <button
                             onClick={async () => {
@@ -364,16 +364,28 @@ const NewAuthorUI = ({ currentUrl = "/", params, searchParams }) => {
                           <MdPending size={20} />
                           Nhắn tin
                         </button>
-                        <button className="relative group flex items-center gap-x-2 px-5 py-2 text-xs font-medium text-center text-black bg-gray-300 rounded-[4px] hover:brightness-110 focus:ring-4 focus:outline-none focus:ring-blue-300">
-                          <HiOutlineDotsHorizontal size={20} />
-                          <div className="absolute z-[9999] hidden group-hover:flex flex-col justify-start items-start top-full right-0 bg-white shadow-sm shadow-gray-500 text-[10px] sm:text-xs font-medium w-[140px] rounded p-1">
-                            <button
-                              onClick={() => setShowReport(true)}
-                              className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5 text-left text-black`}
-                            >
-                              Báo cáo
-                            </button>
-                          </div>
+
+                        <button className="bg-gray-300  rounded-[4px]">
+                          <Dropdown
+                            placement="bottomRight"
+                            className="h-full w-full px-[12px]"
+                            menu={{
+                              items: [
+                                {
+                                  label: (
+                                    <button
+                                      onClick={() => setShowReport(true)}
+                                      className={`w-full text-left`}
+                                    >
+                                      Báo cáo
+                                    </button>
+                                  ),
+                                },
+                              ],
+                            }}
+                          >
+                            <HiOutlineDotsHorizontal size={20} />
+                          </Dropdown>
                         </button>
                       </div>
                     )

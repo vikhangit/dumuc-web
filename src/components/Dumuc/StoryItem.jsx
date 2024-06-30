@@ -27,24 +27,12 @@ const ModalPlayVideos = dynamic(
   { ssr: false }
 );
 
-const StoryItem = ({
-  data,
-  onCallback,
-  user,
-  usingUser,
-  myFollow,
-  myFriend,
-  authors,
-  element,
-  index,
-}) => {
+const StoryItem = ({ data, element, index, setShowImage, setIndexImage }) => {
   const [stories, setStories] = useState(data);
   const [item, setItem] = useState(element);
   useEffect(() => {
     setItem(element);
-  }, []);
-  const [showImage, setShowImage] = useState(false);
-  const [indexImage, setIndexImage] = useState(-1);
+  }, [element]);
   return (
     <>
       <div
@@ -84,18 +72,6 @@ const StoryItem = ({
             : item?.author?.name}
         </span>
       </div>
-      <ModalPlayVideos
-        openImage={showImage}
-        setOpenImage={setShowImage}
-        imageList={stories}
-        index={indexImage}
-        onCallback={onCallback}
-        user={user}
-        usingUser={usingUser}
-        myFollow={myFollow}
-        myFriend={myFriend}
-        authors={authors}
-      />
     </>
   );
 };

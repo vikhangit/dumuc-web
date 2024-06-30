@@ -28,7 +28,7 @@ import {
 } from "firebase/firestore";
 import { uploadImage } from "@apis/other";
 import ModalWating from "@components/Dumuc/ModalWating";
-import { Button, Popconfirm, message } from "antd";
+import { Button, Dropdown, Popconfirm, message } from "antd";
 const ModalImageZoom = dynamic(
   () => {
     return import("@components/ModalImageZoom");
@@ -62,6 +62,8 @@ import { Spinner } from "flowbite-react";
 import { Textarea } from "@nextui-org/input";
 import ModalForwardMessage from "./ModalForwardMessage";
 import { set } from "lodash";
+import { HiPencil } from "react-icons/hi2";
+import ModalNickame from "./ModalChangeEmail";
 
 export default function ChatRight({
   userRecieved,
@@ -71,12 +73,14 @@ export default function ChatRight({
   messages,
   authors,
   activeMessage,
-  user,
-  usingUser,
-  friendList,
   checkFriendType,
+  tenGoiNho,
+  friendList,
   setFriendList,
+  usingUser,
+  setUsingUser,
 }) {
+  const [user] = useAuthState(auth);
   const router = useRouter();
   const search = useSearchParams();
   const refImg = useRef();
@@ -104,7 +108,14 @@ export default function ChatRight({
   const [typeFriend, setTypeFriend] = useState(1);
   const [myMessage, setMyMessage] = useState(activeMessage);
   useEffect(() => {
+    getProfile(user?.accessToken).then((dataCall) => {
+      setUsingUser(dataCall);
+      setFriendList(dataCall?.friendList);
+    });
+  }, [user]);
+  useEffect(() => {
     setMyMessage(activeMessage);
+    scroll.current?.scrollIntoView({ behavior: "smooth" });
   }, [activeMessage]);
   const read = async () => {
     if (
@@ -119,7 +130,6 @@ export default function ChatRight({
     }
   };
   useEffect(() => {
-    scroll.current?.scrollIntoView({ behavior: "smooth" });
     if (search.get("chatId")) {
       read();
     }
@@ -138,9 +148,7 @@ export default function ChatRight({
         setShowEmoji(false);
       }
     };
-
     window.addEventListener("mousedown", handleOutSideClick);
-
     return () => {
       window.removeEventListener("mousedown", handleOutSideClick);
     };
@@ -311,7 +319,7 @@ export default function ChatRight({
                     await addDoc(
                       collection(db, "chat-rooms", `${data?.id}`, "messages"),
                       dataItem
-                    ).then(async (data) => {
+                    ).then(async (dataMessage) => {
                       const washingtonRef = doc(
                         db,
                         "chat-rooms",
@@ -320,7 +328,7 @@ export default function ChatRight({
                       await updateDoc(washingtonRef, {
                         lastMessage: {
                           ...dataItem,
-                          messageId: data?.id,
+                          messageId: dataMessage?.id,
                           text: "[File]",
                         },
                         new: true,
@@ -349,6 +357,208 @@ export default function ChatRight({
   const [imageList, setImageList] = useState([]);
   const [indexImage, setIndexImage] = useState(0);
   const [type, setType] = useState("image");
+  const [editName, setEditName] = useState(false);
+  const [nameActive, setNameActive] = useState(userRecieved?.name);
+  useEffect(() => {
+    setNameActive(tenGoiNho ? tenGoiNho : userRecieved?.name);
+  }, [userRecieved, tenGoiNho]);
+  const itemsInfo = [
+    {
+      label: friendList?.find(
+        (item) =>
+          item?.authorId === userRecieved?.authorId && item?.status === 2
+      ) ? (
+        <button
+          onClick={async (e) => {
+            e.preventDefault();
+            deleteAddFriend(
+              {
+                authorId: userRecieved?.authorId,
+              },
+              user?.accessToken
+            );
+            deleteRecieveFriend(
+              {
+                authorUserId: userRecieved?.userId,
+              },
+              user?.accessToken
+            ).then(() =>
+              getProfile(user?.accessToken).then((dataCall) => {
+                setUsingUser(dataCall);
+                setFriendList(dataCall?.friendList);
+              })
+            );
+            message.success("Đã xóa bạn");
+          }}
+        >
+          Xóa bạn
+        </button>
+      ) : friendList?.find(
+          (item) =>
+            item?.authorId === userRecieved?.authorId &&
+            item?.status === 1 &&
+            item?.type === "send"
+        ) ? (
+        <button
+          onClick={async (e) => {
+            e.preventDefault();
+            deleteAddFriend(
+              {
+                authorId: userRecieved?.authorId,
+              },
+              user?.accessToken
+            );
+            deleteRecieveFriend(
+              {
+                authorUserId: userRecieved?.userId,
+              },
+              user?.accessToken
+            ).then(() =>
+              getProfile(user?.accessToken).then((dataCall) => {
+                setUsingUser(dataCall);
+                setFriendList(dataCall?.friendList);
+              })
+            );
+            message.success("Đã hủy kết bạn");
+          }}
+        >
+          Hủy lời mời
+        </button>
+      ) : friendList?.find(
+          (item) =>
+            item?.authorId === userRecieved?.authorId &&
+            item?.status === 1 &&
+            item?.type === "recieve"
+        ) ? (
+        <button
+          onClick={async (e) => {
+            e.preventDefault();
+            await deleteAddFriend(
+              {
+                authorId: userRecieved?.authorId,
+              },
+              user?.accessToken
+            ).then(() => {
+              deleteRecieveFriend(
+                {
+                  authorUserId: userRecieved?.userId,
+                },
+                user?.accessToken
+              );
+            });
+            await sendRequestAddFriend(
+              {
+                authorId: userRecieved?.authorId,
+                status: 2,
+              },
+              user?.accessToken
+            )
+              .then(() => {
+                receiveRequestAddFriend(
+                  {
+                    authorUserId: userRecieved?.userId,
+                    status: 2,
+                  },
+                  user?.accessToken
+                );
+              })
+              .then(() =>
+                getProfile(user?.accessToken).then((dataCall) => {
+                  setUsingUser(dataCall);
+                  setFriendList(dataCall?.friendList);
+                })
+              );
+            message.success("Bạn đã đồng ý lời mời kết bạn");
+          }}
+        >
+          Chấp nhận kết bạn
+        </button>
+      ) : (
+        <button
+          onClick={async (e) => {
+            e.preventDefault();
+            sendRequestAddFriend(
+              {
+                authorId: userRecieved?.authorId,
+              },
+              user?.accessToken
+            );
+            receiveRequestAddFriend(
+              {
+                authorUserId: userRecieved?.userId,
+              },
+              user?.accessToken
+            ).then(() =>
+              getProfile(user?.accessToken).then((dataCall) => {
+                setUsingUser(dataCall);
+                setFriendList(dataCall?.friendList);
+              })
+            );
+            message.success("Đã gữi yêu cầu kết bạn.");
+          }}
+        >
+          Kết bạn
+        </button>
+      ),
+      key: "0",
+    },
+    {
+      label: (
+        <Popconfirm
+          placement="bottomRight"
+          title="Xóa tin nhắn"
+          description="Toàn bộ tin nhắn sẽ bị xóa vĩnh viễn. Bạn có chắc chắn xóa"
+          onConfirm={async () => {
+            myMessage?.map(async (x) => {
+              const washingtonRef = doc(
+                db,
+                "chat-rooms",
+                search.get("chatId"),
+                "messages",
+                x?.id
+              );
+              await updateDoc(washingtonRef, {
+                isDelete: arrayUnion({
+                  user: user?.uid,
+                }),
+              });
+            });
+            const chatRef = doc(db, "chat-rooms", search.get("chatId"));
+            await updateDoc(chatRef, {
+              isDelete: arrayUnion({
+                user: user?.uid,
+              }),
+            });
+            message.success("Đã xóa tin nhắn thành công!!");
+            router.push("/chat");
+          }}
+          onCancel={() => {}}
+          okText="Đồng ý"
+          cancelText="Hủy bỏ"
+          style={{
+            width: 200,
+          }}
+        >
+          <button>Xóa tin nhắn</button>
+        </Popconfirm>
+      ),
+      key: "1",
+    },
+    {
+      label: (
+        <button
+          onClick={(e) => {
+            e.preventDefault();
+          }}
+        >
+          Báo cáo
+        </button>
+      ),
+      key: "2",
+    },
+  ];
+  const myAuthor = authors?.find((x) => x?.userId === user?.uid);
+  console.log(userRecieved);
   return (
     <div
       className={`h-full  ${
@@ -398,14 +608,18 @@ export default function ChatRight({
               <div>
                 <div
                   href={``}
-                  className="text-base font-semibold cursor-pointer"
-                  onClick={() => {
-                    router.push(
-                      `/author/${userRecieved?.slug}/${userRecieved?.authorId}`
-                    );
-                  }}
+                  className="text-base font-semibold cursor-pointer flex items-center gap-x-2"
                 >
-                  {userRecieved?.name}
+                  <button
+                    onClick={() => {
+                      router.push(
+                        `/author/${userRecieved?.slug}/${userRecieved?.authorId}`
+                      );
+                    }}
+                  >
+                    {nameActive}
+                  </button>
+                  <HiPencil size={12} onClick={() => setEditName(true)} />
                 </div>
                 {/* <p className='text-sm'>Đang hoạt động</p> */}
               </div>
@@ -413,197 +627,21 @@ export default function ChatRight({
             <div className="flex items-center gap-x-3 pr-0 sm:pr-5">
               <IoIosCall color="#0084ff" size={28} />
               <HiVideoCamera color="#0084ff" size={28} />
-              <button className="group relative">
+
+              <Dropdown
+                menu={{
+                  items: itemsInfo,
+                }}
+                placement="bottomRight"
+              >
                 <IoInformationCircleSharp color="#0084ff" size={28} />
-                <div className="absolute z-[99999] hidden group-hover:flex flex-col justify-start items-start top-full right-0 bg-white shadow-sm shadow-gray-500 text-[10px] sm:text-xs font-medium w-[125px] rounded p-1">
-                  <Link
-                    href={``}
-                    onClick={async (e) => {
-                      e.preventDefault();
-                    }}
-                    className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left`}
-                  ></Link>
-                  <Popconfirm
-                    placement="topLeft"
-                    title="Xóa tin nhắn"
-                    description="Toàn bộ tin nhắn sẽ bị xóa vĩnh viễn. Bạn có chắc chắn xóa"
-                    onConfirm={async () => {
-                      myMessage?.map(async (x) => {
-                        const washingtonRef = doc(
-                          db,
-                          "chat-rooms",
-                          search.get("chatId"),
-                          "messages",
-                          x?.id
-                        );
-                        await updateDoc(washingtonRef, {
-                          isDelete: arrayUnion({
-                            user: user?.uid,
-                          }),
-                        });
-                      });
-                      const chatRef = doc(
-                        db,
-                        "chat-rooms",
-                        search.get("chatId")
-                      );
-                      await updateDoc(chatRef, {
-                        isDelete: arrayUnion({
-                          user: user?.uid,
-                        }),
-                      });
-                      message.success("Đã xóa tin nhắn thành công!!");
-                      router.push("/chat");
-                    }}
-                    onCancel={() => {}}
-                    okText="Đồng ý"
-                    cancelText="Hủy bỏ"
-                    style={{
-                      width: 200,
-                    }}
-                  >
-                    <button className="border-0 hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left">
-                      Xóa tin nhắn
-                    </button>
-                  </Popconfirm>
-                  <Link
-                    href={``}
-                    onClick={(e) => {
-                      e.preventDefault();
-                    }}
-                    className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left`}
-                  >
-                    Báo cáo
-                  </Link>
-                </div>
-              </button>
+              </Dropdown>
             </div>
           </>
         )}
       </div>
       <div ref={addFriend}></div>
-      {/* {userRecieved && typeFriend !== 2 && (
-        <div
-          ref={addFriend}
-          className="flex justify-between items-center px-[15px]  sm:px-[20px] border-b py-2 border-gray-300"
-        >
-          <div>{type === 4 ? "Đã gửi" : "Gửi"} lời mời kết bạn</div>
-          <div className="flex items-center gap-x-2">
-            {typeFriend == 1 ? (
-              <button
-                onClick={() => {
-                  sendRequestAddFriend(
-                    {
-                      authorId: userRecieved?.authorId,
-                    },
-                    user?.accessToken
-                  );
-                  receiveRequestAddFriend(
-                    {
-                      authorUserId: userRecieved?.userId,
-                    },
-                    user?.accessToken
-                  );
-                  setTypeFriend(3);
 
-                  message.success("Đã gữi yêu cầu kết bạn.");
-                }}
-                type="button"
-                class="flex items-center gap-x-1 px-2 py-1 text-xs font-medium text-center text-white bg-[#c80000] rounded-[4px] hover:brightness-110 focus:ring-4 focus:outline-none focus:ring-blue-300"
-              >
-                {loadingAdd ? <Spinner className="w-4 h-4" /> : <>Kết bạn</>}
-              </button>
-            ) : typeFriend === 3 ? (
-              <button
-                onClick={() => {
-                  deleteAddFriend(
-                    {
-                      authorId: userRecieved?.authorId,
-                    },
-                    user?.accessToken
-                  );
-                  deleteRecieveFriend(
-                    {
-                      authorUserId: userRecieved?.userId,
-                    },
-                    user?.accessToken
-                  );
-                  setTypeFriend(1);
-                  message.success("Đã hủy kết bạn");
-                }}
-                type="button"
-                class="flex items-center gap-x-1 px-2 py-1 text-xs font-medium text-center text-white bg-[#c80000] rounded-[4px] hover:brightness-110 focus:ring-4 focus:outline-none focus:ring-blue-300"
-              >
-                Hủy lời mời
-              </button>
-            ) : typeFriend === 4 ? (
-              <>
-                <button
-                  onClick={() => {
-                    deleteAddFriend(
-                      {
-                        authorId: userRecieved?.authorId,
-                      },
-                      user?.accessToken
-                    );
-                    deleteRecieveFriend(
-                      {
-                        authorUserId: userRecieved?.userId,
-                      },
-                      user?.accessToken
-                    );
-                    sendRequestAddFriend(
-                      {
-                        authorId: userRecieved?.authorId,
-                        status: 2,
-                      },
-                      user?.accessToken
-                    );
-                    receiveRequestAddFriend(
-                      {
-                        authorUserId: userRecieved?.userId,
-                        status: 2,
-                      },
-                      user?.accessToken
-                    );
-                    setTypeFriend(2);
-                    setFriendList(usingUser?.authorId);
-                    message.success("Bạn đã đồng ý lời mời kết bạn");
-                  }}
-                  type="button"
-                  class="flex items-center gap-x-1 px-2 py-1 text-xs font-medium text-center text-white bg-[#c80000] rounded-[4px] hover:brightness-110 focus:ring-4 focus:outline-none focus:ring-blue-300"
-                >
-                  Đồng ý
-                </button>
-                <button
-                  onClick={() => {
-                    deleteAddFriend(
-                      {
-                        authorId: userRecieved?.authorId,
-                      },
-                      user?.accessToken
-                    );
-                    deleteRecieveFriend(
-                      {
-                        authorUserId: userRecieved?.userId,
-                      },
-                      user?.accessToken
-                    );
-                    setTypeFriend(1);
-                    message.success("Bạn đã xóa lời mời kết bạn");
-                  }}
-                  type="button"
-                  class="flex items-center gap-x-1 px-2 py-1 text-xs border font-medium text-center rounded-[4px] hover:brightness-110 focus:ring-4 focus:outline-none focus:ring-blue-300"
-                >
-                  Xóa lời mời
-                </button>
-              </>
-            ) : (
-              <div>Bạn</div>
-            )}
-          </div>
-        </div>
-      )} */}
       {userRecieved ? (
         <>
           <div
@@ -712,131 +750,152 @@ export default function ChatRight({
                                 {item?.formAuthor?.userId === user?.uid &&
                                   !item?.recall && (
                                     <button className="relative group w-fit mr-1">
-                                      <HiOutlineDotsHorizontal />
-                                      <div
-                                        className={`absolute z-[9999] hidden group-hover:flex flex-col justify-start items-start top-full ${
-                                          item?.formAuthor?.userId === user?.uid
-                                            ? "left-0"
-                                            : "right-0"
-                                        } bg-white shadow-sm shadow-gray-500 text-[10px] sm:text-xs font-medium w-[120px] rounded p-1`}
+                                      <Dropdown
+                                        placement="bottomLeft"
+                                        menu={{
+                                          items: [
+                                            {
+                                              label: (
+                                                <button
+                                                  onClick={async (e) => {
+                                                    const washingtonRef = doc(
+                                                      db,
+                                                      "chat-rooms",
+                                                      search.get("chatId"),
+                                                      "messages",
+                                                      item?.id
+                                                    );
+                                                    await updateDoc(
+                                                      washingtonRef,
+                                                      {
+                                                        recall: true,
+                                                      }
+                                                    );
+
+                                                    if (
+                                                      messages?.find(
+                                                        (x) =>
+                                                          x?.id ===
+                                                          search.get("chatId")
+                                                      )?.lastMessage
+                                                        ?.messageId === item?.id
+                                                    ) {
+                                                      const wRef = doc(
+                                                        db,
+                                                        "chat-rooms",
+                                                        search.get("chatId")
+                                                      );
+                                                      await updateDoc(wRef, {
+                                                        lastMessage: {
+                                                          recall: true,
+                                                        },
+                                                      });
+                                                    }
+                                                  }}
+                                                  className={`flex items-center gap-x-2  w-full`}
+                                                >
+                                                  <MdReplay size={20} /> Thu hồi
+                                                </button>
+                                              ),
+                                            },
+                                            {
+                                              label: item?.formAuthor
+                                                ?.userId === user?.uid && (
+                                                <Popconfirm
+                                                  placement="bottomRight"
+                                                  title="Xóa tin nhắn"
+                                                  description="Tin nhắn này sẽ bị xóa vĩnh viễn. Bạn có chắc chắn xóa?"
+                                                  onConfirm={async () => {
+                                                    const washingtonRef = doc(
+                                                      db,
+                                                      "chat-rooms",
+                                                      search.get("chatId"),
+                                                      "messages",
+                                                      item?.id
+                                                    );
+                                                    await updateDoc(
+                                                      washingtonRef,
+                                                      {
+                                                        isDelete: arrayUnion({
+                                                          user: user?.uid,
+                                                        }),
+                                                      }
+                                                    );
+                                                    if (
+                                                      findRoom?.lastMessage
+                                                        ?.messageId === item?.id
+                                                    ) {
+                                                      const wRef = doc(
+                                                        db,
+                                                        "chat-rooms",
+                                                        search.get("chatId")
+                                                      );
+                                                      await updateDoc(wRef, {
+                                                        lastMessage: {
+                                                          ...item,
+                                                          messageId: item?.id,
+                                                          isDelete: arrayUnion({
+                                                            user: user?.uid,
+                                                          }),
+                                                        },
+                                                      });
+                                                    }
+                                                  }}
+                                                  onCancel={() => {}}
+                                                  okText="Đồng ý"
+                                                  cancelText="Hủy bỏ"
+                                                  style={{
+                                                    width: 200,
+                                                  }}
+                                                >
+                                                  <button className="flex items-center gap-x-2 w-full">
+                                                    <MdDelete size={20} /> Xóa
+                                                  </button>
+                                                </Popconfirm>
+                                              ),
+                                            },
+                                            {
+                                              label: (
+                                                <button
+                                                  onClick={async (e) => {
+                                                    setChooseQuote(item);
+                                                  }}
+                                                  className={`flex items-center gap-x-2 w-full`}
+                                                >
+                                                  <MdReply size={20} /> Trả lời
+                                                </button>
+                                              ),
+                                            },
+                                            {
+                                              label: (
+                                                <button
+                                                  onClick={async (e) => {
+                                                    setPhotoForward(
+                                                      item?.photos
+                                                    );
+                                                    setMessageForward("");
+                                                    setFieldForward([]);
+                                                    setShowForward(true);
+                                                  }}
+                                                  className={`flex items-center gap-x-2 w-full`}
+                                                >
+                                                  <IoMdShareAlt size={20} />
+                                                  Chuyển tiếp
+                                                </button>
+                                              ),
+                                            },
+                                          ],
+                                        }}
                                       >
-                                        {item?.formAuthor?.userId ===
-                                          user?.uid && (
-                                          <>
-                                            <Link
-                                              href={``}
-                                              onClick={async (e) => {
-                                                e.preventDefault();
-                                                const washingtonRef = doc(
-                                                  db,
-                                                  "chat-rooms",
-                                                  search.get("chatId"),
-                                                  "messages",
-                                                  item?.id
-                                                );
-                                                await updateDoc(washingtonRef, {
-                                                  recall: true,
-                                                });
-
-                                                if (
-                                                  messages?.find(
-                                                    (x) =>
-                                                      x?.id ===
-                                                      search.get("chatId")
-                                                  )?.lastMessage?.messageId ===
-                                                  item?.id
-                                                ) {
-                                                  const wRef = doc(
-                                                    db,
-                                                    "chat-rooms",
-                                                    search.get("chatId")
-                                                  );
-                                                  await updateDoc(wRef, {
-                                                    lastMessage: {
-                                                      recall: true,
-                                                    },
-                                                  });
-                                                }
-                                              }}
-                                              className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left flex items-center gap-x-2 text-black`}
-                                            >
-                                              <MdReplay size={20} /> Thu hồi
-                                            </Link>
-                                            <Link
-                                              href={``}
-                                              onClick={async (e) => {
-                                                e.preventDefault();
-                                                const washingtonRef = doc(
-                                                  db,
-                                                  "chat-rooms",
-                                                  search.get("chatId"),
-                                                  "messages",
-                                                  item?.id
-                                                );
-                                                await updateDoc(washingtonRef, {
-                                                  isDelete: arrayUnion({
-                                                    user: user?.uid,
-                                                  }),
-                                                });
-
-                                                if (
-                                                  findRoom?.lastMessage
-                                                    ?.messageId === item?.id
-                                                ) {
-                                                  const wRef = doc(
-                                                    db,
-                                                    "chat-rooms",
-                                                    search.get("chatId")
-                                                  );
-                                                  await updateDoc(wRef, {
-                                                    lastMessage: {
-                                                      ...item,
-                                                      messageId: item?.id,
-                                                      isDelete: arrayUnion({
-                                                        user: user?.uid,
-                                                      }),
-                                                    },
-                                                  });
-                                                }
-                                              }}
-                                              className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left flex items-center gap-x-2 text-black`}
-                                            >
-                                              <MdDelete size={20} /> Xóa
-                                            </Link>
-                                          </>
-                                        )}
-                                        <Link
-                                          href={``}
-                                          onClick={async (e) => {
-                                            e.preventDefault();
-                                            setChooseQuote(item);
-                                          }}
-                                          className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left  flex items-center gap-x-2 text-black`}
-                                        >
-                                          <MdReply size={20} /> Trả lời
-                                        </Link>
-                                        <Link
-                                          href={``}
-                                          onClick={async (e) => {
-                                            e.preventDefault();
-                                            setPhotoForward(item?.photos);
-                                            setMessageForward("");
-                                            setFieldForward([]);
-                                            setShowForward(true);
-                                          }}
-                                          className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left  flex items-center gap-x-2 text-black`}
-                                        >
-                                          <IoMdShareAlt size={20} />
-                                          Chuyển tiếp
-                                        </Link>
-                                      </div>
+                                        <HiOutlineDotsHorizontal />
+                                      </Dropdown>
                                     </button>
                                   )}
                                 {item?.photos?.map((photo, indexC) => {
                                   return (
                                     <div
                                       key={indexC}
-                                      className={`rounded-md h-full relative w-1/2 sm:w-1/3 2xl:w-1/4 `}
+                                      className={`rounded-md h-full relative w-1/2 sm:w-1/3 2xl:w-1/4`}
                                     >
                                       <button
                                         onClick={() => {
@@ -866,86 +925,49 @@ export default function ChatRight({
                                     </div>
                                   );
                                 })}
-                                {item?.formAuthor?.userId !== user?.uid &&
-                                  !item?.recall && (
-                                    <button className="relative group w-fit mr-1">
-                                      <HiOutlineDotsHorizontal />
-                                      <div
-                                        className={`absolute z-[9999] hidden group-hover:flex flex-col justify-start items-start top-full ${
-                                          item?.formAuthor?.userId === user?.uid
-                                            ? "left-0"
-                                            : "right-0"
-                                        } bg-white shadow-sm shadow-gray-500 text-[10px] sm:text-xs font-medium w-[120px] rounded p-1`}
-                                      >
-                                        {item?.formAuthor?.userId ===
-                                          user?.uid && (
-                                          <Link
-                                            href={``}
-                                            onClick={async (e) => {
-                                              e.preventDefault();
-                                              const washingtonRef = doc(
-                                                db,
-                                                "chat-rooms",
-                                                search.get("chatId"),
-                                                "messages",
-                                                item?.id
-                                              );
-                                              await updateDoc(washingtonRef, {
-                                                recall: true,
-                                              });
-
-                                              if (
-                                                messages?.find(
-                                                  (x) =>
-                                                    x?.id ===
-                                                    search.get("chatId")
-                                                )?.lastMessage?.messageId ===
-                                                item?.id
-                                              ) {
-                                                const wRef = doc(
-                                                  db,
-                                                  "chat-rooms",
-                                                  search.get("chatId")
-                                                );
-                                                await updateDoc(wRef, {
-                                                  lastMessage: {
-                                                    recall: true,
-                                                  },
-                                                });
-                                              }
-                                            }}
-                                            className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left flex items-center gap-x-2 text-black`}
-                                          >
-                                            <MdReplay size={20} /> Thu hồi
-                                          </Link>
-                                        )}
-                                        <Link
-                                          href={``}
-                                          onClick={async (e) => {
-                                            e.preventDefault();
-                                            setChooseQuote(item);
-                                          }}
-                                          className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left  flex items-center gap-x-2 text-black`}
-                                        >
-                                          <MdReply size={20} /> Trả lời
-                                        </Link>
-                                        <Link
-                                          href={``}
-                                          onClick={async (e) => {
-                                            e.preventDefault();
-                                            setPhotoForward(item?.photos);
-                                            setMessageForward("");
-                                            setFieldForward([]);
-                                            setShowForward(true);
-                                          }}
-                                          className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left  flex items-center gap-x-2 text-black`}
-                                        >
-                                          <IoMdShareAlt size={20} />
-                                          Chuyển tiếp
-                                        </Link>
-                                      </div>
-                                    </button>
-                                  )}
+                                {item?.formAuthor?.userId !== user?.uid && (
+                                  <Dropdown
+                                    placement="bottomRight"
+                                    menu={{
+                                      items: [
+                                        {
+                                          label: (
+                                            <Link
+                                              href={``}
+                                              onClick={async (e) => {
+                                                e.preventDefault();
+                                                setChooseQuote(item);
+                                              }}
+                                              className={`flex items-center gap-x-2 w-full`}
+                                            >
+                                              <MdReply size={20} /> Trả lời
+                                            </Link>
+                                          ),
+                                        },
+                                        {
+                                          label: (
+                                            <Link
+                                              href={``}
+                                              onClick={async (e) => {
+                                                e.preventDefault();
+                                                setPhotoForward(item?.photos);
+                                                setMessageForward("");
+                                                setFieldForward([]);
+                                                setShowForward(true);
+                                              }}
+                                              className={`flex items-center gap-x-2 w-full`}
+                                            >
+                                              <IoMdShareAlt size={20} />
+                                              Chuyển tiếp
+                                            </Link>
+                                          ),
+                                        },
+                                      ],
+                                    }}
+                                  >
+                                    <HiOutlineDotsHorizontal />
+                                  </Dropdown>
+                                )}
                               </div>
                               <div
                                 className={`w-fit ${
@@ -1192,122 +1214,141 @@ export default function ChatRight({
                                 })}
                               </div>
                               {!item?.recall && (
-                                <button className="relative group w-fit  pt-[40px]">
+                                <Dropdown
+                                  placement="bottomRight"
+                                  menu={{
+                                    items: [
+                                      {
+                                        label: item?.formAuthor?.userId ===
+                                          user?.uid && (
+                                          <button
+                                            href={``}
+                                            onClick={async (e) => {
+                                              e.preventDefault();
+                                              const washingtonRef = doc(
+                                                db,
+                                                "chat-rooms",
+                                                search.get("chatId"),
+                                                "messages",
+                                                item?.id
+                                              );
+                                              await updateDoc(washingtonRef, {
+                                                recall: true,
+                                              });
+                                              if (
+                                                messages?.find(
+                                                  (x) =>
+                                                    x?.id ===
+                                                    search.get("chatId")
+                                                )?.lastMessage?.messageId ===
+                                                item?.id
+                                              ) {
+                                                const wRef = doc(
+                                                  db,
+                                                  "chat-rooms",
+                                                  search.get("chatId")
+                                                );
+                                                await updateDoc(wRef, {
+                                                  lastMessage: {
+                                                    recall: true,
+                                                  },
+                                                });
+                                              }
+                                            }}
+                                            className={`flex items-center gap-x-2 w-full`}
+                                          >
+                                            <MdReplay size={20} /> Thu hồi
+                                          </button>
+                                        ),
+                                      },
+                                      {
+                                        label: item?.formAuthor?.userId ===
+                                          user?.uid && (
+                                          <Popconfirm
+                                            placement="bottomRight"
+                                            title="Xóa tin nhắn"
+                                            description="Tin nhắn này sẽ bị xóa vĩnh viễn. Bạn có chắc chắn xóa?"
+                                            onConfirm={async () => {
+                                              const washingtonRef = doc(
+                                                db,
+                                                "chat-rooms",
+                                                search.get("chatId"),
+                                                "messages",
+                                                item?.id
+                                              );
+                                              await updateDoc(washingtonRef, {
+                                                isDelete: arrayUnion({
+                                                  user: user?.uid,
+                                                }),
+                                              });
+                                              if (
+                                                findRoom?.lastMessage
+                                                  ?.messageId === item?.id
+                                              ) {
+                                                const wRef = doc(
+                                                  db,
+                                                  "chat-rooms",
+                                                  search.get("chatId")
+                                                );
+                                                await updateDoc(wRef, {
+                                                  lastMessage: {
+                                                    ...item,
+                                                    messageId: item?.id,
+                                                    isDelete: arrayUnion({
+                                                      user: user?.uid,
+                                                    }),
+                                                  },
+                                                });
+                                              }
+                                            }}
+                                            onCancel={() => {}}
+                                            okText="Đồng ý"
+                                            cancelText="Hủy bỏ"
+                                            style={{
+                                              width: 200,
+                                            }}
+                                          >
+                                            <button className="flex items-center gap-x-2 w-full">
+                                              <MdDelete size={20} /> Xóa
+                                            </button>
+                                          </Popconfirm>
+                                        ),
+                                      },
+                                      {
+                                        label: (
+                                          <button
+                                            onClick={async (e) => {
+                                              e.preventDefault();
+                                              setChooseQuote(item);
+                                            }}
+                                            className={`flex items-center gap-x-2 w-full`}
+                                          >
+                                            <MdReply size={20} /> Trả lời
+                                          </button>
+                                        ),
+                                      },
+                                      {
+                                        label: (
+                                          <button
+                                            onClick={async (e) => {
+                                              e.preventDefault();
+                                              setFieldForward(item?.files);
+                                              setMessageForward("");
+                                              setPhotoForward([]);
+                                              setShowForward(true);
+                                            }}
+                                            className={`flex items-center gap-x-2 w-full`}
+                                          >
+                                            <IoMdShareAlt size={20} />
+                                            Chuyển tiếp
+                                          </button>
+                                        ),
+                                      },
+                                    ],
+                                  }}
+                                >
                                   <HiOutlineDotsHorizontal />
-                                  <div
-                                    className={`absolute z-[9999] hidden group-hover:flex flex-col justify-start items-start top-full ${
-                                      item?.formAuthor?.userId === user?.uid
-                                        ? "left-0"
-                                        : "right-0"
-                                    } bg-white shadow-sm shadow-gray-500 text-[10px] sm:text-xs font-medium w-[120px] rounded p-1`}
-                                  >
-                                    {item?.formAuthor?.userId === user?.uid && (
-                                      <>
-                                        <Link
-                                          href={``}
-                                          onClick={async (e) => {
-                                            e.preventDefault();
-                                            const washingtonRef = doc(
-                                              db,
-                                              "chat-rooms",
-                                              search.get("chatId"),
-                                              "messages",
-                                              item?.id
-                                            );
-                                            await updateDoc(washingtonRef, {
-                                              recall: true,
-                                            });
-                                            if (
-                                              messages?.find(
-                                                (x) =>
-                                                  x?.id === search.get("chatId")
-                                              )?.lastMessage?.messageId ===
-                                              item?.id
-                                            ) {
-                                              const wRef = doc(
-                                                db,
-                                                "chat-rooms",
-                                                search.get("chatId")
-                                              );
-                                              await updateDoc(wRef, {
-                                                lastMessage: {
-                                                  recall: true,
-                                                },
-                                              });
-                                            }
-                                          }}
-                                          className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left flex items-center gap-x-2 text-black`}
-                                        >
-                                          <MdReplay size={20} /> Thu hồi
-                                        </Link>
-                                        <Link
-                                          href={``}
-                                          onClick={async (e) => {
-                                            e.preventDefault();
-                                            const washingtonRef = doc(
-                                              db,
-                                              "chat-rooms",
-                                              search.get("chatId"),
-                                              "messages",
-                                              item?.id
-                                            );
-                                            await updateDoc(washingtonRef, {
-                                              isDelete: arrayUnion({
-                                                user: user?.uid,
-                                              }),
-                                            });
-                                            if (
-                                              findRoom?.lastMessage
-                                                ?.messageId === item?.id
-                                            ) {
-                                              const wRef = doc(
-                                                db,
-                                                "chat-rooms",
-                                                search.get("chatId")
-                                              );
-                                              await updateDoc(wRef, {
-                                                lastMessage: {
-                                                  ...item,
-                                                  messageId: item?.id,
-                                                  isDelete: arrayUnion({
-                                                    user: user?.uid,
-                                                  }),
-                                                },
-                                              });
-                                            }
-                                          }}
-                                          className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left flex items-center gap-x-2 text-black`}
-                                        >
-                                          <MdDelete size={20} /> Xóa
-                                        </Link>
-                                      </>
-                                    )}
-                                    <Link
-                                      href={``}
-                                      onClick={async (e) => {
-                                        e.preventDefault();
-                                        setChooseQuote(item);
-                                      }}
-                                      className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left  flex items-center gap-x-2 text-black`}
-                                    >
-                                      <MdReply size={20} /> Trả lời
-                                    </Link>
-                                    <Link
-                                      href={``}
-                                      onClick={async (e) => {
-                                        e.preventDefault();
-                                        setFieldForward(item?.files);
-                                        setMessageForward("");
-                                        setPhotoForward([]);
-                                        setShowForward(true);
-                                      }}
-                                      className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left  flex items-center gap-x-2 text-black`}
-                                    >
-                                      <IoMdShareAlt size={20} />
-                                      Chuyển tiếp
-                                    </Link>
-                                  </div>
-                                </button>
+                                </Dropdown>
                               )}
                             </div>
                           ))}
@@ -1334,122 +1375,140 @@ export default function ChatRight({
                               }`}
                             >
                               {!item?.recall && (
-                                <button className="relative group w-fit">
+                                <Dropdown
+                                  placement="bottomRight"
+                                  menu={{
+                                    items: [
+                                      {
+                                        label: item?.formAuthor?.userId ===
+                                          user?.uid && (
+                                          <button
+                                            onClick={async (e) => {
+                                              e.preventDefault();
+                                              const washingtonRef = doc(
+                                                db,
+                                                "chat-rooms",
+                                                search.get("chatId"),
+                                                "messages",
+                                                item?.id
+                                              );
+                                              await updateDoc(washingtonRef, {
+                                                recall: true,
+                                              });
+                                              if (
+                                                messages?.find(
+                                                  (x) =>
+                                                    x?.id ===
+                                                    search.get("chatId")
+                                                )?.lastMessage?.messageId ===
+                                                item?.id
+                                              ) {
+                                                const wRef = doc(
+                                                  db,
+                                                  "chat-rooms",
+                                                  search.get("chatId")
+                                                );
+                                                await updateDoc(wRef, {
+                                                  lastMessage: {
+                                                    recall: true,
+                                                  },
+                                                });
+                                              }
+                                            }}
+                                            className="flex items-center gap-x-2 w-full"
+                                          >
+                                            <MdReplay size={20} /> Thu hồi
+                                          </button>
+                                        ),
+                                      },
+                                      {
+                                        label: item?.formAuthor?.userId ===
+                                          user?.uid && (
+                                          <Popconfirm
+                                            placement="bottomRight"
+                                            title="Xóa tin nhắn"
+                                            description="Tin nhắn này sẽ bị xóa vĩnh viễn. Bạn có chắc chắn xóa?"
+                                            onConfirm={async () => {
+                                              const washingtonRef = doc(
+                                                db,
+                                                "chat-rooms",
+                                                search.get("chatId"),
+                                                "messages",
+                                                item?.id
+                                              );
+                                              await updateDoc(washingtonRef, {
+                                                isDelete: arrayUnion({
+                                                  user: user?.uid,
+                                                }),
+                                              });
+                                              if (
+                                                findRoom?.lastMessage
+                                                  ?.messageId === item?.id
+                                              ) {
+                                                const wRef = doc(
+                                                  db,
+                                                  "chat-rooms",
+                                                  search.get("chatId")
+                                                );
+                                                await updateDoc(wRef, {
+                                                  lastMessage: {
+                                                    ...item,
+                                                    messageId: item?.id,
+                                                    isDelete: arrayUnion({
+                                                      user: user?.uid,
+                                                    }),
+                                                  },
+                                                });
+                                              }
+                                            }}
+                                            onCancel={() => {}}
+                                            okText="Đồng ý"
+                                            cancelText="Hủy bỏ"
+                                            style={{
+                                              width: 200,
+                                            }}
+                                          >
+                                            <button className="flex items-center gap-x-2 w-full">
+                                              <MdDelete size={20} /> Xóa
+                                            </button>
+                                          </Popconfirm>
+                                        ),
+                                      },
+                                      {
+                                        label: (
+                                          <button
+                                            className="flex items-center gap-x-2 w-full"
+                                            onClick={async (e) => {
+                                              e.preventDefault();
+                                              setChooseQuote(item);
+                                            }}
+                                          >
+                                            <MdReply size={20} /> Trả lời
+                                          </button>
+                                        ),
+                                      },
+                                      {
+                                        label: (
+                                          <button
+                                            className="flex items-center gap-x-2 w-full"
+                                            onClick={async (e) => {
+                                              e.preventDefault();
+                                              setMessageForward(item?.text);
+                                              setPhotoForward([]);
+                                              setFieldForward([]);
+                                              setShowForward(true);
+                                            }}
+                                          >
+                                            <IoMdShareAlt size={20} />
+                                            Chuyển tiếp
+                                          </button>
+                                        ),
+                                      },
+                                    ],
+                                  }}
+                                >
                                   <HiOutlineDotsHorizontal />
-                                  <div
-                                    className={`absolute z-[9999] hidden group-hover:flex flex-col justify-start items-start top-full ${
-                                      item?.formAuthor?.userId === user?.uid
-                                        ? "left-0"
-                                        : "right-0"
-                                    } bg-white shadow-sm shadow-gray-500 text-[10px] sm:text-xs font-medium w-[120px] rounded p-1`}
-                                  >
-                                    {item?.formAuthor?.userId === user?.uid && (
-                                      <>
-                                        <Link
-                                          href={``}
-                                          onClick={async (e) => {
-                                            e.preventDefault();
-                                            const washingtonRef = doc(
-                                              db,
-                                              "chat-rooms",
-                                              search.get("chatId"),
-                                              "messages",
-                                              item?.id
-                                            );
-                                            await updateDoc(washingtonRef, {
-                                              recall: true,
-                                            });
-                                            if (
-                                              messages?.find(
-                                                (x) =>
-                                                  x?.id === search.get("chatId")
-                                              )?.lastMessage?.messageId ===
-                                              item?.id
-                                            ) {
-                                              const wRef = doc(
-                                                db,
-                                                "chat-rooms",
-                                                search.get("chatId")
-                                              );
-                                              await updateDoc(wRef, {
-                                                lastMessage: {
-                                                  recall: true,
-                                                },
-                                              });
-                                            }
-                                          }}
-                                          className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left flex items-center gap-x-2 text-black`}
-                                        >
-                                          <MdReplay size={20} /> Thu hồi
-                                        </Link>
-                                        <Link
-                                          href={``}
-                                          onClick={async (e) => {
-                                            e.preventDefault();
-                                            const washingtonRef = doc(
-                                              db,
-                                              "chat-rooms",
-                                              search.get("chatId"),
-                                              "messages",
-                                              item?.id
-                                            );
-                                            await updateDoc(washingtonRef, {
-                                              isDelete: arrayUnion({
-                                                user: user?.uid,
-                                              }),
-                                            });
-                                            if (
-                                              findRoom?.lastMessage
-                                                ?.messageId === item?.id
-                                            ) {
-                                              const wRef = doc(
-                                                db,
-                                                "chat-rooms",
-                                                search.get("chatId")
-                                              );
-                                              await updateDoc(wRef, {
-                                                lastMessage: {
-                                                  ...item,
-                                                  messageId: item?.id,
-                                                  isDelete: arrayUnion({
-                                                    user: user?.uid,
-                                                  }),
-                                                },
-                                              });
-                                            }
-                                          }}
-                                          className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left flex items-center gap-x-2 text-black`}
-                                        >
-                                          <MdDelete size={20} /> Xóa
-                                        </Link>
-                                      </>
-                                    )}
-                                    <Link
-                                      href={``}
-                                      onClick={async (e) => {
-                                        e.preventDefault();
-                                        setChooseQuote(item);
-                                      }}
-                                      className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left  flex items-center gap-x-2 text-black`}
-                                    >
-                                      <MdReply size={20} /> Trả lời
-                                    </Link>
-                                    <Link
-                                      href={``}
-                                      onClick={async (e) => {
-                                        e.preventDefault();
-                                        setMessageForward(item?.text);
-                                        setPhotoForward([]);
-                                        setFieldForward([]);
-                                        setShowForward(true);
-                                      }}
-                                      className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left  flex items-center gap-x-2 text-black`}
-                                    >
-                                      <IoMdShareAlt size={20} />
-                                      Chuyển tiếp
-                                    </Link>
-                                  </div>
-                                </button>
+                                </Dropdown>
                               )}
 
                               <div
@@ -1969,6 +2028,15 @@ export default function ChatRight({
         photForward={photoForward}
         fileForward={fileForward}
         listmessage={messages}
+      />
+      <ModalNickame
+        visible={editName}
+        onCancel={() => setEditName(false)}
+        nameActive={nameActive}
+        setNameActive={setNameActive}
+        myAuthor={myAuthor}
+        userRecieved={userRecieved}
+        chatId={search.get("chatId")}
       />
     </div>
   );

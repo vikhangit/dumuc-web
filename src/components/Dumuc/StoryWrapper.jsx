@@ -1,6 +1,7 @@
 "use client";
 import dynamic from "next/dynamic";
 import Story from "./Story";
+import { useEffect, useState } from "react";
 const QuickAddStory = dynamic(
   () => {
     return import("@components/QuickAddStory");
@@ -23,11 +24,15 @@ const StoryWrapper = ({
   myFriend,
   authors,
 }) => {
+  const [items, setItems] = useState(data);
+  useEffect(() => {
+    setItems(data);
+  }, [data]);
   return (
     <>
       <Story
         authors={authors}
-        data={data}
+        data={items}
         myFollow={myFollow}
         myFriend={myFriend}
         onCallback={onCallback}

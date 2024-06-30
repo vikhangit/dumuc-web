@@ -15,6 +15,7 @@ import { MdOutlineAdd } from "react-icons/md";
 import { Swiper, SwiperSlide } from "swiper/react";
 import ModalWating from "./ModalWating";
 import StoryItem from "./StoryItem";
+import { getFeedsLoadMore } from "@apis/feeds";
 const QuickAddStory = dynamic(
   () => {
     return import("@components/QuickAddStory");
@@ -50,6 +51,7 @@ const Story = ({
   const [showTool, setShowTool] = useState(false);
   const params = useParams();
   const search = useSearchParams();
+  const [indexImage, setIndexImage] = useState(-1);
   useEffect(() => {
     setStories(data?.filter((x) => user?.uid === x?.userId || !x?.isPrivate));
     if (search.get("storyId")) {
@@ -60,6 +62,7 @@ const Story = ({
       setIndexImage(index);
     }
   }, [data]);
+  console.log("dellll", stories);
 
   const handleChange = (e) => {
     setLoading(true);
@@ -83,7 +86,7 @@ const Story = ({
     }
   };
   const [showImage, setShowImage] = useState(false);
-  const [indexImage, setIndexImage] = useState(-1);
+
   React.useCallback(() => {
     const timeToStart = 7 * 60 + 12.6;
     videoEl.current.seekTo(timeToStart, "seconds");
@@ -221,6 +224,8 @@ const Story = ({
                       usingUser={usingUser}
                       element={item}
                       index={index}
+                      setShowImage={setShowImage}
+                      setIndexImage={setIndexImage}
                     />
                   </SwiperSlide>
                 );
@@ -243,7 +248,7 @@ const Story = ({
           </button>
         )}
       </div>
-      {/* <ModalPlayVideos
+      <ModalPlayVideos
         openImage={showImage}
         setOpenImage={setShowImage}
         imageList={stories}
@@ -254,7 +259,7 @@ const Story = ({
         myFollow={myFollow}
         myFriend={myFriend}
         authors={authors}
-      /> */}
+      />
       <QuickAddStory
         onCallback={() => {
           setVideo("");

@@ -1,10 +1,28 @@
+"use client";
 import React from "react";
 import { CKEditor } from "@ckeditor/ckeditor5-react";
 import Editor from "ckeditor5-custom-build";
+import translations from "ckeditor5/translations/vi.js";
+
+import "ckeditor5/ckeditor5.css";
 
 function CustomEditor(props) {
   const editorConfiguration = {
-    //  plugins: [ MediaEmbed],
+    // plugins: [LinkImage, Link],
+    htmlSupport: {
+      allow: [
+        {
+          name: /^.*$/,
+          styles: true,
+          attributes: true,
+          classes: true,
+        },
+      ],
+    },
+    image: {
+      toolbar: ["imageTextAlternative"],
+    },
+    language: "vi",
     mediaEmbed: {
       previewsInData: true,
       extraProviders: [
@@ -16,7 +34,31 @@ function CustomEditor(props) {
         },
       ],
     },
-    placeholder: props.initialData === "" && props.placeholder,
+    htmlEmbed: {
+      showPreviews: true,
+      sanitizeHtml: (inputHtml) => {
+        const outputHtml = sanitize(inputHtml);
+        return {
+          html: outputHtml,
+          hasChanged: true,
+        };
+      },
+    },
+    link: {
+      addTargetToExternalLinks: true,
+      defaultProtocol: "https://",
+      decorators: {
+        toggleDownloadable: {
+          mode: "manual",
+          label: "Downloadable",
+          attributes: {
+            download: "file",
+          },
+        },
+      },
+    },
+    // placeholder: props.initialData === "" && props.placeholder,
+    translations: [translations],
   };
   return (
     <CKEditor

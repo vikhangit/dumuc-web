@@ -11,6 +11,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
+import { BsInfoSquareFill } from "react-icons/bs";
 import { FaPhoneAlt } from "react-icons/fa";
 import { FaCheck, FaRegAddressCard } from "react-icons/fa6";
 import { HiMiniIdentification } from "react-icons/hi2";
@@ -38,6 +39,8 @@ const SettingPage = () => {
   const [activePhone, setActivePhone] = useState(true);
   const [showSettingId, setShowSettingId] = useState(false);
   const [activeId, setActiveId] = useState(true);
+  const [showSettingReview, setShowSettingReview] = useState(false);
+  const [activeReview, setActiveReview] = useState(true);
   const [loading, setLoading] = useState(false);
   useEffect(() => {
     getProfile(user?.accessToken).then((dataCall) => {
@@ -49,6 +52,7 @@ const SettingPage = () => {
     setActiveEmail(usingUser?.activeEmail);
     setActivePhone(usingUser?.activePhone);
     setActiveId(usingUser?.activeId);
+    setActiveReview(usingUser?.activeReview);
   }, [usingUser]);
   console.log(usingUser);
   return (
@@ -74,6 +78,7 @@ const SettingPage = () => {
                       activeEmail,
                       activePhone,
                       activeId,
+                      activeReview,
                     },
                     user?.accessToken
                   ).then(() => {
@@ -306,6 +311,64 @@ const SettingPage = () => {
                     }`}
                   >
                     {activeId === true && <FaCheck className="text-white" />}
+                  </div>
+                  Hiện
+                </button>
+              </div>
+            )}
+          </button>
+          <button className="relative w-full">
+            <div
+              className="px-4 py-2 inline-flex justify-between items-center w-full text-sm sm:text-base text-[#424141B2] border-b border-[#9C9C9CB2] hover:border-black hover:bg-gray-100 hover:text-blue-700 focus:z-10  focus:text-blue-700 font-medium"
+              onClick={() => setShowSettingReview(!showSettingReview)}
+            >
+              <div className="flex items-center gap-x-4">
+                <BsInfoSquareFill size={24} />
+                Hiển thị giới thiệu trên trang cá nhân
+              </div>
+              {showSettingId ? (
+                <MdOutlineArrowDropDown size={32} />
+              ) : (
+                <MdOutlineArrowRight size={32} />
+              )}
+            </div>
+            {showSettingReview && (
+              <div className="flex flex-col items-start mt-[5px] border-b border-[#9C9C9CB2]">
+                <button
+                  className="py-2 w-full text-left px-4 text-xs sm:text-sm font-medium flex gap-x-4 items-center"
+                  onClick={() => {
+                    setActiveReview(false);
+                  }}
+                >
+                  <div
+                    className={`flex justify-center items-center w-[22px] h-[22px] rounded-[5px] border ${
+                      activeReview === false
+                        ? "bg-green-400 "
+                        : "border-gray-500"
+                    }`}
+                  >
+                    {activeReview === false && (
+                      <FaCheck className="text-white" />
+                    )}
+                  </div>
+                  Ẩn
+                </button>
+                <button
+                  className="py-2 w-full text-left px-4 text-xs sm:text-sm font-medium flex gap-x-4 items-center"
+                  onClick={() => {
+                    setActiveReview(true);
+                  }}
+                >
+                  <div
+                    className={`flex justify-center items-center w-[22px] h-[22px] rounded-[5px] border ${
+                      activeReview === true
+                        ? "bg-green-400 border-green-400"
+                        : "border-gray-500"
+                    }`}
+                  >
+                    {activeReview === true && (
+                      <FaCheck className="text-white" />
+                    )}
                   </div>
                   Hiện
                 </button>

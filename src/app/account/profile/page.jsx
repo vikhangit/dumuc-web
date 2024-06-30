@@ -21,6 +21,12 @@ const TabbarBottom = dynamic(
   },
   { ssr: false }
 );
+const CustomEditor = dynamic(
+  () => {
+    return import("@components/editorjs/CustomCKEditor");
+  },
+  { ssr: false }
+);
 import {
   useAuthState,
   useUpdateEmail,
@@ -72,6 +78,7 @@ const ProfilePage = () => {
   const [numberPlate, setNumberPlate] = useState(plateArray[0]);
   const [numberPlate2, setNumberPlate2] = useState(plateArray[1]);
   const [numberPlateError, setNumberPlateError] = useState("");
+  const [review, setReview] = useState();
   const refImage = useRef(null);
   const refFontSide = useRef(null);
   const refBackSide = useRef(null);
@@ -80,6 +87,7 @@ const ProfilePage = () => {
   const [loadingFontSide, setLoadingFontSide] = useState(false);
   const [loadingBackSide, setLoadingBackSide] = useState(false);
   const [usingUser, setUsingUser] = useState();
+
   useEffect(() => {
     getProfile(user?.accessToken).then((dataCall) => {
       setUsingUser(dataCall);
@@ -89,6 +97,7 @@ const ProfilePage = () => {
       setPhone(dataCall?.phone?.length > 0 ? dataCall?.phone : "");
       setSex(dataCall?.sex);
       setEmail(dataCall?.email?.length > 0 ? dataCall?.email : "");
+      setReview(dataCall?.review?.length > 0 ? dataCall?.review : "");
       setPlateArray(
         dataCall?.numberPlate
           ? `${dataCall?.numberPlate}`?.replace(/\s/g, "")?.split(",")
@@ -166,7 +175,7 @@ const ProfilePage = () => {
     }
   }, [user, loading]);
 
-  console.log(usingUser);
+  console.log(numberPlate);
 
   const save = () => {
     setLoadingSubmit(true);
@@ -205,8 +214,11 @@ const ProfilePage = () => {
       nickName,
       address,
       sex,
+      review,
       numberPlate:
-        numberPlate2 != undefined && numberPlate2 != ""
+        numberPlate === undefined || numberPlate?.length <= 0
+          ? ""
+          : numberPlate2 != undefined && numberPlate2 != ""
           ? `${numberPlate?.replace(/\s/g, "")},${numberPlate2?.replace(
               /\s/g,
               ""
@@ -461,6 +473,9 @@ const ProfilePage = () => {
                       <option key={1} value={1}>
                         Nữ
                       </option>
+                      <option key={2} value={2}>
+                        Khác
+                      </option>
                     </select>
                     {/* {sexError !== "" && (
                    <p class="mt-1 text-xs sm:text-sm text-[#c80000] font-semibold">
@@ -481,9 +496,7 @@ const ProfilePage = () => {
                       type="text"
                       id="default-input"
                       class={
-                        address === ""
-                          ? "bg-red-50 border border-red-500 text-red-900 placeholder-red-700 text-xs sm:text-sm rounded-lg focus:ring-red-500 dark:bg-gray-700 focus:border-red-500 block w-full px-2.5 py-1.5 dark:text-red-500 dark:placeholder-red-500 dark:border-red-500"
-                          : "bg-gray-50 border border-gray-300 text-gray-900 text-xs sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full px-2.5 py-1.5"
+                        "bg-gray-50 border border-gray-300 text-gray-900 text-xs sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full px-2.5 py-1.5"
                       }
                       onChange={(e) => {
                         setAddress(e.target.value);
@@ -514,9 +527,7 @@ const ProfilePage = () => {
                       type="text"
                       id="default-input"
                       class={
-                        numberPlate === ""
-                          ? "bg-red-50 border border-red-500 text-red-900 placeholder-red-700 text-xs sm:text-sm rounded-lg focus:ring-red-500 dark:bg-gray-700 focus:border-red-500 block w-full px-2.5 py-1.5 dark:text-red-500 dark:placeholder-red-500 dark:border-red-500"
-                          : "bg-gray-50 border border-gray-300 text-gray-900 text-xs sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full px-2.5 py-1.5"
+                        "bg-gray-50 border border-gray-300 text-gray-900 text-xs sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full px-2.5 py-1.5"
                       }
                       onChange={(e) => {
                         setNumberPlate(e.target.value?.replace(/\s/g, ""));
@@ -554,6 +565,22 @@ const ProfilePage = () => {
                       }}
                       value={numberPlate2?.replace(/\s/g, "")}
                     />
+                    {/* {numberPlateError !== "" && (
+                   <p class="mt-1 text-xs sm:text-sm text-[#c80000] font-semibold">
+                     {numberPlateError}
+                   </p>
+                 )} */}
+                  </div>
+                </div>
+                <div class="mb-3 flex items-center">
+                  <label
+                    for="default-input"
+                    class="block mb-2 text-xs sm:text-sm font-medium text-gray-900 dark:text-white w-[105px]"
+                  >
+                    Giới thiệu
+                  </label>
+                  <div className="border border-gray-300 w-full rounded-lg pt-[4px]">
+                    <CustomEditor initialData={review} setData={setReview} />
                     {/* {numberPlateError !== "" && (
                    <p class="mt-1 text-xs sm:text-sm text-[#c80000] font-semibold">
                      {numberPlateError}

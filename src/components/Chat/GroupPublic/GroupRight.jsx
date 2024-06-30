@@ -29,7 +29,7 @@ import {
 } from "firebase/firestore";
 import { uploadImage } from "@apis/other";
 import ModalWating from "@components/Dumuc/ModalWating";
-import { Popconfirm, message } from "antd";
+import { Dropdown, Popconfirm, message } from "antd";
 const ModalImageZoom = dynamic(
   () => {
     return import("@components/ModalImageZoom");
@@ -64,6 +64,7 @@ import EmojiPicker from "emoji-picker-react";
 import moment from "moment";
 import ModalAddMember from "./ModalAddMember";
 import ModalAddLeader from "./ModalAddLeader";
+import { CiUser } from "react-icons/ci";
 
 export default function ChatGroupRight({
   userRecieved,
@@ -359,7 +360,10 @@ export default function ChatGroupRight({
                 <Link href="" className="text-base font-semibold">
                   {groupTo?.name}
                 </Link>
-                {/* <p className='text-sm'>Đang hoạt động</p> */}
+                <p className="text-xs flex gap-x-1 items-center">
+                  <CiUser size={14} />
+                  {groupTo?.member?.length} thành viên
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-x-3 pr-0 sm:pr-5">
@@ -370,168 +374,328 @@ export default function ChatGroupRight({
                   onClick={() => setShowModalAddMember(true)}
                 />
               )}
-              <button className="group relative">
-                <IoInformationCircleSharp color="#0084ff" size={28} />
-                <div className="absolute z-[99999] hidden group-hover:flex flex-col justify-start items-start top-full right-0 bg-white shadow-sm shadow-gray-500 text-[10px] sm:text-xs font-medium w-[165px] rounded p-1">
-                  <Link
-                    href={``}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setOpenAbout(true);
-                      setTypeAbout("about");
-                    }}
-                    className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left`}
-                  >
-                    Thông tin nhóm
-                  </Link>
-                  {groupTo?.member?.find((x) => x?.user === userId) && (
-                    <>
-                      <Link
-                        href={``}
-                        onClick={async (e) => {
-                          e.preventDefault();
-                          setOpenAbout(true);
-                          setTypeAbout("member");
-                        }}
-                        className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left`}
-                      >
-                        Xem thành viên
-                      </Link>
-                      <Popconfirm
-                        placement="topLeft"
-                        title="Xóa tin nhắn"
-                        description="Toàn bộ tin nhắn sẽ bị xóa vĩnh viễn. Bạn có chắc chắn xóa?"
-                        onConfirm={async () => {
-                          myMessage?.map(async (x) => {
-                            const washingtonRef = doc(
+              <Dropdown
+                placement="bottomRight"
+                menu={{
+                  items: [
+                    {
+                      label: (
+                        <Link
+                          href={``}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            setOpenAbout(true);
+                            setTypeAbout("about");
+                          }}
+                          className={`w-full`}
+                        >
+                          Thông tin nhóm
+                        </Link>
+                      ),
+                      key: "0",
+                    },
+                    {
+                      label: (
+                        <Link
+                          href={``}
+                          onClick={async (e) => {
+                            e.preventDefault();
+                            setOpenAbout(true);
+                            setTypeAbout("member");
+                          }}
+                          className={`w-full`}
+                        >
+                          Xem thành viên
+                        </Link>
+                      ),
+                      disabled: groupTo?.member?.find((x) => x?.user === userId)
+                        ? false
+                        : true,
+                      key: "1",
+                    },
+                    {
+                      label: (
+                        <Popconfirm
+                          placement="bottomRight"
+                          title="Xóa tin nhắn"
+                          description="Toàn bộ tin nhắn ở phía sẽ bị xóa vĩnh viễn các thành viên khác vẫn sẽ  thấy. Bạn có chắc chắn xóa?"
+                          onConfirm={async () => {
+                            myMessage?.map(async (x) => {
+                              const washingtonRef = doc(
+                                db,
+                                "chat-groups",
+                                groupTo?.id,
+                                "messages",
+                                x?.id
+                              );
+                              await updateDoc(washingtonRef, {
+                                isDelete: arrayUnion({
+                                  user: userId,
+                                }),
+                              });
+                            });
+                            const groupRef = doc(
                               db,
                               "chat-groups",
-                              groupTo?.id,
-                              "messages",
-                              x?.id
+                              groupTo?.id
                             );
-                            await updateDoc(washingtonRef, {
+                            await updateDoc(groupRef, {
                               isDelete: arrayUnion({
                                 user: userId,
                               }),
                             });
-                          });
-                          const groupRef = doc(db, "chat-groups", groupTo?.id);
-                          await updateDoc(groupRef, {
-                            isDelete: arrayUnion({
-                              user: userId,
-                            }),
-                          });
-                          message.success("Đã xóa tin nhắn thành công!!");
-                          setGroupTo();
-                          router.push("/chat/group-public");
-                        }}
-                        onCancel={() => {}}
-                        okText="Đồng ý"
-                        cancelText="Hủy bỏ"
-                        style={{
-                          width: 200,
-                        }}
-                      >
-                        <button className="border-0 hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left">
-                          Xóa tin nhắn
-                        </button>
-                      </Popconfirm>
-                    </>
-                  )}
-                  {groupTo?.leader === userId && (
-                    <Popconfirm
-                      placement="topLeft"
-                      title="Chuyển đổi nhóm"
-                      description="Bạn có chắc chắn chuyển đổi nhóm thành nhóm riêng tư không?"
-                      onConfirm={async () => {
-                        const cityRef = doc(db, "chat-groups", groupTo?.id);
-                        await updateDoc(cityRef, {
-                          isPrivate: true,
-                        }).then(async () => {
-                          await addDoc(
-                            collection(
+                            message.success("Đã xóa tin nhắn thành công!!");
+                          }}
+                          onCancel={() => {}}
+                          okText="Đồng ý"
+                          cancelText="Hủy bỏ"
+                          style={{
+                            width: 200,
+                          }}
+                        >
+                          <button className="w-full flex">Xóa tin nhắn</button>
+                        </Popconfirm>
+                      ),
+
+                      disabled: groupTo?.member?.find((x) => x?.user === userId)
+                        ? false
+                        : true,
+                      key: "2",
+                    },
+                    {
+                      label: (
+                        <Popconfirm
+                          placement="bottomRight"
+                          title="Chuyển đổi nhóm"
+                          description="Bạn có chắc chắn chuyển đổi nhóm thành nhóm riêng tư không?"
+                          onConfirm={async () => {
+                            const cityRef = doc(db, "chat-groups", groupTo?.id);
+                            await updateDoc(cityRef, {
+                              isPrivate: true,
+                            }).then(async () => {
+                              await addDoc(
+                                collection(
+                                  db,
+                                  "chat-groups",
+                                  search.get("groupId"),
+                                  "messages"
+                                ),
+                                {
+                                  type: "change",
+                                  notify: true,
+                                  user: userId,
+                                  text: "đã đổi nhóm thành nhóm riêng tư",
+                                  createdAt: serverTimestamp(),
+                                }
+                              ).then(() => {
+                                message.success(
+                                  "Đã chuyển nhóm thành nhóm riêng tư thành công"
+                                );
+
+                                router.push(
+                                  `/chat/group?groupId=${groupTo?.id}`
+                                );
+                              });
+                            });
+                          }}
+                          onCancel={() => {}}
+                          okText="Đồng ý"
+                          cancelText="Hủy bỏ"
+                          style={{
+                            width: 200,
+                          }}
+                        >
+                          <button className="w-full flex">
+                            Chuyển nhóm thành riêng tư
+                          </button>
+                        </Popconfirm>
+                      ),
+                      disabled: groupTo?.leader === userId ? false : true,
+                      key: "3",
+                    },
+                    {
+                      disabled:
+                        groupTo?.leader === userId ||
+                        groupTo?.deputyLeader === userId
+                          ? false
+                          : true,
+                      label: (
+                        <Link
+                          href={``}
+                          onClick={async (e) => {
+                            e.preventDefault();
+                            setOpenAbout(true);
+                            setTypeAbout("request");
+                          }}
+                          className={` w-full flex item-cemter justify-between`}
+                        >
+                          Yêu cầu tham gia nhóm
+                          <div className="bg-[#C82027]  text-white w-[12px] h-[12px] rounded-full flex justify-center items-center text-[10px] font-semibold">
+                            {groupTo?.requestList
+                              ? groupTo?.requestList?.length
+                              : "0"}
+                          </div>
+                        </Link>
+                      ),
+                      key: "4",
+                    },
+                    {
+                      label: (
+                        <Popconfirm
+                          placement="bottomRight"
+                          title="Xác nhận rời nhóm"
+                          description={`Bạn có chắc chắn khỏi nhóm nhóm không?`}
+                          onConfirm={async () => {
+                            const washingtonRef = doc(
                               db,
                               "chat-groups",
-                              search.get("groupId"),
-                              "messages"
-                            ),
-                            {
-                              type: "change",
-                              notify: true,
-                              user: userId,
-                              text: "đã đổi nhóm thành nhóm riêng tư",
-                              createdAt: serverTimestamp(),
-                            }
-                          ).then(() => {
-                            message.success(
-                              "Đã chuyển nhóm sang công khai thành công"
+                              groupTo?.id
                             );
-
-                            router.push(`/chat/group?groupId=${groupTo?.id}`);
-                          });
-                        });
-                      }}
-                      onCancel={() => {}}
-                      okText="Đồng ý"
-                      cancelText="Hủy bỏ"
-                      style={{
-                        width: 200,
-                      }}
-                    >
-                      <button className="border-0 hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left">
-                        Chuyển nhóm thành riêng tư
-                      </button>
-                    </Popconfirm>
-                  )}
-                  {groupTo?.leader === userId && (
-                    <Link
-                      href={``}
-                      onClick={async (e) => {
-                        e.preventDefault();
-                        setOpenAbout(true);
-                        setTypeAbout("request");
-                      }}
-                      className={`hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left flex item-cemter justify-between`}
-                    >
-                      Yêu cầu tham gia nhóm
-                      <div className="bg-[#C82027]  text-white w-[12px] h-[12px] rounded-full flex justify-center items-center text-[10px] font-semibold">
-                        {groupTo?.requestList
-                          ? groupTo?.requestList?.length
-                          : "0"}
-                      </div>
-                    </Link>
-                  )}
-                  {groupTo?.leader === userId && (
-                    <Popconfirm
-                      placement="topLeft"
-                      title="Xóa nhóm"
-                      description="Toàn bộ thông tin tin nhắn, hình ảnh, video,,,, sẽ bị xóa vĩnh viễn. Bạn có chắc chắn xóa nhóm?"
-                      onConfirm={async () => {
-                        const cityRef = doc(db, "chat-groups", groupTo?.id);
-                        await updateDoc(cityRef, {
-                          messages: deleteField(),
-                        });
-                        await deleteDoc(cityRef).then(() => {
-                          message.success("Đã xóa nhóm thành công!!");
-                          setGroupTo();
-                          router.push("/chat/group-public");
-                        });
-                      }}
-                      onCancel={() => {}}
-                      okText="Đồng ý"
-                      cancelText="Hủy bỏ"
-                      style={{
-                        width: 200,
-                      }}
-                    >
-                      <button className="border-0 hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-1.5 text-left">
-                        Giải tán nhóm
-                      </button>
-                    </Popconfirm>
-                  )}
-                </div>
-              </button>
+                            if (groupTo?.leader === userId) {
+                              if (
+                                groupTo?.deputyLeader !== "" &&
+                                groupTo?.deputyLeader?.length > 0
+                              ) {
+                                await updateDoc(washingtonRef, {
+                                  member: arrayRemove(
+                                    groupTo?.member?.find(
+                                      (x) => x?.user === userId
+                                    )
+                                  ),
+                                })
+                                  .then(async (result) => {
+                                    await updateDoc(washingtonRef, {
+                                      leader: groupTo?.deputyLeader,
+                                      deputyLeader: "",
+                                      createdAt: serverTimestamp(),
+                                    });
+                                    await addDoc(
+                                      collection(
+                                        db,
+                                        "chat-groups",
+                                        search.get("groupId"),
+                                        "messages"
+                                      ),
+                                      {
+                                        type: "exit",
+                                        notify: true,
+                                        user: userId,
+                                        createdAt: serverTimestamp(),
+                                      }
+                                    );
+                                    await addDoc(
+                                      collection(
+                                        db,
+                                        "chat-groups",
+                                        search.get("groupId"),
+                                        "messages"
+                                      ),
+                                      {
+                                        type: "leader",
+                                        notify: true,
+                                        user: groupTo?.deputyLeader,
+                                        createdAt: serverTimestamp(),
+                                      }
+                                    );
+                                    message.success(
+                                      "Bạn đã rời khỏi nhóm thành công"
+                                    );
+                                    setGroupTo();
+                                    router.push("/chat/group");
+                                  })
+                                  .catch((err) => {
+                                    message.error(
+                                      "Bạn đã rời khỏi nhóm thất bại"
+                                    );
+                                  });
+                              } else {
+                                setShowModalLeader(true);
+                              }
+                            } else {
+                              await updateDoc(washingtonRef, {
+                                member: arrayRemove(
+                                  groupTo?.member?.find(
+                                    (x) => x?.user === userId
+                                  )
+                                ),
+                                createdAt: serverTimestamp(),
+                              })
+                                .then(async (result) => {
+                                  if (userId === groupTo?.deputyLeader) {
+                                    await updateDoc(washingtonRef, {
+                                      deputyLeader: "",
+                                      createdAt: serverTimestamp(),
+                                    });
+                                  }
+                                  await addDoc(
+                                    collection(
+                                      db,
+                                      "chat-groups",
+                                      search.get("groupId"),
+                                      "messages"
+                                    ),
+                                    {
+                                      type: "exit",
+                                      notify: true,
+                                      user: userId,
+                                      createdAt: serverTimestamp(),
+                                    }
+                                  );
+                                  message.success("Rời khỏi nhóm thành công");
+                                  setGroupTo();
+                                  router.push("/chat/group-public");
+                                })
+                                .catch((err) => {});
+                            }
+                          }}
+                          onCancel={() => {}}
+                          okText="Đồng ý"
+                          cancelText="Hủy bỏ"
+                        >
+                          <button className={`w-full text-left`}>
+                            Rời nhóm
+                          </button>
+                        </Popconfirm>
+                      ),
+                      disabled: groupTo?.member?.find((x) => x?.user === userId)
+                        ? false
+                        : true,
+                    },
+                    {
+                      disabled: groupTo?.leader === userId ? false : true,
+                      label: (
+                        <Popconfirm
+                          placement="bottomRight"
+                          title="Xóa nhóm"
+                          description="Toàn bộ thông tin tin nhắn, hình ảnh, video,,,, sẽ bị xóa vĩnh viễn. Bạn có chắc chắn xóa nhóm?"
+                          onConfirm={async () => {
+                            const cityRef = doc(db, "chat-groups", groupTo?.id);
+                            await updateDoc(cityRef, {
+                              messages: deleteField(),
+                            });
+                            await deleteDoc(cityRef).then(() => {
+                              message.success("Đã xóa nhóm thành công!!");
+                              setGroupTo();
+                              router.push("/chat/group-public");
+                            });
+                          }}
+                          onCancel={() => {}}
+                          okText="Đồng ý"
+                          cancelText="Hủy bỏ"
+                          style={{
+                            width: 200,
+                          }}
+                        >
+                          <button className="w-full flex">Giải tán nhóm</button>
+                        </Popconfirm>
+                      ),
+                      key: "5",
+                    },
+                  ],
+                }}
+              >
+                <IoInformationCircleSharp color="#0084ff" size={28} />
+              </Dropdown>
             </div>
           </>
         )}
@@ -1894,6 +2058,44 @@ export default function ChatGroupRight({
                                     <strong>{author?.name}</strong> đã đổi tên
                                     nhóm thành
                                     <strong>"{item?.text}"</strong>
+                                  </p>
+                                </div>
+                              ) : item.type === "noi_quy" ? (
+                                <div className="flex items-center gap-x-1">
+                                  <Image
+                                    src={
+                                      author?.user?.photo &&
+                                      author?.user?.photo?.length > 0
+                                        ? author?.user?.photo
+                                        : "/dumuc/avatar.jpg"
+                                    }
+                                    width={0}
+                                    height={0}
+                                    sizes="100vw"
+                                    className="w-[15px] h-[15px] rounded-full"
+                                  />
+                                  <p className="text-[12px]">
+                                    <strong>{author?.name}</strong> đã thay đổi
+                                    nội quy nhóm
+                                  </p>
+                                </div>
+                              ) : item.type === "gioi_thieu" ? (
+                                <div className="flex items-center gap-x-1">
+                                  <Image
+                                    src={
+                                      author?.user?.photo &&
+                                      author?.user?.photo?.length > 0
+                                        ? author?.user?.photo
+                                        : "/dumuc/avatar.jpg"
+                                    }
+                                    width={0}
+                                    height={0}
+                                    sizes="100vw"
+                                    className="w-[15px] h-[15px] rounded-full"
+                                  />
+                                  <p className="text-[12px]">
+                                    <strong>{author?.name}</strong> đã thay đổi
+                                    thông tin giới thiệu về nhóm
                                   </p>
                                 </div>
                               ) : item.type === "avatar" ? (

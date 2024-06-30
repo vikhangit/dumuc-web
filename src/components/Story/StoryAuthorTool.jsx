@@ -13,7 +13,7 @@ import {
   receiveRequestAddFriend,
   sendRequestAddFriend,
 } from "@apis/users";
-import { message } from "antd";
+import { Dropdown, Popconfirm, message } from "antd";
 import { Spinner } from "flowbite-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -24,6 +24,8 @@ import { useEffect } from "react";
 import { IoMdMore } from "react-icons/io";
 import { deleteStoryByUser, getStory, updateStoryByUser } from "@apis/feeds";
 import QuickAddStory from "@components/QuickAddStory";
+import { useAuthState } from "react-firebase-hooks/auth";
+import { auth } from "@utils/firebase";
 // const QuickAddStory = dynamic(
 //   () => {
 //     return import("./QuickAddStory");
@@ -38,14 +40,13 @@ import QuickAddStory from "@components/QuickAddStory";
 // );
 export default function StoryAuthorTool({
   data,
-  user,
-  usingUser,
   imageList,
   onCallback,
   myFollow,
   myFriend,
   close,
 }) {
+  const [user] = useAuthState(auth);
   const router = useRouter();
   const sizes = useWindowSize();
   const [loading2, setLoading2] = useState(false);
@@ -55,19 +56,35 @@ export default function StoryAuthorTool({
   const [friendType, setFriendType] = useState(1);
   const [item, setItem] = useState(data);
   const [hidden, setHidden] = useState(data?.isPrivate);
+  const [friendList, setFriendList] = useState([]);
+  const [followList, setFollowList] = useState([]);
+  const [usingUser, setUsingUser] = useState();
+  useEffect(() => {
+    getProfile(user?.accessToken).then((dataCall) => {
+      setUsingUser(dataCall);
+    });
+  }, [user]);
+  useEffect(() => {
+    setFriendList(usingUser?.friendList);
+    setFollowList(usingUser?.follows);
+  }, [usingUser]);
   useEffect(() => {
     setItem(data);
     setHidden(data?.isPrivate);
   }, [data]);
   // 1 = "chưa bạn" 2 = "Bạn bè" 3 = "đã gửi" 4 = Đã nhận
   useEffect(() => {
-    const find = myFollow?.find((a) => a.authorId === item?.author?.authorId);
-    const findFriend = myFriend?.find(
-      (x) => x?.authorId === item?.author?.authorId
+    const find = followList?.find(
+      (a) => a?.authorId === item?.author?.authorId
     );
     if (find) {
       setFollowing(true);
     }
+  }, [followList]);
+  useEffect(() => {
+    const findFriend = friendList?.find(
+      (x) => x?.authorId === item?.author?.authorId
+    );
     if (findFriend) {
       if (findFriend?.status === 2) {
         setFriendType(2);
@@ -78,13 +95,16 @@ export default function StoryAuthorTool({
           setFriendType(4);
         }
       }
+    } else {
+      setFriendType(1);
     }
-  }, []);
+  }, [friendList]);
   const onCallbackData = (storyId) => {
     getStory({ storyId }).then((data) => {
       setItem(data);
     });
   };
+  console.log("Following", followList);
   return (
     <>
       <div className="">
@@ -138,9 +158,12 @@ export default function StoryAuthorTool({
                             authorUserId: item?.author?.userId,
                           },
                           user?.accessToken
-                        ).then(() => {});
-                        setFriendType(3);
-                        message.success("Đã gữi yêu cầu kết bạn.");
+                        ).then(() => {
+                          getProfile(user?.accessToken).then((data) => {
+                            setFriendList(data?.friendList);
+                          });
+                          message.success("Đã gữi yêu cầu kết bạn.");
+                        });
                       } else {
                         router.push(
                           `/auth?url_return=${process.env.NEXT_PUBLIC_HOMEPAGE_URL}?${item?.storyId}`
@@ -177,9 +200,12 @@ export default function StoryAuthorTool({
                           authorUserId: item?.author?.userId,
                         },
                         user?.accessToken
-                      );
-                      setFriendType(1);
-                      message.success("Đã hủy kết bạn.");
+                      ).then(() => {
+                        getProfile(user?.accessToken).then((data) => {
+                          setFriendList(data?.friendList);
+                        });
+                        message.success("Đã hủy kết bạn.");
+                      });
                     }}
                     type="button"
                     class="flex items-center gap-x-1 px-4 py-2 text-xs font-medium text-center text-white bg-[#c80000] rounded-[4px] hover:brightness-110 focus:ring-4 focus:outline-none focus:ring-blue-300"
@@ -229,11 +255,13 @@ export default function StoryAuthorTool({
                                 status: 2,
                               },
                               user?.accessToken
-                            );
+                            ).then(() => {
+                              getProfile(user?.accessToken).then((data) => {
+                                setFriendList(data?.friendList);
+                              });
+                              message.success("Đã đồng ý kết bạn");
+                            });
                           });
-
-                          setFriendType(2);
-                          message.success("Đã đồng ý kết bạn");
                         }}
                         className="hover:bg-[#c80000] text-black hover:text-white w-full rounded px-1.5 py-0.5 text-left"
                       >
@@ -274,7 +302,7 @@ export default function StoryAuthorTool({
                     href={``}
                     onClick={(e) => {
                       e.preventDefault();
-                      setLoading2(true);
+
                       deleteUserFollow(
                         {
                           authorId: item?.author?.authorId,
@@ -287,11 +315,14 @@ export default function StoryAuthorTool({
                             authorUserId: item?.author?.userId,
                           },
                           user?.accessToken
-                        );
+                        ).then(() => {
+                          setFollowing(false);
+                          getProfile(user?.accessToken).then((data) => {
+                            setFriendList(data?.follows);
+                          });
+                          message.success("Hủy theo dõi thành công");
+                        });
                       });
-                      setFollowing(false);
-                      message.success("Hủy theo dõi thành công");
-                      setLoading2(false);
                     }}
                     className="flex items-center gap-x-2 px-4 py-2 text-xs font-medium text-center text-white bg-indigo-500 rounded-[4px] hover:brightness-110 focus:ring-4 focus:outline-none focus:ring-blue-300"
                   >
@@ -314,10 +345,14 @@ export default function StoryAuthorTool({
                               authorUserId: item?.author?.userId,
                             },
                             user?.accessToken
-                          );
+                          ).then(() => {
+                            setFollowing(true);
+                            getProfile(user?.accessToken).then((data) => {
+                              setFriendList(data?.follows);
+                            });
+                            message.success("Theo dõi thành công");
+                          });
                         });
-                        setFollowing(true);
-                        message.success("Theo dõi thành công");
                       } else {
                         router.push(
                           `/auth?url_return=${process.env.NEXT_PUBLIC_HOMEPAGE_URL}?${item?.storyId}`
@@ -343,101 +378,130 @@ export default function StoryAuthorTool({
                 Chỉnh sửa
               </button>
             )}
-            <div className="relative cursor-pointer group">
+            <Dropdown
+              placement="topRight"
+              menu={{
+                items: [
+                  {
+                    label: (
+                      <Link
+                        href=""
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setShowEdit(true);
+                          setActiveEdit(item);
+                        }}
+                        className=" w-full"
+                      >
+                        Sửa video
+                      </Link>
+                    ),
+                    disabled: item?.userId === user?.uid ? false : true,
+                  },
+                  {
+                    label: (
+                      <Link
+                        href=""
+                        onClick={(e) => {
+                          e.preventDefault();
+                          if (hidden === true) {
+                            return updateStoryByUser(
+                              {
+                                ...item,
+                                isPrivate: false,
+                              },
+                              user?.accessToken
+                            ).then((result) => {
+                              onCallbackData(item?.storyId);
+                              setHidden(false);
+                              message.success("Công khai bài viết thành công");
+                            });
+                          } else {
+                            return updateStoryByUser(
+                              {
+                                ...item,
+                                isPrivate: true,
+                              },
+                              user?.accessToken
+                            ).then((result) => {
+                              onCallbackData(item?.storyId);
+                              setHidden(true);
+                              message.success("Ẩn bài viết thành công");
+                            });
+                          }
+                        }}
+                        className="w-full"
+                      >
+                        {hidden === true ? "Hủy ẩn video" : "Ẩn video"}
+                      </Link>
+                    ),
+                  },
+                  {
+                    label: (
+                      <Link
+                        href=""
+                        onClick={(e) => {
+                          e.preventDefault();
+                          return updateFeedByUser(
+                            {
+                              ...item,
+                              isReport: true,
+                            },
+                            user?.accessToken
+                          ).then((result) => {
+                            message.success(
+                              "Chúng tôi sẽ xem xét báo cáo của bạn về bài viết này. Xin cảm ơn!!!"
+                            );
+                          });
+                        }}
+                        className=" w-full"
+                      >
+                        Báo cáo video
+                      </Link>
+                    ),
+                    disabled: item?.userId !== user?.uid ? false : true,
+                  },
+                  {
+                    label: (
+                      <Popconfirm
+                        placement="topRight"
+                        title="Xóa video"
+                        description="Video sẽ bị xóa vĩnh viễn. Bạn có chắc chắn xóa?"
+                        onConfirm={async () => {
+                          return deleteStoryByUser(
+                            item?.storyId,
+                            user?.accessToken
+                          ).then((result) => {
+                            onCallback();
+                            message.success("Xóa bài viết thành công");
+                            close();
+                          });
+                        }}
+                        onCancel={() => {}}
+                        okText="Đồng ý"
+                        cancelText="Hủy bỏ"
+                        style={{
+                          width: 200,
+                        }}
+                      >
+                        <Link
+                          href=""
+                          onClick={(e) => {
+                            e.preventDefault();
+                          }}
+                          className=" w-full"
+                        >
+                          Xóa video
+                        </Link>
+                      </Popconfirm>
+                    ),
+                    disabled: item?.userId === user?.uid ? false : true,
+                  },
+                ],
+              }}
+            >
               <IoMdMore size={24} />
-              <div className="absolute z-40 hidden group-hover:flex flex-col top-0 right-2 bg-white shadow-sm shadow-gray-500 text-[10px] sm:text-xs font-medium w-[80px] rounded p-1">
-                {item?.userId === user?.uid && (
-                  <Link
-                    href=""
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setShowEdit(true);
-                      setActiveEdit(item);
-                    }}
-                    className="hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5"
-                  >
-                    Sửa
-                  </Link>
-                )}
-                {item?.userId === user?.uid && (
-                  <Link
-                    href=""
-                    onClick={(e) => {
-                      e.preventDefault();
-                      if (hidden === true) {
-                        return updateStoryByUser(
-                          {
-                            ...item,
-                            isPrivate: false,
-                          },
-                          user?.accessToken
-                        ).then((result) => {
-                          onCallbackData(item?.storyId);
-                          setHidden(false);
-                          message.success("Công khai bài viết thành công");
-                        });
-                      } else {
-                        return updateStoryByUser(
-                          {
-                            ...item,
-                            isPrivate: true,
-                          },
-                          user?.accessToken
-                        ).then((result) => {
-                          onCallbackData(item?.storyId);
-                          setHidden(ftrue);
-                          message.success("Ẩn bài viết thành công");
-                        });
-                      }
-                    }}
-                    className="hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5"
-                  >
-                    {hidden === true ? "Hủy ẩn" : "Ẩn"}
-                  </Link>
-                )}
-                {item?.userId !== user?.uid && (
-                  <Link
-                    href=""
-                    onClick={(e) => {
-                      e.preventDefault();
-                      return updateFeedByUser(
-                        {
-                          ...item,
-                          isReport: true,
-                        },
-                        user?.accessToken
-                      ).then((result) => {
-                        message.success(
-                          "Chúng tôi sẽ xem xét báo cáo của bạn về bài viết này. Xin cảm ơn!!!"
-                        );
-                      });
-                    }}
-                    className="hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5"
-                  >
-                    Báo cáo
-                  </Link>
-                )}
-                {item?.userId === user?.uid && (
-                  <Link
-                    href=""
-                    onClick={(e) => {
-                      e.preventDefault();
-                      return deleteStoryByUser(
-                        item?.storyId,
-                        user?.accessToken
-                      ).then((result) => {
-                        onCallback();
-                        message.success("Xóa bài viết thành công");
-                        close();
-                      });
-                    }}
-                    className="hover:bg-[#c80000] hover:text-white w-full rounded px-1.5 py-0.5"
-                  >
-                    Xóa
-                  </Link>
-                )}
-              </div>
-            </div>
+            </Dropdown>
           </div>
         </div>
       </div>

@@ -49,6 +49,7 @@ export default function ChatGroup() {
   const [userRecieved, setUserRecieved] = useState();
   const [usingUser, setUsingUser] = useState();
   const [friendList, setFriendList] = useState([]);
+  const [tenGoiNho, setTenGoNho] = useState();
   const router = useRouter();
   useEffect(() => {
     getProfile(user?.accessToken).then((dataCall) => {
@@ -174,6 +175,8 @@ export default function ChatGroup() {
           typeFriend={typeFriend}
           setTypeFriend={setTypeFriend}
           setActiveMessage={setActiveMessage}
+          tenGoiNho={tenGoiNho}
+          setTenGoNho={setTenGoNho}
         />
         <ChatRight
           userRecieved={userRecieved}
@@ -190,6 +193,8 @@ export default function ChatGroup() {
           setFriendList={setFriendList}
           typeFriend={typeFriend}
           setTypeFriend={setTypeFriend}
+          tenGoiNho={tenGoiNho}
+          setUsingUser={setUsingUser}
         />
       </div>
       {/* <div className={sizes.width > 411 ? "mb-24" :  "mb-16"} /> */}

@@ -27,7 +27,7 @@ export default function ModalAddMember({
   activeGroup,
   member,
 }) {
-  const user = JSON.parse(localStorage.getItem("userLogin"));
+  const [user] = useAuthState(auth);
   const userId = JSON.parse(localStorage.getItem("userId"));
   const userToken = JSON.parse(localStorage.getItem("userToken"));
   const router = useRouter();
@@ -39,9 +39,10 @@ export default function ModalAddMember({
   const [friendList, setFriendList] = useState([]);
   const [memberList, setMemberList] = useState([]);
   useEffect(() => {
-    getProfile(userToken).then((dataCall) => {
+    getProfile(user?.accessToken).then((dataCall) => {
+      console.log("List.Friend", dataCall);
       setUsingUser(dataCall);
-      setFriendList(dataCall?.friendList?.filter((x) => x.status === 2));
+      setFriendList(dataCall?.friendList?.filter((x) => x?.status === 2));
     });
   }, [user]);
 
@@ -87,6 +88,7 @@ export default function ModalAddMember({
       }
     }
   };
+  console.log("List.Friend", friendList);
   return (
     <Modal
       visible={visible}

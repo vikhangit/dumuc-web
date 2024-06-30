@@ -136,7 +136,7 @@ export default function ModalPlayVideos({
             </>
           )}
           <div
-            className={`modal-image  mx-auto overflow-y-auto mt-[30px] px-[25px]`}
+            className={`modal-image  mx-auto overflow-y-auto mt-[30px] px-[40px]`}
           >
             <div className="w-full h-full bg-white pt-0">
               <Swiper

@@ -22,6 +22,7 @@ import {
 } from "firebase/firestore";
 import ModalAddFriend from "./ModalAddFriend";
 import RequestFriend from "./RequestFriend";
+import { set } from "lodash";
 export default function ChatLeft({
   setUserRecieved,
   userRecieved,
@@ -38,7 +39,10 @@ export default function ChatLeft({
   typeFriend,
   setTypeFriend,
   setActiveMessage,
+
   data,
+  tenGoiNho,
+  setTenGoNho,
 }) {
   const sizes = useWindowSize();
   const router = useRouter();
@@ -46,13 +50,12 @@ export default function ChatLeft({
   const [valueSearch, setValueSearch] = useState("");
   const [searchFunction, setSearchFunction] = useState(false);
   const [showAddFriend, setShowAddFriend] = useState(false);
-  const [friendList, setFriendList] = useState([]);
+  const [friendList, setFriendList] = useState(
+    friendListP?.filter((x) => x.status === 2)
+  );
   const [messages, setMessage] = useState(data);
   const [requestFr, setRequestFr] = useState();
-  useEffect(() => {
-    setMessage(data);
-  }, [data]);
-
+  const [tab, setTab] = useState(0);
   useEffect(() => {
     setFriendList(friendListP?.filter((x) => x.status === 2));
     setRequestFr(
@@ -60,12 +63,46 @@ export default function ChatLeft({
     );
   }, [friendListP]);
   useEffect(() => {
+    const friendChat = data
+      ?.filter((item) => item?.member?.find((x) => x?.userId === user?.uid))
+      .filter((x) => {
+        const findUserOrtherMe = x?.member?.find(
+          (x) => x?.userId !== user?.uid
+        );
+        if (
+          friendList?.find((aa) => aa?.authorId === findUserOrtherMe?.authorId)
+        ) {
+          return x;
+        }
+      });
+    const anonymousChat = data
+      ?.filter((item) => item?.member?.find((x) => x?.userId === user?.uid))
+      .filter((x) => {
+        const findUserOrtherMe = x?.member?.find(
+          (x) => x?.userId !== user?.uid
+        );
+        if (
+          friendList?.find((aa) => aa?.authorId === findUserOrtherMe?.authorId)
+        ) {
+        } else {
+          return x;
+        }
+      });
+
+    if (tab === 0) {
+      setMessage(friendChat);
+    } else {
+      setMessage(anonymousChat);
+    }
+  }, [data, tab, friendList]);
+
+  useEffect(() => {
     if (search.get("friendId")) {
       // setSearchFunction(true);
       const author = authors?.find(
         (x) => x?.authorId === search.get("friendId")
       );
-      const findChat2 = messages?.filter((item) =>
+      const findChat2 = data?.filter((item) =>
         item?.member?.find((x) => x?.userId === user?.uid)
       );
       const findChat = findChat2?.find((item) =>
@@ -76,22 +113,18 @@ export default function ChatLeft({
         setUserRecieved(author);
       } else {
         setUserRecieved();
+
         router.push(`/chat?chatId=${findChat?.id}`);
       }
     } else {
       setUserRecieved();
       setMobile(false);
     }
-  }, [search, messages, authors]);
-  const updateChat = async () => {
-    const washingtonRef = doc(db, "chat-rooms", search.get("chatId"));
-    await updateDoc(washingtonRef, {
-      isDelete: deleteField(),
-    });
-  };
+  }, [search, data, authors]);
+
   useEffect(() => {
     if (search.get("chatId")) {
-      const chatDetail = messages?.find((x) => x?.id === search.get("chatId"));
+      const chatDetail = data?.find((x) => x?.id === search.get("chatId"));
       if (chatDetail) {
         const userRecieveds = chatDetail?.member?.find(
           (x) => x?.userId !== user?.uid
@@ -99,8 +132,15 @@ export default function ChatLeft({
         const author = authors?.find(
           (item) => item?.authorId === userRecieveds?.authorId
         );
+
         setMobile(true);
+        if (friendList?.find((x) => x?.authorId === author?.authorId)) {
+          setTab(0);
+        } else {
+          setTab(1);
+        }
         setUserRecieved(author);
+        setTenGoNho(userRecieveds?.ten_goi_nho);
         router.push(`/chat?chatId=${chatDetail?.id}`);
       } else {
         setMobile(false);
@@ -110,7 +150,8 @@ export default function ChatLeft({
       setUserRecieved();
       setMobile(false);
     }
-  }, [search, messages]);
+  }, [search, data, friendList]);
+  console.log("UserRecire", userRecieved);
   const searchField = (value) => {
     setValueSearch(value);
     if (value.trim() === "") {
@@ -153,12 +194,17 @@ export default function ChatLeft({
       .replace("few", "");
   };
   const selectFriend = (author) => {
-    const findChat2 = messages?.filter((item) =>
+    const findChat2 = data?.filter((item) =>
       item?.member?.find((x) => x?.userId === user?.uid)
     );
     const findChat = findChat2?.find((item) =>
       item?.member?.find((x) => x?.userId === author?.userId)
     );
+    if (friendList?.find((x) => x?.authorId === author?.authorId)) {
+      setTab(0);
+    } else {
+      setTab(1);
+    }
     if (!findChat) {
       // const type = checkFriendType(author?.authorId);
       // setTypeFriend(type);
@@ -166,6 +212,7 @@ export default function ChatLeft({
       setUserRecieved(author);
     } else {
       setUserRecieved();
+
       router.push(`/chat?chatId=${findChat?.id}`);
     }
   };
@@ -246,14 +293,28 @@ export default function ChatLeft({
           sizes.width > 800 ? "h-[calc(100%-135px)]" : " h-[calc(100%-120px)]"
         } overflow-auto scroll-chat px-2 pb-4`}
       >
-        {showRequesFriend && (
-          <RequestFriend
-            authors={authors}
-            items={requestFr}
-            onCallback={() => {}}
-            user={user}
-          />
-        )}
+        <div>
+          <button
+            onClick={() => {
+              setTab(0);
+            }}
+            className={`px-3 py-3 ${
+              tab === 0 && "border-b-2 border-[#c80000]"
+            }`}
+          >
+            Bạn bè
+          </button>
+          <button
+            onClick={() => {
+              setTab(1);
+            }}
+            className={`px-3 py-3 ${
+              tab === 1 && "border-b-2 border-[#c80000]"
+            }`}
+          >
+            Người lạ
+          </button>
+        </div>
         <div className="mt-2">
           {searchFunction ? (
             friendList?.length > 0 ? (
@@ -337,10 +398,6 @@ export default function ChatLeft({
                       }
                     }
                   );
-                  console.log(
-                    "FindIndeMEsss",
-                    item?.messages[finIndexMessages]
-                  );
                   return (
                     itemChild?.userId !== user?.uid && (
                       <div
@@ -357,6 +414,7 @@ export default function ChatLeft({
                               lastMessagesCount: deleteField(),
                             });
                           }
+                          // setTenGoNho(itemChild?.ten_goi_nho);
                         }}
                         className={`${
                           userRecieved?.authorId === itemChild?.authorId
@@ -364,19 +422,6 @@ export default function ChatLeft({
                             : "bg-white"
                         } rounded-md shadow shadow-gray-400 pl-[15px] pr-2 py-[10px] mt-[10px] cursor-pointer`}
                       >
-                        <div className="w-fit">
-                          {friendList?.find(
-                            (aa) => aa?.authorId === itemChild?.authorId
-                          ) ? (
-                            <div className="bg-green-500 text-white px-2">
-                              Bạn bè
-                            </div>
-                          ) : (
-                            <div className="bg-gray-500 text-white px-2">
-                              Người lạ
-                            </div>
-                          )}
-                        </div>
                         <div className="flex items-center gap-x-2 mt-2">
                           <Image
                             src={
@@ -397,7 +442,10 @@ export default function ChatLeft({
                           <div className="w-full">
                             <div className="flex justify-between">
                               <Link href="" className="text-base">
-                                {author?.name}
+                                {itemChild?.ten_goi_nho &&
+                                itemChild?.ten_goi_nho?.length > 0
+                                  ? itemChild?.ten_goi_nho
+                                  : author?.name}
                               </Link>
                               <span
                                 className={`text-[13px] text-gray-600 ${
