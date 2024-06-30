@@ -99,7 +99,7 @@ export default function TabbarBottom({ active = "home" }) {
           <div class="tooltip-arrow" data-popper-arrow></div>
         </div>
         <div
-          onClick={() => router.push("/sos")}
+          onClick={() => router.push("#")}
           className="cursor-pointer inline-flex flex-col items-center justify-center px-0 sm:px-2 hover:bg-gray-50 dark:hover:bg-gray-800 group"
         >
           <HiSpeakerWave
@@ -174,7 +174,7 @@ export default function TabbarBottom({ active = "home" }) {
                 <div className="w-1/4 h-[50px] sm:h-20 bg-white rounded-[50%] shadow-md shadow-gray-300 flex justify-center ml-[12.5%]"></div>
                 <div className="w-1/4 h-[50px] sm:h-20 bg-white rounded-[50%] shadow-md shadow-gray-300 flex justify-center mr-[12.5%]"></div>
               </div>
-              <Link
+              {/* <Link
                 className="bottom-link relative flex items-center justify-center basis-1/2 bg-[#c80000] bg-opacity-40 shadow-lg shadow-gray-500 text-white text-center h-[50px] rounded-xl hover:text-white"
                 href={user ? "/sos" : "/auth"}
                 onClick={(e) => {
@@ -189,7 +189,7 @@ export default function TabbarBottom({ active = "home" }) {
                 }}
               >
                 <span> Gửi SOS </span>
-              </Link>
+              </Link> */}
               <Link
                 className="bottom-link  relative flex items-center justify-center basis-1/2 bg-[#c80000] bg-opacity-40 shadow-lg shadow-gray-500 text-white text-center h-[50px] rounded-xl hover:text-white"
                 href={user ? "/forum/post" : "/auth"}
