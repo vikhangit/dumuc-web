@@ -199,7 +199,9 @@ export default function ChatLeft({ mobile, setMobile, authors }) {
                           className="w-[45px] h-[45px] rounded-full"
                         />
                         <Link href="" className="text-base">
-                          {item?.author?.name}
+                          {item?.ten_goi_nho && item?.ten_goi_nho?.length > 0
+                            ? item?.ten_goi_nho
+                            : item?.author?.name}
                         </Link>
                       </div>
 

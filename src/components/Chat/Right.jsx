@@ -542,20 +542,22 @@ export default function ChatRight({
           <button>Xóa tin nhắn</button>
         </Popconfirm>
       ),
+
       key: "1",
+      disable: myMessage?.length > 0 ? false : true,
     },
-    {
-      label: (
-        <button
-          onClick={(e) => {
-            e.preventDefault();
-          }}
-        >
-          Báo cáo
-        </button>
-      ),
-      key: "2",
-    },
+    // {
+    //   label: (
+    //     <button
+    //       onClick={(e) => {
+    //         e.preventDefault();
+    //       }}
+    //     >
+    //       Báo cáo
+    //     </button>
+    //   ),
+    //   key: "2",
+    // },
   ];
   const myAuthor = authors?.find((x) => x?.userId === user?.uid);
   console.log(userRecieved);
@@ -619,7 +621,9 @@ export default function ChatRight({
                   >
                     {nameActive}
                   </button>
-                  <HiPencil size={12} onClick={() => setEditName(true)} />
+                  {myMessage?.length > 0 && (
+                    <HiPencil size={12} onClick={() => setEditName(true)} />
+                  )}
                 </div>
                 {/* <p className='text-sm'>Đang hoạt động</p> */}
               </div>
@@ -2037,6 +2041,8 @@ export default function ChatRight({
         myAuthor={myAuthor}
         userRecieved={userRecieved}
         chatId={search.get("chatId")}
+        userId={user?.uid}
+        friendList={friendList}
       />
     </div>
   );

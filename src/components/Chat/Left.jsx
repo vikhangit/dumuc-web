@@ -109,16 +109,15 @@ export default function ChatLeft({
         item?.member?.find((x) => x?.userId === author?.userId)
       );
       setMobile(true);
+      console.log("Findchat", findChat);
+      console.log("Findchat2222", findChat2);
       if (!findChat) {
         setUserRecieved(author);
+        setMobile(true);
       } else {
         setUserRecieved();
-
         router.push(`/chat?chatId=${findChat?.id}`);
       }
-    } else {
-      setUserRecieved();
-      setMobile(false);
     }
   }, [search, data, authors]);
 
@@ -142,16 +141,9 @@ export default function ChatLeft({
         setUserRecieved(author);
         setTenGoNho(userRecieveds?.ten_goi_nho);
         router.push(`/chat?chatId=${chatDetail?.id}`);
-      } else {
-        setMobile(false);
-        router.push(`/chat`);
       }
-    } else {
-      setUserRecieved();
-      setMobile(false);
     }
   }, [search, data, friendList]);
-  console.log("UserRecire", userRecieved);
   const searchField = (value) => {
     setValueSearch(value);
     if (value.trim() === "") {
@@ -200,23 +192,19 @@ export default function ChatLeft({
     const findChat = findChat2?.find((item) =>
       item?.member?.find((x) => x?.userId === author?.userId)
     );
-    if (friendList?.find((x) => x?.authorId === author?.authorId)) {
-      setTab(0);
-    } else {
-      setTab(1);
-    }
+
+    setMobile(true);
     if (!findChat) {
       // const type = checkFriendType(author?.authorId);
       // setTypeFriend(type);
-      setMobile(true);
       setUserRecieved(author);
     } else {
       setUserRecieved();
-
       router.push(`/chat?chatId=${findChat?.id}`);
     }
   };
   const [showRequesFriend, setShowRequesFriend] = useState(true);
+  console.log("Left", userRecieved);
 
   return (
     <div

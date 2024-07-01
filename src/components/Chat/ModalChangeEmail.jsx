@@ -2,6 +2,7 @@
 import { db } from "@utils/firebase";
 import { Modal, message } from "antd";
 import { doc, updateDoc } from "firebase/firestore";
+import { useEffect, useState } from "react";
 
 export default function ModalNickame({
   visible,
@@ -11,7 +12,13 @@ export default function ModalNickame({
   myAuthor,
   userRecieved,
   chatId,
+  userId,
+  friendList,
 }) {
+  const [newName, setNewName] = useState(nameActive);
+  useEffect(() => {
+    setNewName(nameActive);
+  }, [nameActive]);
   return (
     <Modal
       visible={visible}
@@ -24,18 +31,42 @@ export default function ModalNickame({
         <div className="w-full flex justify-end">
           <button
             onClick={async () => {
-              const wRef = doc(db, "chat-rooms", chatId);
-              await updateDoc(wRef, {
-                member: [
-                  myAuthor,
-                  { ...userRecieved, ten_goi_nho: nameActive },
-                ],
-              });
-              message.success("Đổi tên gợi nhớ thành công");
-              onCancel();
+              if (newName?.trim() !== "") {
+                if (chatId) {
+                  const findFriendId = friendList?.find(
+                    (x) => x?.authorId === userRecieved?.authorId
+                  )?.friendListId;
+                  const wRef = doc(db, "chat-rooms", chatId);
+                  await updateDoc(wRef, {
+                    member: [
+                      myAuthor,
+                      { ...userRecieved, ten_goi_nho: newName },
+                    ],
+                  });
+                  if (findFriendId) {
+                    const friendRef = doc(
+                      db,
+                      "users",
+                      userId,
+                      "friendList",
+                      findFriendId
+                    );
+                    await updateDoc(friendRef, {
+                      ten_goi_nho: newName,
+                    });
+                  }
+                  message.success("Đổi tên gợi nhớ thành công");
+                  onCancel();
+                } else {
+                  message.error("Bạn chưa nhắn tin với người này");
+                }
+              }
             }}
             type="button"
-            class={`text-white bg-[#c80000] hover:brightness-110 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-1.5`}
+            class={`text-white bg-[#c80000] hover:brightness-110 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-4 py-1.5 ${
+              newName?.trim() === "" &&
+              "bg-opacity-30 ointer-events-none cursor-not-allowed"
+            }`}
           >
             Xác nhận
           </button>
@@ -58,9 +89,9 @@ export default function ModalNickame({
             id="default-input"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-xs sm:text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full px-2.5 py-1.5"
             onChange={(e) => {
-              setNameActive(e.target.value);
+              setNewName(e.target.value);
             }}
-            value={nameActive}
+            value={newName}
           />
         </div>
       </div>
