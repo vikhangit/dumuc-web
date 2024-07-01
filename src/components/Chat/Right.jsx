@@ -560,7 +560,6 @@ export default function ChatRight({
     // },
   ];
   const myAuthor = authors?.find((x) => x?.userId === user?.uid);
-  console.log(userRecieved);
   return (
     <div
       className={`h-full  ${

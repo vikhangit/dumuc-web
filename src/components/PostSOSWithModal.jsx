@@ -278,7 +278,6 @@ function PostSOSWithModal({ searchParams, setModalSuccess, setCloseForm }) {
           setLoading(false);
         })
         .catch((error) => {
-          console.error(error);
           setLoading(false);
         });
     } else {
@@ -301,7 +300,6 @@ function PostSOSWithModal({ searchParams, setModalSuccess, setCloseForm }) {
           });
         })
         .catch((error) => {
-          console.error(error);
           setLoading(false);
         });
     }

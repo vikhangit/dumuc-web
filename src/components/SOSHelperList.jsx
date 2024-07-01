@@ -27,7 +27,6 @@ const SOSHelperList = ({ items, onCallback }) => {
         onCallback();
       })
       .catch((error) => {
-        console.error(error);
         setLoadingSubmit(false);
       });
   };
@@ -45,7 +44,6 @@ const SOSHelperList = ({ items, onCallback }) => {
         onCallback();
       })
       .catch((error) => {
-        console.error(error);
         setLoadingSubmit(false);
       });
   };

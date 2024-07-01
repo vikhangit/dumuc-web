@@ -109,8 +109,6 @@ export default function ChatLeft({
         item?.member?.find((x) => x?.userId === author?.userId)
       );
       setMobile(true);
-      console.log("Findchat", findChat);
-      console.log("Findchat2222", findChat2);
       if (!findChat) {
         setUserRecieved(author);
         setMobile(true);
@@ -203,8 +201,7 @@ export default function ChatLeft({
       router.push(`/chat?chatId=${findChat?.id}`);
     }
   };
-  const [showRequesFriend, setShowRequesFriend] = useState(true);
-  console.log("Left", userRecieved);
+  const [showRequesFriend, setShowRequesFriend] = useState(true)
 
   return (
     <div

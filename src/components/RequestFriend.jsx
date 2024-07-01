@@ -22,7 +22,6 @@ export default function RequestFriend({ items, onCallback, authors, user }) {
   useEffect(() => {
     setFriendList(items);
   }, [items]);
-  console.log("123", friendList);
   return (
     <div>
       {friendList?.length > 0 && (

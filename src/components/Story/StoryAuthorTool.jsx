@@ -104,7 +104,6 @@ export default function StoryAuthorTool({
       setItem(data);
     });
   };
-  console.log("Following", followList);
   return (
     <>
       <div className="">

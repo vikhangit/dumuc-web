@@ -5,19 +5,11 @@ import Header from "@components/Header";
 import { message } from "antd";
 
 //apis
-import {
-  createUserRanking,
-} from "@apis/users";
+import { createUserRanking } from "@apis/users";
 
-import {
-  getCategories,
-} from "@apis/posts";
+import { getCategories } from "@apis/posts";
 
-import {
-  getSos,
-  createSos,
-  updateSos,
-} from "@apis/soss";
+import { getSos, createSos, updateSos } from "@apis/soss";
 import { getAddressFromLatLng } from "@apis/other";
 import { uploadImage } from "apis/other";
 import { Spinner } from "flowbite-react";
@@ -31,7 +23,7 @@ const SOSPostPage = ({ searchParams }) => {
   const router = useRouter();
   const [user] = useAuthState(auth);
   const [loading, setLoading] = useState(false);
-  const [loadingImage, setLoadingImage] = useState(false)
+  const [loadingImage, setLoadingImage] = useState(false);
 
   const deadlines = [
     {
@@ -89,28 +81,30 @@ const SOSPostPage = ({ searchParams }) => {
   const maxPhotos = 3;
   const [photos, setPhotos] = useState([]);
   const [photosError, setPhotosError] = useState();
-  const maximumSize = 5 * 1024 * 1024
+  const maximumSize = 5 * 1024 * 1024;
 
   const handleChange = (name) => (e) => {
     if (name === "photo") {
       if (photos.length < maxPhotos) {
-        if(e.target.files[0].size > maximumSize){
-          message.error("Ảnh tải lên dung lượng quá lớn")
-         }else{   
-          setLoadingImage(true);  
-           return uploadImage(e.target.files[0], user?.accessToken).then((data) => {
-             setPhotos([...photos, data?.url]);
-             setLoadingImage(false);
-           });
-         }
+        if (e.target.files[0].size > maximumSize) {
+          message.error("Ảnh tải lên dung lượng quá lớn");
+        } else {
+          setLoadingImage(true);
+          return uploadImage(e.target.files[0], user?.accessToken).then(
+            (data) => {
+              setPhotos([...photos, data?.url]);
+              setLoadingImage(false);
+            }
+          );
+        }
       }
     }
   };
-  
+
   const [coordinates, setCoordinates] = useState({ lat: 0, lng: 0 });
   const [address, setAddress] = useState("");
-  const [address_components, setAddress_components] = useState()
-  
+  const [address_components, setAddress_components] = useState();
+
   useEffect(() => {
     navigator.geolocation.getCurrentPosition(
       ({ coords: { latitude, longitude } }) => {
@@ -121,7 +115,7 @@ const SOSPostPage = ({ searchParams }) => {
       }
     );
     getCategories().then((result) => {
-      setCategories(result.filter(x => x.type === 'soss'))
+      setCategories(result.filter((x) => x.type === "soss"));
     });
   }, []);
 
@@ -137,7 +131,7 @@ const SOSPostPage = ({ searchParams }) => {
             user?.accessToken
           );
           setAddress(addressData?.results[0]?.formatted_address);
-          setAddress_components(addressData?.results[0]?.address_components)
+          setAddress_components(addressData?.results[0]?.address_components);
         }
       } catch (e) {}
     })();
@@ -177,8 +171,8 @@ const SOSPostPage = ({ searchParams }) => {
     //   return;
     // }
 
-    if (category === undefined || category === '') {
-      setCategoryError('Vui lòng chọn loại S.O.S!');
+    if (category === undefined || category === "") {
+      setCategoryError("Vui lòng chọn loại S.O.S!");
       setLoading(false);
       return;
     }
@@ -236,7 +230,6 @@ const SOSPostPage = ({ searchParams }) => {
           setLoading(false);
         })
         .catch((error) => {
-          console.error(error);
           setLoading(false);
         });
     } else {
@@ -248,7 +241,7 @@ const SOSPostPage = ({ searchParams }) => {
           //ranking
           createUserRanking(
             {
-              rankingType: 'sos_creat',
+              rankingType: "sos_creat",
               rankingValue: 5,
               rankingDocId: result?.sosId,
             },
@@ -259,7 +252,6 @@ const SOSPostPage = ({ searchParams }) => {
           });
         })
         .catch((error) => {
-          console.error(error);
           setLoading(false);
         });
     }
@@ -430,7 +422,7 @@ const SOSPostPage = ({ searchParams }) => {
                     <button
                       className="absolute -top-2 -right-2 bg-black rounded-full p-1 shadow shadow-white z-50 close-btn"
                       onClick={() => {
-                        setPhotos(photos?.filter(x => x !== url))
+                        setPhotos(photos?.filter((x) => x !== url));
                       }}
                     >
                       <svg
@@ -451,7 +443,9 @@ const SOSPostPage = ({ searchParams }) => {
                   )}
                   <div className="cursor-pointer bg-gray-200 rounded-md w-[100px] h-[100px] flex justify-center items-center border-0 focus:border border-blue-600 image">
                     <Image
-                    width={0} height={0} sizes="100vw"
+                      width={0}
+                      height={0}
+                      sizes="100vw"
                       src={url}
                       className="w-[100px] h-[100px] rounded-md"
                       alt=""
@@ -460,40 +454,41 @@ const SOSPostPage = ({ searchParams }) => {
                 </div>
               );
             })}
-            {
-              photos.length <3 && <div className="relative">
-              <input
-                type="file"
-                id={`photo`}
-                onChange={handleChange("photo")}
-                style={{ display: "none" }}
-              />
-              <label
-                for={`photo`}
-                className="cursor-pointer bg-gray-200 rounded-md w-[100px] h-[100px] flex justify-center items-center border-0 focus:border border-blue-600 image"
-              >
-                <div className="flex justify-center items-center">
-                  {
-                    loadingImage ? <Spinner /> :
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                    stroke="currentColor"
-                    className="w-6 h-6"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M12 4.5v15m7.5-7.5h-15"
-                    />
-                  </svg>
-                  }
-                </div>
-              </label>
-            </div>
-            }
+            {photos.length < 3 && (
+              <div className="relative">
+                <input
+                  type="file"
+                  id={`photo`}
+                  onChange={handleChange("photo")}
+                  style={{ display: "none" }}
+                />
+                <label
+                  for={`photo`}
+                  className="cursor-pointer bg-gray-200 rounded-md w-[100px] h-[100px] flex justify-center items-center border-0 focus:border border-blue-600 image"
+                >
+                  <div className="flex justify-center items-center">
+                    {loadingImage ? (
+                      <Spinner />
+                    ) : (
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={1.5}
+                        stroke="currentColor"
+                        className="w-6 h-6"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M12 4.5v15m7.5-7.5h-15"
+                        />
+                      </svg>
+                    )}
+                  </div>
+                </label>
+              </div>
+            )}
           </div>
           <p class="mt-1 text-sm text-gray-500">PNG, JPG (Tối đa 5MB).</p>
           {photosError !== "" && (

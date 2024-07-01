@@ -131,7 +131,6 @@ export default function SOSHeaderBar() {
         setOpenHelperModal(false);
       })
       .catch((error) => {
-        console.error(error);
         setLoadingSubmit(false);
       });
   };
@@ -149,7 +148,6 @@ export default function SOSHeaderBar() {
         setOpenHelperModal(false);
       })
       .catch((error) => {
-        console.error(error);
         setLoadingSubmit(false);
       });
   };
@@ -168,7 +166,6 @@ export default function SOSHeaderBar() {
         onCallback();
       })
       .catch((error) => {
-        console.error(error);
         setLoadingSubmit(false);
       });
   };
@@ -229,7 +226,6 @@ export default function SOSHeaderBar() {
                                 })
                                   .then((result) => {})
                                   .catch((error) => {
-                                    console.error(error);
                                     setLoadingSubmit(false);
                                   });
                               }
@@ -340,7 +336,6 @@ export default function SOSHeaderBar() {
                                 })
                                   .then((result) => {})
                                   .catch((error) => {
-                                    console.error(error);
                                     setLoadingSubmit(false);
                                   });
                               }

@@ -175,8 +175,6 @@ const ProfilePage = () => {
     }
   }, [user, loading]);
 
-  console.log(numberPlate);
-
   const save = () => {
     setLoadingSubmit(true);
     if (name === undefined || name === "") {
@@ -227,7 +225,6 @@ const ProfilePage = () => {
       userId: user?.userId,
     };
     updateProfile(item, user?.accessToken).then(async (re) => {
-      console.log("Result", re);
       const success = await updateEmail(email);
       if (success) {
         getProfile(user?.accessToken).then(async (profile) => {

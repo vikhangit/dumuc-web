@@ -9,9 +9,10 @@ import moment from "moment";
 import { DateTimeLog } from "@utils/dateFormat";
 import { MdPending, MdPeople } from "react-icons/md";
 import { useRouter } from "next/navigation";
-import { auth } from "utils/firebase";
+import { auth, db } from "utils/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
 import dynamic from "next/dynamic";
+import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
 const PostSOSWithModal = dynamic(
   () => {
     return import("./PostSOSWithModal");
@@ -23,6 +24,7 @@ import { GoHomeFill } from "react-icons/go";
 import { HiSpeakerWave } from "react-icons/hi2";
 export default function TabbarBottom({ active = "home" }) {
   const [user, loading, error] = useAuthState(auth);
+  const userId = JSON.parse(localStorage.getItem("userId"));
   const [isOpenMenu, setIsOpenMenu] = useState(false);
   const [openModal, setOpenModal] = useState(false);
   const [modalSuccess, setModalSuccess] = useState(false);
@@ -35,6 +37,84 @@ export default function TabbarBottom({ active = "home" }) {
     getSossByUser(user?.accessToken).then((result) => setSoss(result));
     setCheck(false);
   }, [user]);
+  const [chats, setChats] = useState([]);
+  const [groupPublic, setGroupPublic] = useState([]);
+  const [groupPrivate, setGroupPrivate] = useState([]);
+  const [friendList, setFriendList] = useState([]);
+  useEffect(() => {
+    const q = query(collection(db, "chat-rooms"), orderBy("createdAt", "desc"));
+    const unsubscribe = onSnapshot(q, (QuerySnapshot) => {
+      let fetchedMessages = [];
+      QuerySnapshot.forEach((doc) => {
+        fetchedMessages.push({
+          ...doc.data(),
+          id: doc.id,
+          createdAt: doc.data()?.createdAt?.toDate(),
+        });
+      });
+      setChats(
+        fetchedMessages?.filter((a) =>
+          a?.member?.find((x) => x?.userId === userId)
+        )
+      );
+    });
+    return () => unsubscribe;
+  }, []);
+  useEffect(() => {
+    const q = query(
+      collection(db, "chat-groups"),
+      orderBy("createdAt", "desc")
+    );
+    const unsubscribe = onSnapshot(q, (QuerySnapshot) => {
+      let fetchedGroup = [];
+      QuerySnapshot.forEach((doc) => {
+        let messages = [];
+        fetchedGroup.push({
+          ...doc.data(),
+          id: doc.id,
+          // member,
+          messages,
+          createdAt: doc.data()?.createdAt?.toDate(),
+        });
+      });
+      setGroupPublic(
+        fetchedGroup?.filter(
+          (x) =>
+            x?.isPrivate === false &&
+            x?.member?.find((aa) => aa?.user === userId)
+        )
+      );
+      setGroupPrivate(
+        fetchedGroup?.filter(
+          (x) =>
+            x?.isPrivate === true &&
+            x?.member?.find((aa) => aa?.user === userId)
+        )
+      );
+    });
+    return () => unsubscribe;
+  }, []);
+  useEffect(() => {
+    const q = query(
+      collection(db, "users", userId, "friendList"),
+      orderBy("createdAt", "desc")
+    );
+    const unsubscribe = onSnapshot(q, (QuerySnapshot) => {
+      let fetchedGroup = [];
+      QuerySnapshot.forEach((doc) => {
+        let messages = [];
+        fetchedGroup.push({
+          ...doc.data(),
+          id: doc.id,
+          // member,
+          messages,
+          createdAt: doc.data()?.createdAt?.toDate(),
+        });
+      });
+      setFriendList(fetchedGroup);
+    });
+    return () => unsubscribe;
+  }, []);
   return (
     <div className="tabbarBottom fixed bottom-0 w-full z-50 py-[10px] bg-white border-t border-gray-200 dark:bg-gray-700 dark:border-gray-600">
       <div className="grid h-full mx-auto grid-cols-5 font-medium">
@@ -125,7 +205,33 @@ export default function TabbarBottom({ active = "home" }) {
           }
           className="cursor-pointer inline-flex flex-col items-center justify-center px-0 sm:px-2 hover:bg-gray-50 dark:hover:bg-gray-800 group"
         >
-          <MdPending size={32} color="#9C9C9C" />
+          <div className="relative">
+            <MdPending size={32} color="#9C9C9C" />
+            {((chats &&
+              chats?.find(
+                (x) =>
+                  x?.new === true &&
+                  x?.lastMessage?.formAuthor?.userId !== userId
+              )) ||
+              (friendList &&
+                friendList?.find(
+                  (x) => x?.status === 1 && x?.type === "recieve"
+                )) ||
+              (groupPublic &&
+                groupPublic?.find(
+                  (x) =>
+                    x?.new === true &&
+                    x?.lastMessage?.formAuthor?.userId !== userId
+                )) ||
+              (groupPrivate &&
+                groupPrivate?.find(
+                  (x) =>
+                    x?.new === true &&
+                    x?.lastMessage?.formAuthor?.userId !== userId
+                ))) && (
+              <div className="w-[10px] h-[10px] bg-[#c80000] absolute -right-[5px] top-[1px] rounded-full"></div>
+            )}
+          </div>
           <span class="text-base md:text-lg font-semibold text-[#9C9C9C] text-center bottomTabBarHiden1">
             Chat
           </span>

@@ -54,7 +54,6 @@ const SettingPage = () => {
     setActiveId(usingUser?.activeId);
     setActiveReview(usingUser?.activeReview);
   }, [usingUser]);
-  console.log(usingUser);
   return (
     <main className="w-full">
       <Header isBack={true} />

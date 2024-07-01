@@ -115,7 +115,6 @@ const SOSListByUser = ({ items, onCallback }) => {
         });
       })
       .catch((error) => {
-        console.error(error);
         setLoadingSubmit(false);
       });
   };
@@ -177,7 +176,6 @@ const SOSListByUser = ({ items, onCallback }) => {
                                     );
                                   })
                                   .catch((error) => {
-                                    console.error(error);
                                     setLoadingSubmit(false);
                                   });
                               },

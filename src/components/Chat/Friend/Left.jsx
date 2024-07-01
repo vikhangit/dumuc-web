@@ -34,6 +34,7 @@ export default function ChatLeft({ mobile, setMobile, authors }) {
   const [followedArray, setFollowedArray] = useState([]);
   useEffect(() => {
     getProfile(user?.accessToken).then((dataCall) => {
+      console.log("Friend", dataCall);
       setUsingUser(dataCall);
     });
   }, [user]);
@@ -69,8 +70,6 @@ export default function ChatLeft({ mobile, setMobile, authors }) {
       }
     });
   }, [friendList, myFollow]);
-  console.log(friendList);
-  console.log("User", usingUser);
 
   const searchField = (value) => {
     setValueSearch(value);
@@ -93,6 +92,7 @@ export default function ChatLeft({ mobile, setMobile, authors }) {
     }
   };
   const [tab, setTab] = useState(0);
+
   return (
     <div
       className={`h-full ${

@@ -17,6 +17,7 @@ import Clock from "@components/Clock";
 import { FaArrowLeftLong } from "react-icons/fa6";
 import { useAuthState, useUpdateProfile } from "react-firebase-hooks/auth";
 import dynamic from "next/dynamic";
+import { IoMdFemale, IoMdMale } from "react-icons/io";
 const TabbarBottomChat = dynamic(
   () => {
     return import("@components/TabbarBottomChat");
@@ -58,14 +59,7 @@ const RecentMembers = () => {
   }, [user]);
 
   useEffect(() => {
-    (async () => {
-      try {
-        if (user) {
-          let profile = await getProfile(user?.accessToken);
-          // setUser(profile);
-        }
-      } catch (e) {}
-    })();
+    getProfile(user?.accessToken);
   }, [user]);
 
   return (
@@ -153,8 +147,13 @@ const RecentMembers = () => {
                           />
                         </div>
                         <div className="md:flex-1 md:min-w-0 text-sm font-medium text-gray-900">
-                          <div className="text-base font-medium text-[#363535]">
-                            Tran Vi Khang
+                          <div className="text-base font-medium text-[#363535] flex items-center">
+                            Tran Vi Khang{" "}
+                            {index % 2 === 0 ? (
+                              <IoMdFemale color="violet" />
+                            ) : (
+                              <IoMdMale color="blue" />
+                            )}
                           </div>
                           <div
                             className={`flex gap-x-4 ${
@@ -163,10 +162,10 @@ const RecentMembers = () => {
                                 : "flex-col gap-y-1"
                             }`}
                           >
-                            <div className="text-xs sm:text-sm text-[#747272]">
+                            {/* <div className="text-xs sm:text-sm text-[#747272]">
                               Ngày tham gia:{" "}
                               <span className="">12/08/2023</span>
-                            </div>
+                            </div> */}
                             <div className="text-xs sm:text-sm text-[#747272]">
                               Khoảng cách:{" "}
                               <span className="text-[#FC1717B2]">1.2km</span>

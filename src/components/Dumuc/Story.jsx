@@ -62,7 +62,6 @@ const Story = ({
       setIndexImage(index);
     }
   }, [data]);
-  console.log("dellll", stories);
 
   const handleChange = (e) => {
     setLoading(true);

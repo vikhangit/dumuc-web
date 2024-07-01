@@ -187,7 +187,6 @@ export default function ModalAddFriend({
                           size={32}
                           className="mt-[8px] text-gray-400"
                           onClick={() => {
-                            console.log("this is author", x);
                             onChooseUser(x);
                             onCancel();
                           }}

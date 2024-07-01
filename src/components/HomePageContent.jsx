@@ -65,7 +65,6 @@ const HomePageContent = () => {
     });
     setLoading(false);
   }, [user]);
-  console.log("Friend", requestFr);
   return loading ? (
     <Loading />
   ) : (

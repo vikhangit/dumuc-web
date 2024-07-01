@@ -75,7 +75,6 @@ export default function QuickPostModal({
   const editorRef = useRef(null);
   const log = () => {
     if (editorRef.current) {
-      console.log(editorRef.current.getContent());
     }
   };
   useEffect(() => {
@@ -198,7 +197,6 @@ export default function QuickPostModal({
           message.success("Sửa tin thành công");
         })
         .catch((error) => {
-          console.error(error);
           setLoading(false);
         });
     } else {
@@ -225,7 +223,6 @@ export default function QuickPostModal({
           message.success("Đăng tin thành công");
         })
         .catch((error) => {
-          console.error(error);
           setLoading(false);
         });
     }
@@ -333,10 +330,7 @@ export default function QuickPostModal({
                 alt={"avatars"}
               />
               <div className="flex flex-col">
-                <p className="text-sm font-medium">
-                  {usingUser?.name}{" "}
-                  {emotion && emotion.length > 0 ? emotion : ""}
-                </p>
+                <p className="text-sm font-medium">{usingUser?.name} </p>
                 <div className="relative rounded-[6px] mt-1 w-fit">
                   <select
                     className="w-full h-full bg-[#e5e5e5] border-0 text-sm font-medium"
@@ -392,6 +386,7 @@ export default function QuickPostModal({
               </div>
             </div>
           </div>
+          {emotion && emotion.length > 0 ? emotion : ""}
           <CustomEditor
             initialData={description}
             setData={setDescription}

@@ -40,7 +40,6 @@ export default function ModalAddMember({
   const [memberList, setMemberList] = useState([]);
   useEffect(() => {
     getProfile(user?.accessToken).then((dataCall) => {
-      console.log("List.Friend", dataCall);
       setUsingUser(dataCall);
       setFriendList(dataCall?.friendList?.filter((x) => x?.status === 2));
     });
@@ -88,7 +87,6 @@ export default function ModalAddMember({
       }
     }
   };
-  console.log("List.Friend", friendList);
   return (
     <Modal
       visible={visible}

@@ -1,16 +1,23 @@
-"use client"
+"use client";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 const { arrange } = require("emoji-api");
-import { Spinner } from 'flowbite-react';
+import { Spinner } from "flowbite-react";
 import { Modal } from "antd";
 import { emotionData } from "@utils/emotionData";
 
-export default function QuickPostModalEmoji({ visible, onCancel, setEmotion, onSaveEmotion}) {
+export default function QuickPostModalEmoji({
+  visible,
+  onCancel,
+  setEmotion,
+  onSaveEmotion,
+}) {
   const router = useRouter();
-  const [emojiData, setEmojiData] = useState(arrange()['Smileys & Emotion']?.filter((x) => {
-  return x
-  }));
+  const [emojiData, setEmojiData] = useState(
+    arrange()["Smileys & Emotion"]?.filter((x) => {
+      return x;
+    })
+  );
   return (
     <Modal
       visible={visible}
@@ -22,17 +29,16 @@ export default function QuickPostModalEmoji({ visible, onCancel, setEmotion, onS
       className="modal-quick-post"
     >
       <div>
-        {
-          emotionData.length > 0 ? <div className='grid grid-cols-2 gap-x-2 gap-y-2'>
-          {
-            emotionData.map((item, index) => {
+        {emotionData.length > 0 ? (
+          <div className="grid grid-cols-2 gap-x-2 gap-y-2">
+            {emotionData.map((item, index) => {
               return (
                 <button
                   key={index}
                   className="flex items-center p-2 gap-x-4 rounded-lg hover:bg-gray-300"
                   onClick={() => {
-                    setEmotion(`đang ${item.icon} cảm thấy ${item?.title.toLocaleLowerCase()}`);
-                    onSaveEmotion()
+                    setEmotion(`${item.icon}`);
+                    onSaveEmotion();
                   }}
                 >
                   <div className="basis-1/6 text-3xl bg-gray-200 rounded-full p-2">
@@ -46,12 +52,13 @@ export default function QuickPostModalEmoji({ visible, onCancel, setEmotion, onS
                   </div>
                 </button>
               );
-            })
-          }
-        </div> : <div className="flex justify-center">
-          <Spinner />
-        </div>
-        }
+            })}
+          </div>
+        ) : (
+          <div className="flex justify-center">
+            <Spinner />
+          </div>
+        )}
       </div>
     </Modal>
   );

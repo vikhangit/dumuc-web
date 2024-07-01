@@ -35,7 +35,6 @@ const LibraryPage = ({ searchParams }) => {
       setLoadingSkeleton(false);
     }
   }, [user, usingUser, searchParams?.tab]);
-  console.log("Feeds", feeds);
   return loadingSkeleton ? (
     <Loading />
   ) : (

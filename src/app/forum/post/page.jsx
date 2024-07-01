@@ -468,7 +468,6 @@ const PostWritePage = ({ searchParams }) => {
               setLoading(false);
             })
             .catch((err) => {
-              console.error(err);
               setLoading(false);
             });
         } else {
@@ -490,7 +489,6 @@ const PostWritePage = ({ searchParams }) => {
               });
             })
             .catch((err) => {
-              console.error(err);
               setLoading(false);
             });
         }

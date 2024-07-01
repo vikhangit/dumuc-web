@@ -242,7 +242,6 @@ export const updatePartnerTasks = (payload, token) => {
 };
 
 export const updateProfile = (payload, token) => {
-  console.log("Payload",payload)
   return request("api/user/profile", payload, { method: "PUT", token })
     .then((data) => {
       return data;

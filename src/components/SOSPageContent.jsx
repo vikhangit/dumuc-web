@@ -215,7 +215,6 @@ const SOSPageContent = () => {
       })
         .then((result) => {})
         .catch((error) => {
-          console.error(error);
           setLoadingSubmit(false);
         });
       setSos({
@@ -1474,7 +1473,6 @@ const SOSPageContent = () => {
                                       setLoadingSubmit(false);
                                     })
                                     .catch((error) => {
-                                      console.error(error);
                                       setLoadingSubmit(false);
                                     });
                                 }

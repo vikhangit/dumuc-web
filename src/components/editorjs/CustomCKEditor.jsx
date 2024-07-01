@@ -57,7 +57,7 @@ function CustomEditor(props) {
         },
       },
     },
-    // placeholder: props.initialData === "" && props.placeholder,
+    placeholder: props.placeholder,
     translations: [translations],
   };
   return (

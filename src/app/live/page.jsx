@@ -1,6 +1,12 @@
 import BannerRight from "@components/BannerRight";
 import Header from "@components/Header";
-import TabbarBottom from "@components/TabbarBottom";
+import dynamic from "next/dynamic";
+const TabbarBottom = dynamic(
+  () => {
+    return import("@components/TabbarBottom");
+  },
+  { ssr: false }
+);
 import Image from "next/image";
 import React from "react";
 
@@ -17,7 +23,14 @@ export default function Live() {
           <div className="bg-white p-4 rounded-md flex flex-col justify-between h-[400px] hover:border-blue-700 border-2">
             <div>
               <div className="bg-red-600 w-fit rounded-full p-4">
-                <Image width={0} height={0} sizes="100vw" src="/icons/video2.png" alt="" className="w-9 h-9" />
+                <Image
+                  width={0}
+                  height={0}
+                  sizes="100vw"
+                  src="/icons/video2.png"
+                  alt=""
+                  className="w-9 h-9"
+                />
               </div>
               <h4 className="font-semibold my-4">Phát trực tiếp</h4>
               <div className="flex items-start gap-x-3">
@@ -90,7 +103,14 @@ export default function Live() {
           <div className="bg-white p-4 rounded-md flex flex-col justify-between h-[400px] hover:border-blue-700 border-2">
             <div>
               <div className="bg-blue-600 w-fit rounded-full p-4">
-                <Image width={0} height={0} sizes="100vw" src="/icons/calendar.png" alt="" className="w-9 h-9" />
+                <Image
+                  width={0}
+                  height={0}
+                  sizes="100vw"
+                  src="/icons/calendar.png"
+                  alt=""
+                  className="w-9 h-9"
+                />
               </div>
               <h4 className="font-semibold my-4">Tạo sự kiện phát trực tiếp</h4>
               <div className="flex items-start gap-x-3">
@@ -132,22 +152,22 @@ export default function Live() {
                 <div>Người xem có thể phản hồi về sự kiện của bạn</div>
               </div>
               <div className="flex items-start gap-x-3">
-               <div>
-                 <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  strokeWidth={1.5}
-                  stroke="currentColor"
-                  className="w-6 h-6 text-gray-500"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"
-                  />
-                </svg>
-               </div>
+                <div>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    className="w-6 h-6 text-gray-500"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"
+                    />
+                  </svg>
+                </div>
                 <div>
                   Bạn và người xem sẽ nhận được lời nhắc trước khi bạn phát trực
                   tiếp

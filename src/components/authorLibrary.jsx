@@ -152,7 +152,6 @@ export default function AuthorLibrary({
   useEffect(() => {
     // setFollowedArray([]);
     arrayList?.map((item) => {
-      console.log(":::::", item);
       if (followedArray?.find((a) => a?.authorId === item?.authorId)) {
         setFollowedArray(followedArray);
       } else {
