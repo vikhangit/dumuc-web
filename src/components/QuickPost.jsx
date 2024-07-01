@@ -66,6 +66,7 @@ export default function QucickPost({ onCallback }) {
         onCallback={onCallback}
       />
       <QuickPostModalEmoji
+        emotion={emotion}
         setEmotion={setEmotion}
         visible={showPostEmotion}
         onCancel={() => {

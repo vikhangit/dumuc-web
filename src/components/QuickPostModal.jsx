@@ -33,6 +33,8 @@ export default function QuickPostModal({
   onCallback,
   feed,
   callData,
+  activeEmo,
+  setActiceEmo,
 }) {
   const [showImage, setShowImage] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -73,6 +75,7 @@ export default function QuickPostModal({
   const inputRef = useRef(null);
   const [active, setActive] = useState(1);
   const editorRef = useRef(null);
+
   const log = () => {
     if (editorRef.current) {
     }
@@ -331,6 +334,29 @@ export default function QuickPostModal({
               />
               <div className="flex flex-col">
                 <p className="text-sm font-medium">{usingUser?.name} </p>
+                {emotion && emotion.length > 0 ? (
+                  <div className="flex items-center gap-x-3">
+                    <p>{emotion}</p>
+                    <div>
+                      <button
+                        onClick={() => {
+                          setEmotion("");
+                        }}
+                        className="text-red-600 text-[11px] font-semibold"
+                      >
+                        Xóa icon
+                      </button>
+                      <button
+                        onClick={() => setShowPostEmotion(true)}
+                        className="text-blue-600 text-[11px] font-semibold ml-2"
+                      >
+                        Đổi icon
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  ""
+                )}
                 <div className="relative rounded-[6px] mt-1 w-fit">
                   <select
                     className="w-full h-full bg-[#e5e5e5] border-0 text-sm font-medium"
@@ -386,7 +412,7 @@ export default function QuickPostModal({
               </div>
             </div>
           </div>
-          {emotion && emotion.length > 0 ? emotion : ""}
+
           <CustomEditor
             initialData={description}
             setData={setDescription}

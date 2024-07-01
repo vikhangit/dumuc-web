@@ -11,6 +11,7 @@ export default function QuickPostModalEmoji({
   onCancel,
   setEmotion,
   onSaveEmotion,
+  emotion,
 }) {
   const router = useRouter();
   const [emojiData, setEmojiData] = useState(
@@ -35,9 +36,11 @@ export default function QuickPostModalEmoji({
               return (
                 <button
                   key={index}
-                  className="flex items-center p-2 gap-x-4 rounded-lg hover:bg-gray-300"
+                  className={`flex items-center p-2 gap-x-4 rounded-lg hover:bg-gray-300 ${
+                    emotion === item.icon && "bg-green-500"
+                  }`}
                   onClick={() => {
-                    setEmotion(`${item.icon}`);
+                    setEmotion(item.icon);
                     onSaveEmotion();
                   }}
                 >

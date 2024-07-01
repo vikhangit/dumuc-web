@@ -121,6 +121,9 @@ const FeedItem = ({ data, index, user, usingUser }) => {
               ? item?.author?.nickName
               : item?.author?.name}
           </Link>
+          <p class="text-lg sm:text-xl font-normal mt-1 mb-1 leading-none text-gray-900 dark:text-white">
+            {item?.emotion}
+          </p>
           <p class="text-sm sm:text-base font-normal text-gray-500 truncate dark:text-gray-400 flex items-center">
             {moment(item?.publishDate).format("DD")} tháng{" "}
             {moment(item?.publishDate).format("MM")}{" "}
@@ -328,7 +331,6 @@ const FeedItem = ({ data, index, user, usingUser }) => {
           </div>
         )}
         <div className="text-base mt-2">
-          {item?.emotion}
           <div
             dangerouslySetInnerHTML={{ __html: descriptionData }}
             className={`text-lg font-normal text-justify [&>figure]:mt-2 html`}
